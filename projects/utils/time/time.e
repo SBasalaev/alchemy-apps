@@ -1,5 +1,5 @@
 /* Time program
- * Version 1.0.2
+ * Version 1.0.3
  * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
@@ -20,5 +20,10 @@ def main(args: Array) {
   var ms = systime()
   if (cmd != null) exec_wait(cmd, params)
   ms = systime()-ms
-  println("" + (ms/1000) + "." + (ms%1000) + " s")
+  print(ms/1000)
+  ms = ms % 1000
+  if (ms < 10) print(".00"+ms)
+  else if (ms < 100) print(".0"+ms)
+  else print("."+ms)
+  println(" s")
 }
