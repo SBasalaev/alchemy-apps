@@ -7,7 +7,7 @@ use "pkg.eh"
 use "io.eh"
 
 const HELP = "Usage: pkg-arh command ...\n\npkg-arh show file\n shows archive info\npkg-arh install file\n installs archive"
-const VERSION = "pkg-arh 0.1"
+const VERSION = "pkg-arh 0.1.1"
 
 def _print_spec_field(spec: PkgSpec, f: Any) {
   var value = pkgspec_get(spec, to_str(f))
@@ -28,7 +28,7 @@ def main(args: Array) {
       println("pkg-arh show: file not specified")
     } else {
       var spec = pkg_arh_extract_spec(to_str(args[1]))
-      var fields = new Array {"Package", "Version", "Summary"}
+      var fields = new Array {"Package", "Version", "Section", "Depends", "Summary"}
       for (var j=0, j<fields.len, j=j+1) _print_spec_field(spec, fields[j])
     }
   } else if (args[0] == "install") {

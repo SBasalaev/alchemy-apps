@@ -8,7 +8,7 @@ use "io.eh"
 use "sys.eh"
 
 const HELP = "Usage: pkg command ...\n\npkg install packages...\n install/update packages\npkg update\n update all packages\npkg remove packages...\n remove packages\npkg refresh\n refresh package lists\npkg show packages...\n show packages info\npkg list\n list available packages"
-const VERSION = "pkg 0.1"
+const VERSION = "pkg 0.1.1"
 
 def _print_spec_field(spec: PkgSpec, f: Any) {
   var value = pkgspec_get(spec, to_str(f))
@@ -31,7 +31,7 @@ def main(args: Array) {
       println("pkg show: no packages specified")
     }
     var pm = pkg_init()
-    var fields = new Array {"Package", "Version", "Summary"}
+    var fields = new Array {"Package", "Version", "Section", "Depends", "Summary"}
     for (var i=1, i<args.len, i=i+1) {
       var spec = pkg_query(pm, cast(String)args[i], cast(String)null)
       if (spec == null) {
