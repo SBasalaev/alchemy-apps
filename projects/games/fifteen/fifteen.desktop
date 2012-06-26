@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Fifteen
+Exec=fifteen
+Icon=fifteen.png
+Categories=Game;LogicGame;

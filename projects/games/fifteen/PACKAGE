@@ -1,5 +1,5 @@
 Package: fifteen
-Version: 1.0-1
+Version: 1.0-2
 Section: games
 Depends: libcore2, libui0.1
 Summary: fifteen puzzle game
