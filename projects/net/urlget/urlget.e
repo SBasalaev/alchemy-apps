@@ -17,7 +17,7 @@ def main(args: Array): Int {
       substr(url, strlindex(url, '/')+1, strlen(url))
     else
       to_str(args[1])
-    var in = netread(to_str(args[0]))
+    var in = netread(url)
     var out = fopen_w(file)
     var buf = new BArray(4096)
     var len = freadarray(in, buf, 0, 4096)
