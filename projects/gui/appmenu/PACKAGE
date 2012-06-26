@@ -1,0 +1,7 @@
+Package: appmenu
+Version: 0.3-1
+Section: gui
+Depends: libcore2, libui0.1
+Summary: application menu
+Copyright: (c) 2012, Sergey Basalaev
+License: GPL v3
