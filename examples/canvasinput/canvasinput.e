@@ -9,6 +9,7 @@ use "graphics"
 use "string"
 use "sys"
 
+/* Returns descriptive string for the pressed key. */
 def keystr(key: Int): String {
   var sb = new_sb()
   sb_append(sb, "Key code: ")

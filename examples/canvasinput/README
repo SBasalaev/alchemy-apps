@@ -1,0 +1,9 @@
+Graphical example of using canvas.
+
+Canvas displays key code of the last pressed key.
+If the last pressed key is alphanumeric, the
+corresponding character is also displayed.
+
+To quit application press #.
+
+To compile: ex canvasinput.e -o canvasinput -lui

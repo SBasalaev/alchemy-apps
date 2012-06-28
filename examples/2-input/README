@@ -1,0 +1,4 @@
+Terminal input.
+
+We read line of text from the terminal and store it
+in the variable. Then we use this variable in the output.
