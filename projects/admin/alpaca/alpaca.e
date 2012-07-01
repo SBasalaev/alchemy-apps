@@ -1,5 +1,6 @@
 use "io.eh"
 use "vector.eh"
+use "sys.eh"
 
 use "ui.eh"
 use "form.eh"
@@ -7,6 +8,8 @@ use "image.eh"
 use "stdscreens.eh"
 
 use "pkg.eh"
+
+// TODO: use pkg.eh API once it is guarded
 
 var icon_inst: Image;
 var icon_del: Image;
@@ -133,41 +136,59 @@ def main(args: Array) {
     "Video",
     "Other/Unknown"
   }
-  var pm = pkg_init()
+  //var pm = pkg_init()
   var pkgindex = new Array(catnames.len)
-  buildindex(pkgindex, pm)
-  
-  var catscr = new_listbox(catnames, cast(Array)null, new_menu("Select", 1))
-  screen_set_title(catscr, "Alpaca")
+  buildindex(pkgindex, pkg_init())
+
+  var mselect = new_menu("Select", 1)
+  var mrefresh = new_menu("Refresh lists", 2)
+  var mupdate = new_menu("Update all", 3)
   var mquit = new_menu("Quit", 5)
+  var catscr = new_listbox(catnames, cast(Array)null, mselect)
+  screen_set_title(catscr, "Alpaca")
+  screen_add_menu(catscr, mrefresh)
+  screen_add_menu(catscr, mupdate)
   screen_add_menu(catscr, mquit)
   ui_set_screen(catscr)
   
   var e = ui_wait_event()
   while (e.value != mquit) {
     if (e.kind == EV_MENU) {
-      var list = cast (Vector) pkgindex[listbox_get_index(catscr)]
-      var index = show_list(list)
-      if (index >= 0) {
-        var spec = cast(PkgSpec)v_get(list, index*2)
-        var instspec = cast(PkgSpec)v_get(list, index*2+1)
-        if (show_package(spec, instspec)) {
-          var name = pkgspec_get(spec, "Package")
-          if (instspec == null) {
-            ui_set_screen(new_textbox("Installing package "+name+"..."))
-            pkg_install(pm, new Array{name})
-          } else if (instspec != spec) {
-            ui_set_screen(new_textbox("Updating package "+name+"..."))
-            pkg_install(pm, new Array{name})
-          } else {
-            ui_set_screen(new_textbox("Removing package "+name+"..."))
-            pkg_remove(pm, new Array{name})
+      if (e.value == mselect) {
+        var list = cast (Vector) pkgindex[listbox_get_index(catscr)]
+        var index = show_list(list)
+        if (index >= 0) {
+          var spec = cast(PkgSpec)v_get(list, index*2)
+          var instspec = cast(PkgSpec)v_get(list, index*2+1)
+          if (show_package(spec, instspec)) {
+            var name = pkgspec_get(spec, "Package")
+            if (instspec == null) {
+              ui_set_screen(new_textbox("Installing package "+name+"..."))
+              //pkg_install(pm, new Array{name})
+              exec_wait("terminal", new Array{"-k", "pkg", "install", name})
+            } else if (instspec != spec) {
+              ui_set_screen(new_textbox("Updating package "+name+"..."))
+              //pkg_install(pm, new Array{name})
+              exec_wait("terminal", new Array{"-k", "pkg", "install", name})
+            } else {
+              ui_set_screen(new_textbox("Removing package "+name+"..."))
+              //pkg_remove(pm, new Array{name})
+              exec_wait("terminal", new Array{"-k", "pkg", "remove", name})
+            }
           }
-          ui_set_screen(new_textbox("Building package index..."))
-          buildindex(pkgindex, pm)
-          ui_set_screen(catscr)
         }
+        ui_set_screen(catscr)
+      } else if (e.value == mrefresh) {
+        ui_set_screen(new_textbox("Downloading package lists..."))
+        //pkg_refresh(pm)
+        exec_wait("terminal", new Array{"-k", "pkg", "refresh"})
+      } else if (e.value == mupdate) {
+        ui_set_screen(new_textbox("Updating all packages..."))
+        //pkg_install(pm, pkg_list_installed())
+        exec_wait("terminal", new Array{"-k", "pkg", "update"})
       }
+      ui_set_screen(new_textbox("Building package index..."))
+      buildindex(pkgindex, pkg_init())
       ui_set_screen(catscr)
     }
     e = ui_wait_event()
