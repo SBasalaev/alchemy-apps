@@ -106,8 +106,9 @@ def pkg_arh_unpack(pm: PkgManager, file: String) {
   var oldspec = pkglist_get(cast(PkgList)pm.lists[0], name)
   if (oldspec != null) {
     println("Replacing package "+name+" with new version")
-    if (pkg_cmp_versions(pkgspec_get(spec, "Version"), pkgspec_get(oldspec, "Version")) < 0)
-      println("Warning: version of the package decreases")
+    var cmp = pkg_cmp_versions(pkgspec_get(spec, "Version"), pkgspec_get(oldspec, "Version"))
+    if (cmp < 0) println("Warning: version of the package decreases")
+    else if (cmp == 0) println("Warning: reinstalling the same version of the package")
     pkg_db_remove(pm, name)
   } else {
     println("Installing new package "+name)

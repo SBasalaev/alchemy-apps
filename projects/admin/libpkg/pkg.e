@@ -11,6 +11,7 @@ use "sys.eh"
 use "vector.eh"
 
 def pkg_init(): PkgManager {
+  println("Reading database...")
   new PkgManager(lists=pkg_init_lists())
 }
 
