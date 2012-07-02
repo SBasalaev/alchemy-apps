@@ -1,5 +1,5 @@
 Package: alpaca
-Version: 0.2-1
+Version: 0.2.1-1
 Section: admin
 Depends: libcore2, libui0.1, pkg
 Summary: GUI for Alchemy package manager

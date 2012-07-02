@@ -175,21 +175,26 @@ def main(args: Array) {
               //pkg_remove(pm, new Array{name})
               exec_wait("terminal", new Array{"-k", "pkg", "remove", name})
             }
+            ui_set_screen(new_textbox("Building package index..."))
+            buildindex(pkgindex, pkg_init())
+            ui_set_screen(catscr)
           }
         }
-        ui_set_screen(catscr)
       } else if (e.value == mrefresh) {
         ui_set_screen(new_textbox("Downloading package lists..."))
         //pkg_refresh(pm)
         exec_wait("terminal", new Array{"-k", "pkg", "refresh"})
+        ui_set_screen(new_textbox("Building package index..."))
+        buildindex(pkgindex, pkg_init())
+        ui_set_screen(catscr)
       } else if (e.value == mupdate) {
         ui_set_screen(new_textbox("Updating all packages..."))
         //pkg_install(pm, pkg_list_installed())
         exec_wait("terminal", new Array{"-k", "pkg", "update"})
+        ui_set_screen(new_textbox("Building package index..."))
+        buildindex(pkgindex, pkg_init())
+        ui_set_screen(catscr)
       }
-      ui_set_screen(new_textbox("Building package index..."))
-      buildindex(pkgindex, pkg_init())
-      ui_set_screen(catscr)
     }
     e = ui_wait_event()
   }
