@@ -1,0 +1,7 @@
+Package: fileinfo
+Version: 1.1-1
+Section: gui
+Summary: file properties viewer
+Depends: libcore2, libui0.1
+License: GPL v3
+Copyright: (C) 2012, Sergey Basalaev

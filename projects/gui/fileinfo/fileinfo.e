@@ -5,6 +5,7 @@
 
 use "io.eh"
 use "ui.eh"
+use "time.eh"
 use "form.eh"
 
 def fillform(form: Screen, file: String) {
@@ -17,10 +18,9 @@ def fillform(form: Screen, file: String) {
   form_add(form, item)
   item = new_textitem("Size:", to_str(fsize(file)))
   form_add(form, item)
-  item = new_dateitem("Modified:",DATE_TIME)
-  dateitem_set_date(item, fmodified(file))
+  item = new_textitem("Modified:", datestr(fmodified(file)))
   form_add(form, item)
-  item = new_checkitem("Access:","Read", can_read(file))
+  item = new_checkitem("Access:", "Read", can_read(file))
   form_add(form, item)
   item = new_checkitem("", "Write", can_write(file))
   form_add(form, item)
