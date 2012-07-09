@@ -1,3 +1,3 @@
 #!/bin/sh
 
-ex filetype.e -o libfiletype.0.so -slibfiletype.0.so
+ex filetype.e -o libfiletype.1.so -slibfiletype.1.so

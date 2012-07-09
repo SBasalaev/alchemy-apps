@@ -13,12 +13,18 @@ def _ftype_addtypes(db: Hashtable, file: String) {
   var r = utfreader(in)
   var line = freadline(r)
   var lnum = 1
-  while (line != null) {
+  while (line != null && strlen(line) > 0 && strchr(line, 0) != '#') {
     var ftype = strsplit(line, ',')
     if (ftype.len == 4) {
-      ht_put(db, ftype[0], new FileType(description=ftype[1],kind=ftype[2],command=ftype[3]))
+      ht_put(db, strtrim(to_str(ftype[0])), new FileType(
+        description=strtrim(to_str(ftype[1])),
+        category=strtrim(to_str(ftype[2])),
+        command=strtrim(to_str(ftype[3]))))
     } else if (ftype.len == 3) {
-      ht_put(db, ftype[0], new FileType(description=ftype[1],kind=ftype[2],command=""))
+      ht_put(db, strtrim(to_str(ftype[0])), new FileType(
+        description=strtrim(to_str(ftype[1])),
+        category=strtrim(to_str(ftype[2])),
+        command=""))
     } else {
       fprintln(stderr(), "libfiletype warning: failed to parse line "+lnum+" of "+file)
     }
@@ -28,10 +34,18 @@ def _ftype_addtypes(db: Hashtable, file: String) {
   fclose(in)
 }
 
+def _ftype_createcfg() {
+  var out = fopen_w("/cfg/filetypes")
+  fprintln(out, "#File format:")
+  fprintln(out, "#ext,descripition,category,exec")
+  fclose(out)
+}
+
 def ftype_loaddb(): FTypeDB {
   var ftypes = new_ht()
-  _ftype_addtypes(ftypes, "/res/libfiletype0/filetypes")
-  if (exists("/cfg/filetypes")) _ftype_addtypes(ftypes, "/cfg/filetypes")
+  _ftype_addtypes(ftypes, "/res/libfiletype1/filetypes")
+  if (!exists("/cfg/filetypes")) _ftype_createcfg()
+  _ftype_addtypes(ftypes, "/cfg/filetypes")
   new FTypeDB(filetypes=ftypes)
 }
 
@@ -71,13 +85,13 @@ def ftype_for_file(db: FTypeDB, file: String): FileType {
         if (b < 0) {
           ftype = ftype_for_ext(db, "/text/")
         } else {
-          ftype = ftype_for_ext(db, "/bin/")
+          ftype = ftype_for_ext(db, "/?/")
         }
       }
       fclose(in)
     }
     if (ftype == null) {
-      ftype = ftype_for_ext(db, "/bin/")
+      ftype = ftype_for_ext(db, "/?/")
     }
     ftype
   }
