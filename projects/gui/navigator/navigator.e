@@ -9,10 +9,20 @@ use "string.eh"
 use "stdscreens.eh"
 use "ui.eh"
 use "image.eh"
+use "filetype.eh"
 
-var icon_file: Image;
-var icon_dir: Image;
+var ftypedb: FTypeDB;
+
+// category icons
 var icon_up: Image;
+var icon_dir: Image;
+var icon_text: Image;
+var icon_exec: Image;
+var icon_lib: Image;
+var icon_image: Image;
+var icon_audio: Image;
+var icon_video: Image;
+var icon_other: Image;
 
 var mselect: Menu;
 var mprops: Menu;
@@ -78,10 +88,17 @@ def showfilelist(strings: Array): Screen {
     var str = to_str(strings[i])
     if (str == "..") {
       icons[i] = icon_up
-    } else if (strindex(str, '/') > 0) {
-      icons[i] = icon_dir
     } else {
-      icons[i] = icon_file
+      var ftype = ftype_for_file(ftypedb, str)
+      icons[i] =
+      if (ftype.category == DIR) icon_dir
+      else if (ftype.category == TEXT) icon_text
+      else if (ftype.category == LIB) icon_lib
+      else if (ftype.category == EXEC) icon_exec
+      else if (ftype.category == IMAGE) icon_image
+      else if (ftype.category == AUDIO) icon_audio
+      else if (ftype.category == VIDEO) icon_video
+      else icon_other
     }
   }
   var box = new_listbox(strings, icons, mselect)
@@ -97,17 +114,25 @@ def showfilelist(strings: Array): Screen {
   box
 }
 
+def image_from_file(file: String): Image {
+  var in = fopen_r(file)
+  var image = image_from_stream(in)
+  fclose(in)
+  image
+}
+
 def main(args: Array) {
+  // load db
+  ftypedb = ftype_loaddb()
   // load icons
-  var in = fopen_r("/res/navigator/nav-file.png")
-  icon_file = image_from_stream(in)
-  fclose(in)
-  in = fopen_r("/res/navigator/nav-dir.png")
-  icon_dir = image_from_stream(in)
-  fclose(in)
-  in = fopen_r("/res/navigator/nav-up.png")
-  icon_up = image_from_stream(in)
-  fclose(in)
+  icon_dir   = image_from_file("/res/navigator/dir.png")
+  icon_text  = image_from_file("/res/navigator/text.png")
+  icon_exec  = image_from_file("/res/navigator/exec.png")
+  icon_lib   = image_from_file("/res/navigator/lib.png")
+  icon_image = image_from_file("/res/navigator/image.png")
+  icon_audio = image_from_file("/res/navigator/audio.png")
+  icon_video = image_from_file("/res/navigator/video.png")
+  icon_other = image_from_file("/res/navigator/unknown.png")
   // init menus
   mselect = new_menu("Open", 1)
   mprops = new_menu("Properties", 2)
@@ -130,7 +155,16 @@ def main(args: Array) {
         list = filelist()
         scr = showfilelist(list)
       } else {
-        exec("edit", new Array{path})
+        var ftype = ftype_for_file(ftypedb, path)
+        if (ftype.command != "") {
+          exec(ftype.command, new Array{path})
+        } else if (ftype.category == "text") {
+          exec("edit", new Array{path})
+        } else if (ftype.category == "image") {
+          exec("imgview", new Array{path})
+        } else if (ftype.category == "exec") {
+          exec(path, new Array(0))
+        }
       }
     } else if (e.value == mprops) {
       exec("fileinfo", new Array{path})

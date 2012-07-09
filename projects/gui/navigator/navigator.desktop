@@ -2,4 +2,4 @@
 Type=Application
 Name=Browse files
 Exec=navigator
-Icon=/res/navigator/nav-dir.png
+Icon=/res/navigator/dir.png

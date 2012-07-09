@@ -1,3 +1,3 @@
 #!/bin/sh
 
-ex navigator.e -o navigator -lui
+ex navigator.e -o navigator -lui -lfiletype
