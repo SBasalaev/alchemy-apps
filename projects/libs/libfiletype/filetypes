@@ -1,0 +1,16 @@
+/bin/,Binary file,bin,
+/text/,ASCII text file,text,edit
+/dir/,Directory,node,
+/link/,Executable link,text,env
+/eprog/,E executable,bin,env
+/nprog/,Native executable,text,env
+/script/,Interpreter script,text,edit
+/empty/,Empty file,text,edit
+txt,Text file,text,edit
+e,E source,text,edit
+eh,E header,text,edit
+o,E compiled object,bin,
+so,Shared library,bin,
+png,PNG image,bin,imgview
+desktop,Desktop launcher,text,edit
+sh,Shell script,text,edit
