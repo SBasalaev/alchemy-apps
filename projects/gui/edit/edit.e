@@ -10,7 +10,7 @@ use "ui.eh"
 use "stdscreens.eh"
 
 const HELP = "Usage: edit file"
-const VERSION = "edit 0.8"
+const VERSION = "edit 0.9"
 
 def readfile(f: String): String {
   if (exists(f)) {
@@ -29,6 +29,25 @@ def writefile(f: String, text: String) {
   var out = fopen_w(f)
   fwritearray(out, buf, 0, buf.len)
   fclose(out)
+}
+
+const ALERT_TIMEOUT = 1500
+
+def show_alert(msg: String) {
+  var alert = new_textbox(msg)
+  screen_set_title(alert, "Edit")
+  screen_add_menu(alert, new_menu("Close", 1))
+  var back = ui_get_screen()
+  ui_set_screen(alert)
+  for (var i=0, i< ALERT_TIMEOUT / 100, i=i+1) {
+    var e = ui_read_event()
+    if (e != null && e.source == alert && e.kind == EV_MENU) {
+      i = ALERT_TIMEOUT / 100 // quit
+    } else {
+      sleep(100) // wait a little
+    }
+  }
+  ui_set_screen(back)
 }
 
 def main(args: Array) {
@@ -50,6 +69,7 @@ def main(args: Array) {
     while (e.value != mquit) {
       if (e.value == msave) {
         writefile(f, editbox_get_text(edit))
+        show_alert("File "+f+" is saved.")
       }
       e = ui_wait_event()
     }
