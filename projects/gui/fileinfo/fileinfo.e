@@ -7,14 +7,12 @@ use "io.eh"
 use "ui.eh"
 use "time.eh"
 use "form.eh"
+use "filetype.eh"
 
 def fillform(form: Screen, file: String) {
   var item = new_textitem("File:", file)
   form_add(form, item)
-  item = new_textitem("Type:",
-    if (is_dir(file)) "Directory"
-    else "Normal file"
-  )
+  item = new_textitem("Type:", ftype_for_file(ftype_loaddb(), file).description)
   form_add(form, item)
   item = new_textitem("Size:", to_str(fsize(file)))
   form_add(form, item)
