@@ -163,7 +163,7 @@ def main(args: Array) {
         } else if (ftype.category == "image") {
           exec("imgview", new Array{path})
         } else if (ftype.category == "exec") {
-          exec(path, new Array(0))
+          exec(abspath(path), new Array(0))
         }
       }
     } else if (e.value == mprops) {
