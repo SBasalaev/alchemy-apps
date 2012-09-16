@@ -106,8 +106,10 @@ def pkg_arh_unpack(pm: PkgManager, file: String) {
   var oldspec = pkglist_get(cast(PkgList)pm.lists[0], name)
   if (oldspec != null) {
     println("Replacing package "+name+" with new version")
-    var cmp = pkg_cmp_versions(pkgspec_get(spec, "Version"), pkgspec_get(oldspec, "Version"))
-    if (cmp < 0) println("Warning: version of the package decreases")
+    var oldver = pkgspec_get(oldspec, "Version")
+    var newver = pkgspec_get(spec, "Version")
+    var cmp = pkg_cmp_versions(newver, oldver)
+    if (cmp < 0) println("Warning: version of the package decreases ("+oldver+" -> "+newver+")")
     else if (cmp == 0) println("Warning: reinstalling the same version of the package")
     pkg_db_remove(pm, name)
   } else {
@@ -184,11 +186,15 @@ def pkg_install(pm: PkgManager, names: Array): Bool {
   var seq = pkg_install_seq(pm, names)
   if (seq != null) {
     // printing package sequence
-    println("Packages to be installed:")
-    for (var i=0, i<seq.len, i=i+2) {
-      if (i != 0) write(',')
-      write(' ')
-      print(seq[i])
+    if (seq.len == 0) {
+      println("No packages will be installed or updated.")
+    } else {
+      println("Packages to be installed:")
+      for (var i=0, i<seq.len, i=i+2) {
+        if (i != 0) write(',')
+        write(' ')
+        print(seq[i])
+      }
     }
     write('\n')
     // downloading packages

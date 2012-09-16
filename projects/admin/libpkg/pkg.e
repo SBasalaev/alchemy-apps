@@ -106,7 +106,7 @@ const A_DIR = 16
 def pkg_arh_extract_spec(file: String): PkgSpec {
   var spec: PkgSpec = null
   var in = fopen_r(file)
-  var path = freadutf(in)
+  var path = strucase(freadutf(in))
   fskip(in, 8)
   var attrs = freadubyte(in)
   if (path == "PACKAGE" && (attrs & A_DIR) == 0) {
@@ -114,6 +114,9 @@ def pkg_arh_extract_spec(file: String): PkgSpec {
     var buf = new BArray(len)
     freadarray(in, buf, 0, len)
     spec = pkgspec_parse(ba2utf(buf))
+  } else {
+    println("Error: archive "+file+" is not a correct package")
   }
+  fclose(in)
   spec
 }
