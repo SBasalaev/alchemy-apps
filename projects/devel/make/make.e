@@ -9,7 +9,7 @@ use "sys.eh"
 use "textio.eh"
 use "vector.eh"
 
-const VERSION = "Alchemy make 1.0"
+const VERSION = "Alchemy make 1.1"
 const HELP = "Usage: make [options] [targets]\n\nOptions:\n-h this help\n-v product version\n-s silent mode\n-C change directory"
 
 type Rule {
@@ -98,7 +98,9 @@ def build(target: String, silent: Bool): Bool {
 }
 
 /* Parses makefile. */
-def parse(r: Reader): Bool {
+def readmf(fname: String): Bool {
+  var in = fopen_r(fname)
+  var r = utfreader(in)
   var ok = true
   var lineno = 1
   var line = freadline(r)
@@ -110,7 +112,7 @@ def parse(r: Reader): Bool {
     } else if (strchr(line, 0) == ' ') {
       // add command to the target
       if (rule == null) {
-        fprintln(stderr(), "makefile:"+lineno+": ** Commands before first target. Stop.")
+        fprintln(stderr(), fname+":"+lineno+": Commands before first target. Stop.")
         ok = false
       } else {
         v_add(commands, substvars(strtrim(line)))
@@ -118,7 +120,7 @@ def parse(r: Reader): Bool {
     } else if (strindex(line, '=') > 0) {
       // add variable
       var eq = strindex(line, '=')
-      ht_put(vars, strtrim(substr(line, 0, eq)), strtrim(substr(line, eq+1, strlen(line))))
+      ht_put(vars, strtrim(substr(line, 0, eq)), substvars(strtrim(substr(line, eq+1, strlen(line)))))
     } else if (strindex(line, ':') > 0) {
       // start new target
       if (rule != null) {
@@ -129,11 +131,19 @@ def parse(r: Reader): Bool {
       }
       var cl = strindex(line, ':')
       rule = new Rule(
-        target = substr(line, 0, cl),
-        deps = strsplit(substr(line, cl+1, strlen(line)), ' ')
+        target = substvars(substr(line, 0, cl)),
+        deps = strsplit(substvars(substr(line, cl+1, strlen(line))), ' ')
       )
+    } else if (strstr(line, "include ") == 0) {
+      var incl_name = strtrim(substr(line, 8, strlen(line)))
+      if (exists(incl_name)) {
+        ok = readmf(incl_name)
+      } else {
+        ok = false
+        fprintln(stderr(), fname+":"+lineno+": Included file does not exist: "+incl_name)
+      }
     } else {
-      fprintln(stderr(), "makefile:"+lineno+": Syntax error")
+      fprintln(stderr(), fname+":"+lineno+": Syntax error")
       ok = false
     }
     line = freadline(r)
@@ -144,6 +154,7 @@ def parse(r: Reader): Bool {
     ht_put(rules, rule.target, rule)
     if (def_rule == null) def_rule = rule
   }
+  fclose(in)
   ok
 }
 
@@ -204,13 +215,10 @@ def main(args: Array): Int {
   }
   // parse makefile
   if (!exit) {
-    var in = fopen_r(fname)
-    var r = utfreader(in)
-    if (!parse(r)) {
+    if (!readmf(fname)) {
       exit = true
       result = 2
     }
-    fclose(in)
   }
   // build
   if (!exit) {

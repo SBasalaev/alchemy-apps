@@ -1,0 +1,7 @@
+Package: make
+Version: 1.1-1
+Section: devel
+Depends: libcore2
+Summary: utility to ease program building
+License: GPL v3
+Copyright: (C) 2012, Sergey Basalaev
