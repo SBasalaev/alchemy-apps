@@ -1,0 +1,9 @@
+Source: pkg-tools
+Package: pkg
+Version: 0.1.4-1
+Section: admin
+Summary: package manager
+Depends: libcore3, libpkg1
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: GPL-3

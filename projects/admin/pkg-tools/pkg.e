@@ -10,8 +10,8 @@ use "sys.eh"
 const HELP = "Usage: pkg command ...\n\npkg install packages...\n install/update packages\npkg update\n update all packages\npkg remove packages...\n remove packages\npkg refresh\n refresh package lists\npkg show packages...\n show packages info\npkg list\n list available packages"
 const VERSION = "pkg 0.1.1"
 
-def _print_spec_field(spec: PkgSpec, f: Any) {
-  var value = pkgspec_get(spec, to_str(f))
+def _print_spec_field(spec: PkgSpec, f: String) {
+  var value = spec.get(f)
   if (value != null) {
     print(f)
     print(": ")
@@ -19,7 +19,7 @@ def _print_spec_field(spec: PkgSpec, f: Any) {
   }
 }
 
-def main(args: Array) {
+def main(args: [String]) {
   if (args.len == 0 || args[0] == "-h") {
     println(HELP)
   } else if (args[0] == "-v") {
@@ -31,9 +31,9 @@ def main(args: Array) {
       println("pkg show: no packages specified")
     }
     var pm = pkg_init()
-    var fields = new Array {"Package", "Version", "Section", "Depends", "Summary"}
+    var fields = new [String] {"Package", "Version", "Section", "Depends", "Summary"}
     for (var i=1, i<args.len, i=i+1) {
-      var spec = pkg_query(pm, cast(String)args[i], cast(String)null)
+      var spec = pkg_query(pm, args[i], null)
       if (spec == null) {
         println("pkg show: package "+args[i]+" not found")
       } else {
