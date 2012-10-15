@@ -1,0 +1,8 @@
+Package: alchemy-gui
+Source: alchemy-meta
+Version: 5
+Section: gui
+Depends: appmenu, terminal, alpaca, navigator, imgview, edit
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+Summary: this metapackage depends on all packages that constitute default Alchemy GUI
