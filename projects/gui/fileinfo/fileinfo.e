@@ -9,32 +9,32 @@ use "time.eh"
 use "form.eh"
 use "filetype.eh"
 
-def fillform(form: Screen, file: String) {
-  var item = new_textitem("File:", file)
-  form_add(form, item)
+def fillform(form: Form, file: String) {
+  var item:Item = new_textitem("File:", file)
+  form.add(item)
   item = new_textitem("Type:", ftype_for_file(ftype_loaddb(), file).description)
-  form_add(form, item)
-  item = new_textitem("Size:", to_str(fsize(file)))
-  form_add(form, item)
+  form.add(item)
+  item = new_textitem("Size:", fsize(file).tostr())
+  form.add(item)
   item = new_textitem("Modified:", datestr(fmodified(file)))
-  form_add(form, item)
+  form.add(item)
   item = new_checkitem("Access:", "Read", can_read(file))
-  form_add(form, item)
+  form.add(item)
   item = new_checkitem("", "Write", can_write(file))
-  form_add(form, item)
+  form.add(item)
   item = new_checkitem("", "Execute", can_exec(file))
-  form_add(form, item)
+  form.add(item)
 }
 
-def main(args: Array) {
+def main(args: [String]) {
   if (args.len == 0) {
     println("Syntax: fileinfo file")
   } else {
     var form = new_form()
-    screen_set_title(form, "File info")
-    fillform(form, to_str(args[0]))
+    form.set_title("File info")
+    fillform(form, args[0])
     var mclose = new_menu("Close", 1)
-    screen_add_menu(form, mclose)
+    form.add_menu(mclose)
     ui_set_screen(form)
     var e = ui_wait_event()
     while (e.value != mclose) {
