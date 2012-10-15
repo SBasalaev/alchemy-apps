@@ -1,7 +1,7 @@
 Source: ex
 Package: ex
 Section: devel
-Version: 1.0.2-2
+Version: 1.1-1
 Depends: nec, libcore3
 Summary: build tool for Alchemy OS
 Author: Sergey Basalaev
