@@ -1,39 +1,62 @@
 /* Alchemy coreutils
- * (C) 2011, Sergey Basalaev
+ * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
 
-use "io"
-use "string"
+use "io.eh"
+use "list.eh"
+use "string.eh"
+use "version.eh"
 
-def main(args: Array): Int {
+const VERSION = "mv " + C_VERSION
+const HELP = "Moves/renames files."
+
+def main(args: [String]): Int {
   var len = args.len
-  if (len == 0) {
-    fprintln(stderr(), "mv: missing argument")
-    1
-  } else if (len == 1) {
-    fprintln(stderr(), "mv: missing destination")
-    1
-  } else {
-    var dest = to_str(args[len-1])
-    if (is_dir(dest)) {
-      for (var i=0, i < len-1, i = i+1) {
-        var srcfile = to_str(args[i])
-        var path = new_sb()
-        sb_append(path, dest)
-        sb_addch(path, '/')
-        sb_append(path, pathfile(srcfile))
-        var destfile = to_str(path)
-        fmove(srcfile, destfile)
-      }
-      0
-    } else if (len == 2) {
-      var src = to_str(args[0])
-      fmove(src, dest)
-      0
+  // parse args
+  var quit = false
+  var exitcode = 0
+  var files = new_list()
+  for (var i=0, i < len, i += 1) {
+    var arg = args[i]
+    if (arg == "-h") {
+      println(HELP)
+      quit = true
+    } else if (arg == "-v") {
+      println(VERSION)
+      quit = true
+    } else if (arg.ch(0) == '-') {
+      stderr().println("Unknown option: "+arg)
+      exitcode = 1
+      quit = true
     } else {
-      fprintln(stderr(), "mv: many arguments but target is not directory")
-      1
+      files.add(arg)
     }
   }
+  // do moving
+  if (!quit) {
+    len = files.len()
+    if (len == 0) {
+      stderr().println("mv: missing argument")
+      exitcode = 1
+    } else if (len == 1) {
+      stderr().println("mv: missing destination")
+      exitcode = 1
+    } else {
+      var dest = files[len-1].tostr()
+      if (is_dir(dest)) {
+        for (var i=0, i<len-1, i+=1) {
+          var srcfile = files[i].tostr()
+          fmove(srcfile, dest+"/"+pathfile(srcfile))
+        }
+      } else if (len == 2) {
+        var src = files[0].tostr()
+        fmove(src, dest)
+      } else {
+        stderr().println("mv: many arguments but target is not directory")
+        exitcode = 1
+      }
+    }
+  }
+  exitcode
 }

@@ -1,0 +1,1 @@
+const C_VERSION = "0.5 (Alchemy coreutils)"

@@ -1,3 +1,9 @@
+== coreutils 0.5 ==
+[2012-10-15] add -p to mkdir
+[2012-10-13] add -r to cp and rm
+[2012-10-12] port to current API
+[2012-07-27] port to libcore 3.0
+
 == coreutils 0.4.1 ==
 [2012-06-25] cat: fix output of multiple files
 
