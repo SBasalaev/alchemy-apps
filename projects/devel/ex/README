@@ -1,4 +1,4 @@
-Wrapper on ec/el to build E sources.
+Wrapper on ec/el to build Ether sources.
 
 Usage:
  ex [ec-options] [el-options] files... [-o output]
