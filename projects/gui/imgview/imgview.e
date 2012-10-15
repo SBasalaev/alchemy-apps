@@ -9,24 +9,21 @@ use "io.eh"
 use "ui.eh"
 
 const HELP = "Usage:\nimgview file"
-const VERSION = "imgview\nSimple image viewer\nVersion 0.1"
+const VERSION = "imgview\nSimple image viewer\nVersion 0.1.1"
 
-def main(args: Array) {
+def main(args: [String]) {
   if (args.len != 1 || args[0] == "-h") {
     println(HELP)
   } else if (args[0] == "-v") {
     println(VERSION)
   } else {
     var view = new_form()
-    screen_set_title(view, "Image view")
+    view.set_title("Image view")
     var mclose = new_menu("Close", 1)
-    screen_add_menu(view, mclose)
-    var file = to_str(args[0])
-    var in = fopen_r(file)
-    var img = image_from_stream(in)
-    fclose(in)
-    form_add(view, new_imageitem("", img))
-    form_add(view, new_textitem("", pathfile(file)))
+    view.add_menu(mclose)
+    var img = image_from_file(args[0])
+    view.add(new_imageitem("", img))
+    view.add(new_textitem("", pathfile(args[0])))
     ui_set_screen(view)
     var e = ui_wait_event()
     while (e.value != mclose) {

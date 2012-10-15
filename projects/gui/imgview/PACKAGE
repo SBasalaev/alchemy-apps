@@ -1,7 +1,0 @@
-Package: imgview
-Version: 0.1-1
-Section: gui
-Depends: libcore2, libui0.1
-Summary: simple image viewer
-License: GPL v3
-Copyright: (c) 2012 Sergey Basalaev
