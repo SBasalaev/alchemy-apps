@@ -3,12 +3,18 @@
  * Licensed under LGPL v3
  */
 
-use "hash.eh"
+use "dict.eh"
 
 const SOURCELIST = "/cfg/pkg/sources"
 
 type IStream;
 type OStream;
+
+type PkgList {
+ url: String,
+ dist: String,
+ specs: Dict
+}
 
 def pkg_addr_escape(name: String): String;
 def pkg_read_sourcelist(): Array;
@@ -18,27 +24,21 @@ def pkg_cmp_versions(v1: String, v2: String): Int;
 def pkg_read_addr(addr: String): IStream;
 
 type PkgManager {
-  lists: Array
+  lists: [PkgList]
 }
 
-type PkgSpec;
+type PkgSpec < Any;
 
 def pkgspec_parse(text: String): PkgSpec;
-def pkgspec_get(spec: PkgSpec, key: String): String;
-def pkgspec_set(spec: PkgSpec, key: String, value: String);
-def pkgspec_write(spec: PkgSpec, out: OStream);
+def PkgSpec.get(key: String): String;
+def PkgSpec.set(key: String, value: String);
+def PkgSpec.write(out: OStream);
 
-type PkgList {
- url: String,
- dist: String,
- specs: Hashtable
-}
-
-def pkglist_get(list: PkgList, name: String): PkgSpec;
-def pkglist_put(list: PkgList, spec: PkgSpec);
-def pkglist_remove(list: PkgList, package: String);
+def PkgList.get(name: String): PkgSpec;
+def PkgList.put(spec: PkgSpec);
+def PkgList.remove(package: String);
 def pkglist_read(addr: String, distr: String): PkgList;
-def pkglist_write(list: PkgList);
+def PkgList.write();
 
 def pkg_arh_extract_spec(file: String): PkgSpec;
 

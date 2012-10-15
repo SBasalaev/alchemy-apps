@@ -1,0 +1,9 @@
+Package: libpkg1
+Source: libpkg
+Version: 0.3.4-1
+Section: libs
+Summary: package management library
+Depends: libcore3
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: LGPL-3

@@ -6,16 +6,16 @@
 use "pkg_shared.eh"
 use "dataio.eh"
 use "string.eh"
-use "vector.eh"
+use "list.eh"
 
 def pkg_db_remove(pm: PkgManager, name: String) {
   // reading file list
   var lsfile = "/cfg/pkg/db/lists/"+name+".files"
   var buf = new BArray(fsize(lsfile))
   var in = fopen_r(lsfile)
-  freadarray(in, buf, 0, buf.len)
-  fclose(in)
-  var list = strsplit(ba2utf(buf), '\n')
+  in.readarray(buf, 0, buf.len)
+  in.close()
+  var list = ba2utf(buf).split('\n')
   // removing files
   for (var i=list.len-1, i>=0, i=i-1) {
     var file = "/"+list[i]
@@ -24,9 +24,9 @@ def pkg_db_remove(pm: PkgManager, name: String) {
   }
   fremove(lsfile)
   // removing database entry
-  var instlist = cast(PkgList)pm.lists[0]
-  pkglist_remove(instlist, name)
-  pkglist_write(instlist)
+  var instlist = pm.lists[0]
+  instlist.remove(name)
+  instlist.write()
 }
 
 //attribute flags
@@ -38,76 +38,76 @@ const A_EXEC = 1
 def pkg_arh_list(file: String): Array {
   var in = fopen_r(file)
   // skipping PACKAGE entry
-  freadutf(in)
-  fskip(in, 9)
-  fskip(in, freadint(in))
+  in.readutf()
+  in.skip(9)
+  in.skip(in.readint())
   // reading file names
-  var names = new_vector()
-  var f = freadutf(in)
+  var names = new_list()
+  var f = in.readutf()
   while (f != null) {
-    fskip(in, 8)
-    var attrs = freadubyte(in)
+    in.skip(8)
+    var attrs = in.readubyte()
     if ((attrs & 16) != 0) {
-      v_add(names, f+"/")
+      names.add(f+"/")
     } else {
-      v_add(names, f)
-      fskip(in, freadint(in))
+      names.add(f)
+      in.skip(in.readint())
     }
-    f = freadutf(in)
+    f = in.readutf()
   }
-  fclose(in)
-  v_toarray(names)
+  in.close()
+  names.toarray()
 }
 
 def pkg_unarh(file: String) {
   var in = fopen_r(file)
   // skipping PACKAGE entry
-  freadutf(in)
-  fskip(in, 9)
-  fskip(in, freadint(in))
+  in.readutf()
+  in.skip(9)
+  in.skip(in.readint())
   // unpacking in root
-  var f = freadutf(in)
+  var f = in.readutf()
   while (f != null) {
     f = "/"+f
-    fskip(in,8)
-    var attrs = freadubyte(in)
+    in.skip(8)
+    var attrs = in.readubyte()
     if ((attrs & A_DIR) != 0) {
       if (!exists(f)) mkdir(f)
     } else {
       var out = fopen_w(f)
-      var len = freadint(in)
+      var len = in.readint()
       if (len > 0) {
         var buf = new BArray(4096)
         while (len > 4096) {
-          freadarray(in, buf, 0, 4096)
-          fwritearray(out, buf, 0, 4096)
+          in.readarray(buf, 0, 4096)
+          out.writearray(buf, 0, 4096)
           len = len - 4096
         }
-        freadarray(in, buf, 0, len)
-        fwritearray(out, buf, 0, len)
+        in.readarray(buf, 0, len)
+        out.writearray(buf, 0, len)
       }
-      fflush(out)
-      fclose(out)
+      out.flush()
+      out.close()
     }
     set_read(f, (attrs & A_READ) != 0)
     set_write(f, (attrs & A_WRITE) != 0)
     set_exec(f, (attrs & A_EXEC) != 0)
-    f = freadutf(in)
+    f = in.readutf()
   }
-  fclose(in)
+  in.close()
 }
 
-def pkg_arh_unpack(pm: PkgManager, file: String) {
+def pkg_arh_unpack(pm: PkgManager, f: String) {
   // extract metadata
-  file = abspath(file)
+  var file = abspath(f)
   var spec = pkg_arh_extract_spec(file)
-  var name = pkgspec_get(spec, "Package")
+  var name = spec.get("Package")
   // warn if version decreases
-  var oldspec = pkglist_get(cast(PkgList)pm.lists[0], name)
+  var oldspec = pm.lists[0].get(name)
   if (oldspec != null) {
     println("Replacing package "+name+" with new version")
-    var oldver = pkgspec_get(oldspec, "Version")
-    var newver = pkgspec_get(spec, "Version")
+    var oldver = oldspec.get("Version")
+    var newver = spec.get("Version")
     var cmp = pkg_cmp_versions(newver, oldver)
     if (cmp < 0) println("Warning: version of the package decreases ("+oldver+" -> "+newver+")")
     else if (cmp == 0) println("Warning: reinstalling the same version of the package")
@@ -119,57 +119,57 @@ def pkg_arh_unpack(pm: PkgManager, file: String) {
   var namelist = pkg_arh_list(file)
   var out = fopen_w("/cfg/pkg/db/lists/"+name+".files")
   for (var i=0, i<namelist.len, i=i+1) {
-    var buf = utfbytes(to_str(namelist[i]))
-    fwritearray(out, buf, 0, buf.len)
-    fwrite(out, '\n')
+    var buf = namelist[i].tostr().utfbytes()
+    out.writearray(buf, 0, buf.len)
+    out.write('\n')
   }
-  fclose(out)
+  out.close()
   // writing metadata
-  var list = cast(PkgList)pm.lists[0]
-  pkglist_put(list, spec)
-  pkglist_write(list)
+  var list = pm.lists[0]
+  list.put(spec)
+  list.write()
   // unpacking archive
   println("Unpacking "+pathfile(file))
   pkg_unarh(file)
 }
 
 def pkg_install_seq(pm: PkgManager, names: Array): Array {
-  var seq = new_vector()
-  var check = new_vector()
+  var seq = new_list()
+  var check = new_list()
   for (var i=0, i<names.len,  i=i+1) {
-    if (v_indexof(check, names[i]) < 0) {
-      v_add(check, names[i])
+    if (check.indexof(names[i]) < 0) {
+      check.add(names[i])
     }
   }
   // adding all needed packages and their addresses
   var err = false
-  while (v_size(check) > 0 && !err) {
-    var name = cast (String) v_get(check, 0)
-    v_remove(check, 0)
-    if (v_indexof(seq, name) < 0) {
+  while (check.len() > 0 && !err) {
+    var name = cast (String) check.get(0)
+    check.remove(0)
+    if (seq.indexof(name) < 0) {
       var instspec = pkg_query_installed(pm, name)
-      var newspec = pkg_query(pm, name, cast(String)null)
+      var newspec = pkg_query(pm, name, null)
       if (newspec == null) {
         println("Error: package "+name+" not found in any available source")
         err = true
       } else if (instspec != newspec) {
         // adding new package
         for (var i=1, i<pm.lists.len, i=i+1) {
-          var list = cast (PkgList) pm.lists[i]
-          if (pkglist_get(list, name) == newspec) {
+          var list = pm.lists[i]
+          if (list.get(name) == newspec) {
             i = pm.lists.len
-            v_add(seq, name)
-            v_add(seq, list.url+"/"+pkgspec_get(newspec, "File"))
+            seq.add(name)
+            seq.add(list.url+"/"+newspec.get("File"))
           }
         }
         // checking package dependencies
-        var depstring = pkgspec_get(newspec, "Depends")
+        var depstring = newspec.get("Depends")
         if (depstring != null) {
-          var deps = strsplit(depstring, ',')
+          var deps = depstring.split(',')
           for (var i=0, i<deps.len, i=i+1) {
-            var dep = strtrim(to_str(deps[i]))
-            if (v_indexof(seq, dep) < 0 && pkg_query_installed(pm, dep) == null) {
-              v_add(check, dep)
+            var dep = deps[i].trim()
+            if (seq.indexof(dep) < 0 && pkg_query_installed(pm, dep) == null) {
+              check.add(dep)
             }
           }
         }
@@ -177,9 +177,9 @@ def pkg_install_seq(pm: PkgManager, names: Array): Array {
     }
   }
   if (err)
-    cast(Array)null
+    null
   else
-    v_toarray(seq)
+    seq.toarray()
 }
 
 def pkg_install(pm: PkgManager, names: Array): Bool {
@@ -200,13 +200,13 @@ def pkg_install(pm: PkgManager, names: Array): Bool {
     // downloading packages
     for (var i=0, i<seq.len, i=i+2) {
       var addr = cast (String) seq[i+1]
-      var tmpfile = "/tmp/"+substr(addr, strlindex(addr, '/')+1, strlen(addr))
+      var tmpfile = "/tmp/"+addr.substr(addr.lindexof('/')+1, addr.len())
       println("Get: "+addr)
       var in = pkg_read_addr(addr)
       var out = fopen_w(tmpfile)
       pkg_copyall(in, out)
-      fclose(in)
-      fclose(out)
+      in.close()
+      out.close()
       seq[i] = tmpfile
     }
     // installing and removing archives
@@ -221,46 +221,46 @@ def pkg_install(pm: PkgManager, names: Array): Bool {
 
 def pkg_arh_install(pm: PkgManager, file: String): Bool {
   var spec = pkg_arh_extract_spec(file)
-  var depstring = pkgspec_get(spec, "Depends")
+  var depstring = spec.get("Depends")
   var ok = true
   if (depstring != null) {
-    var deps = strsplit(depstring, ',')
+    var deps = depstring.split(',')
     for (var i=0, i<deps.len, i=i+1) {
-      deps[i] = strtrim(cast(String)deps[i])
+      deps[i] = deps[i].trim()
     }
     ok = pkg_install(pm, deps)
   }
   if (ok) {
-    println("Installing "+pkgspec_get(spec, "Package")+" from archive")
+    println("Installing "+spec.get("Package")+" from archive")
     pkg_arh_unpack(pm, file)
   }
   ok
 }
 
 def pkg_installed_rdeps(pm: PkgManager, names: Array): Array {
-  var vnames = new_vector()
+  var vnames = new_list()
   for (var i=0, i<names.len, i=i+1) {
-    if (v_indexof(vnames, names[i]) < 0) {
-      v_add(vnames, names[i])
+    if (vnames.indexof(names[i]) < 0) {
+      vnames.add(names[i])
     }
   }
-  var rdeps = new_vector()
+  var rdeps = new_list()
   var list = pkg_list_installed(pm)
   for (var i=0, i<list.len, i=i+1) {
     var name = cast(String)list[i]
-    if (v_indexof(vnames, name) < 0) {
+    if (vnames.indexof(name) < 0) {
       var spec = pkg_query_installed(pm, name)
-      var depstring = pkgspec_get(spec, "Depends")
+      var depstring = spec.get("Depends")
       if (depstring != null) {
-        var deps = strsplit(depstring, ',')
+        var deps = depstring.split(',')
         for (var j=0, j<deps.len, j=j+1) {
-          var dep = strtrim(cast(String)deps[j])
-          if (v_indexof(vnames, dep) >= 0) v_add(rdeps, name)
+          var dep = deps[j].trim()
+          if (vnames.indexof(dep) >= 0) rdeps.add(name)
         }
       }
     }
   }
-  v_toarray(rdeps)
+  rdeps.toarray()
 }
 
 def pkg_remove(pm: PkgManager, names: Array) {
@@ -276,7 +276,7 @@ def pkg_remove(pm: PkgManager, names: Array) {
   } else {
     for (var i=0, i<names.len, i=i+1) {
       println("Removing package "+names[i])
-      pkg_db_remove(pm, to_str(names[i]))
+      pkg_db_remove(pm, names[i].tostr())
     }
   }
 }

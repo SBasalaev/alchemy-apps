@@ -4,43 +4,41 @@
  */
 
 use "io.eh"
-use "hash.eh"
+use "dict.eh"
 use "string.eh"
 
-type PkgSpec = Hashtable;
+type PkgSpec < Dict;
 
 def pkgspec_parse(text: String): PkgSpec {
-  var spec = new_ht()
-  var lines = strsplit(text, '\n')
+  var spec = new_dict()
+  var lines = text.split('\n')
   for (var i=0, i<lines.len, i=i+1) {
-    var line = cast (String) lines[i]
-    var colon = strindex(line, ':')
+    var line = lines[i]
+    var colon = line.indexof(':')
     if (colon > 0) {
-      var key = strtrim(substr(line, 0, colon))
-      var value = strtrim(substr(line, colon+1, strlen(line)))
-      ht_put(spec, key, value)
+      var key = line.substr(0, colon).trim()
+      var value = line.substr(colon+1, line.len()).trim()
+      spec.set(key, value)
     }
   }
-  if (ht_get(spec, "Package") != null && ht_get(spec, "Version") != null) {
-    spec
+  if (spec.get("Package") != null && spec.get("Version") != null) {
+    cast (PkgSpec) spec
   } else {
-    cast (PkgSpec) null
+    null
   }
 }
 
-def pkgspec_get(spec: PkgSpec, key: String): String
-  = cast (String) ht_get(spec, key)
+def PkgSpec.get(key: String): String = cast (String) `Dict.get`(this, key)
 
-def pkgspec_set(spec: PkgSpec, key: String, value: String)
-  = ht_put(spec, key, value)
+def PkgSpec.set(key: String, value: String) = `Dict.set`(this, key, value)
 
-def pkgspec_write(spec: PkgSpec, out: OStream) {
-  var keys = ht_keys(spec)
+def PkgSpec.write(out: OStream) {
+  var keys = this.keys()
   for (var i=0, i<keys.len, i=i+1) {
-    fprint(out, keys[i])
-    fwrite(out, ':')
-    fwrite(out, ' ')
-    fprintln(out, ht_get(spec, keys[i]))
+    out.print(keys[i])
+    out.write(':')
+    out.write(' ')
+    out.println(`Dict.get`(this, keys[i]))
   }
-  fwrite(out, '\n')
+  out.write('\n')
 }

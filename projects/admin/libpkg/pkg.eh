@@ -1,7 +1,7 @@
 /* High-level interface to pkg. */
 
 type PkgManager;
-type PkgSpec;
+type PkgSpec < Any;
 
 /* Reads database and creates package manager. */
 def pkg_init(): PkgManager;
@@ -30,7 +30,7 @@ def pkg_list_installed(pm: PkgManager): Array;
 def pkg_list_all(pm: PkgManager): Array;
 
 /* Reads specified key from the spec. */
-def pkgspec_get(spec: PkgSpec, key: String): String;
+def PkgSpec.get(key: String): String;
 
 /* Extracts spec from package archive. */
 def pkg_arh_extract_spec(file: String): PkgSpec;
