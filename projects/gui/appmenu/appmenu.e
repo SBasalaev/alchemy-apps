@@ -4,6 +4,12 @@
  */
 
 use "image.eh"
+use "list.eh"
+use "string.eh"
+use "textio.eh"
+use "stdscreens.eh"
+use "sys.eh"
+use "ui.eh"
 
 type App {
   name: String,
@@ -12,33 +18,30 @@ type App {
 }
 
 def readdesktop(file: String): App {
-  var in = fopen_r(file)
-  var r = utfreader(in)
-  var line = freadline(r)
+  var r = utfreader(fopen_r(file))
+  var line = r.readline()
   var app = new App()
   while (line != null) {
-    var eq = strindex(line, '=')
+    var eq = line.indexof('=')
     if (eq > 0) {
-      var key = strtrim(substr(line, 0, eq))
-      var value = strtrim(substr(line, eq+1, strlen(line)))
+      var key = line.substr(0, eq).trim()
+      var value = line.substr(eq+1, line.len()).trim()
       if (key == "Name") {
         app.name = value
       } else if (key == "Exec") {
         app.exec = value
       } else if (key == "Icon") {
-        if (strchr(value, 0) != '/') value = "/res/icons/"+value
+        if (value.ch(0) != '/') value = "/res/icons/"+value
         if (exists(value)) {
-          var imgin = fopen_r(value)
-          app.icon = image_from_stream(imgin)
-          fclose(imgin)
+          app.icon = image_from_file(value)
         }
       }
     }
-    line = freadline(r)
+    line = r.readline()
   }
-  fclose(in)
+  r.close()
   if (app.exec == null) {
-    cast (App) null
+    null
   } else {
     if (app.name == null) app.name = app.exec
     app
@@ -47,52 +50,52 @@ def readdesktop(file: String): App {
 
 def readapps(): Array {
   var files = flist("/res/apps/")
-  var apps = new_vector()
+  var apps = new_list()
   for (var i=0, i < files.len, i=i+1) {
     var app = readdesktop("/res/apps/"+files[i])
-    if (app != null) v_add(apps, app)
+    if (app != null) apps.add(app)
   }
-  v_toarray(apps)
+  apps.toarray()
 }
 
-def makelist(apps: Array, select: Menu): Screen {
-  var strings = new Array(apps.len)
-  var icons = new Array(apps.len)
+def makelist(apps: Array, select: Menu): ListBox {
+  var strings = new [String](apps.len)
+  var icons = new [Image](apps.len)
   for (var i=0, i < apps.len, i=i+1) {
     var app = cast (App) apps[i]
     strings[i] = app.name
     icons[i] = app.icon
   }
   var scr = new_listbox(strings, icons, select)
-  screen_set_title(scr, "Applications")
+  scr.set_title("Applications")
   scr
 }
 
-def main(args: Array) {
+def main(args: [String]) {
   var mselect = new_menu("Launch", 1)
   var mrefresh = new_menu("Refresh", 2)
   var mquit = new_menu("Quit", 15)
   var apps = readapps()
   var scr = makelist(apps, mselect)
-  screen_add_menu(scr, mrefresh)
-  screen_add_menu(scr, mquit)
+  scr.add_menu(mrefresh)
+  scr.add_menu(mquit)
   ui_set_screen(scr)
   var e = ui_wait_event()
   while (e.value != mquit) {
     if (e.value == mrefresh) {
       apps = readapps()
       scr = makelist(apps, mselect)
-      screen_add_menu(scr, mrefresh)
-      screen_add_menu(scr, mquit)
+      scr.add_menu(mrefresh)
+      scr.add_menu(mquit)
       ui_set_screen(scr)
     } else if (e.value == mselect) {
-      var index = listbox_get_index(scr)
+      var index = scr.get_index()
       if (index >= 0) {
         var app = cast (App) apps[index]
-        var cmd = strsplit(app.exec, ' ')
-        var cmdargs = new Array(cmd.len-1)
+        var cmd = app.exec.split(' ')
+        var cmdargs = new [String](cmd.len-1)
         acopy(cmd, 1, cmdargs, 0, cmdargs.len)
-        exec(to_str(cmd[0]), cmdargs)
+        exec(cmd[0], cmdargs)
       }
     }
     e = ui_wait_event()
