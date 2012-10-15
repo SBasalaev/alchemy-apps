@@ -1,7 +1,0 @@
-Package: navigator
-Version: 0.3.1-1
-Section: gui
-Depends: libcore2, libui0.1, libfiletype1, edit, imgview, fileinfo, coreutils
-Summary: file manager for Alchemy
-License: GPL v3
-Copyright: (c) 2012, Sergey Basalaev
