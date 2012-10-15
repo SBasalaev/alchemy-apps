@@ -1,7 +1,0 @@
-Package: alpaca
-Version: 0.2.1-1
-Section: admin
-Depends: libcore2, libui0.1, pkg
-Summary: GUI for Alchemy package manager
-License: GPL v3
-Copyright: (c) 2012, Sergey Basalaev

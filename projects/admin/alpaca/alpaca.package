@@ -1,0 +1,9 @@
+Package: alpaca
+Source: alpaca
+Version: 0.2.4-2
+Section: admin
+Depends: libcore3, libui1, libpkg1, pkg, terminal
+Summary: GUI for package manager
+License: GPL-3
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
