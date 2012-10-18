@@ -15,4 +15,4 @@ install: all
  install pkg.eh /inc
 
 clean:
- rm ${TARGET} libpkg.so pkg.o pkg_installremove.o pkg_list.o pkg_shared.o pkg_spec.o
+ rm -f ${TARGET} libpkg.so

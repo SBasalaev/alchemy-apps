@@ -1,6 +1,6 @@
 Package: libpkg-dev
 Source: libpkg
-Version: 0.3.4-1
+Version: 0.3.5-1
 Section: libs
 Summary: package management library - development headers
 Depends: libpkg1

@@ -274,7 +274,8 @@ def pkg_remove(pm: PkgManager, names: Array) {
     }
     write('\n')
   } else {
-    for (var i=0, i<names.len, i=i+1) {
+    for (var i=0, i<names.len, i=i+1)
+    if (pkg_query_installed(pm, names[i]) != null) {
       println("Removing package "+names[i])
       pkg_db_remove(pm, names[i].tostr())
     }
