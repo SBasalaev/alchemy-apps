@@ -91,7 +91,10 @@ def main(args: [String]): Int {
       result = exec_wait("el", opts)
     }
     /* clean generated objects */
-    exec_wait("rm", objects.toarray())
+    for (var i=objects.len(), i>=0, i-=1) {
+      var obj = objects[i].tostr()
+      if (exists(obj)) fremove(obj)
+    }
   }
   result
 }
