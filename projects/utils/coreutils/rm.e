@@ -11,7 +11,7 @@ use "version.eh"
 const VERSION = "cp " + C_VERSION
 const HELP = "Removes files and directories.\n" +
              "Options:\n" +
-             "-r remove directories recursively" +
+             "-r remove directories recursively\n" +
              "-f don't fail if missing"
 
 def fremovetree(file: String) {

@@ -1,6 +1,6 @@
 Package: coreutils
 Source: coreutils
-Version: 0.5-1
+Version: 0.5.1-1
 Section: utils
 Summary: essential utilities for Alchemy OS
 Author: Sergey Basalaev

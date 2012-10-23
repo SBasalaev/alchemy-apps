@@ -34,12 +34,14 @@ def main(args: [String]): Int {
     }
   }
   // print strings
-  len = strings.len()
-  for (var i=0, i < len, i += 1) {
-    if (i != 0) write(' ')
-    print(strings[i])
+  if (!quit) {
+    len = strings.len()
+    for (var i=0, i < len, i += 1) {
+      if (i != 0) write(' ')
+      print(strings[i])
+    }
+    write('\n')
+    flush()
   }
-  write('\n')
-  flush()
   exitcode
 }

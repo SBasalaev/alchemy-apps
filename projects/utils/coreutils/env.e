@@ -11,7 +11,7 @@ use "version.eh"
 
 const VERSION = "env " + C_VERSION
 const HELP = "Run program in changed environment.\n" +
-             "Usage: env KEY=VALUE ... program args..."
+             "Usage: env KEY=VALUE... program args..."
 
 def main(args: [String]): Int {
   // pars args
@@ -21,7 +21,7 @@ def main(args: [String]): Int {
   var quit = false
   var exitcode = 0
   for (var i=0, !envread && !quit && i < len, i+=1) {
-    var arg = args[ofs]
+    var arg = args[i]
     if (arg == "-v") {
       println(VERSION)
       quit = true
