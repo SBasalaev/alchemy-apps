@@ -22,6 +22,8 @@ var icon_lib: Image;
 var icon_image: Image;
 var icon_audio: Image;
 var icon_video: Image;
+var icon_web: Image;
+var icon_archive: Image;
 var icon_other: Image;
 
 var mselect: Menu;
@@ -88,8 +90,13 @@ def showfilelist(strings: [String]): ListBox {
     var str = strings[i]
     if (str == "..") {
       icons[i] = icon_up
+    } else if (str[str.len()-1] == '/') {
+      icons[i] = icon_dir
     } else {
-      var ftype = ftype_for_file(ftypedb, str)
+      var ftype: FileType
+      var dot = str.indexof('.')
+      if (dot > 0) ftype = ftype_for_ext(ftypedb, str[dot+1:])
+      if (ftype == null) ftype = ftype_for_file(ftypedb, str)
       icons[i] =
       if (ftype.category == DIR) icon_dir
       else if (ftype.category == TEXT) icon_text
@@ -98,11 +105,13 @@ def showfilelist(strings: [String]): ListBox {
       else if (ftype.category == IMAGE) icon_image
       else if (ftype.category == AUDIO) icon_audio
       else if (ftype.category == VIDEO) icon_video
+      else if (ftype.category == WEB) icon_web
+      else if (ftype.category == ARCHIVE) icon_archive
       else icon_other
     }
   }
   var box = new_listbox(strings, icons, mselect)
-  box.set_title(get_cwd()+"/ - Navigator")
+  box.set_title(pathfile(get_cwd())+" - Navigator")
   box.add_menu(mprops)
   box.add_menu(mrename)
   box.add_menu(mdelete)
@@ -118,13 +127,15 @@ def main(args: [String]) {
   // load db
   ftypedb = ftype_loaddb()
   // load icons
-  icon_dir   = image_from_file("/res/navigator/dir.png")
-  icon_text  = image_from_file("/res/navigator/text.png")
-  icon_exec  = image_from_file("/res/navigator/exec.png")
-  icon_lib   = image_from_file("/res/navigator/lib.png")
-  icon_image = image_from_file("/res/navigator/image.png")
+  icon_archive=image_from_file("/res/navigator/archive.png")
   icon_audio = image_from_file("/res/navigator/audio.png")
+  icon_dir   = image_from_file("/res/navigator/dir.png")
+  icon_exec  = image_from_file("/res/navigator/exec.png")
+  icon_image = image_from_file("/res/navigator/image.png")
+  icon_lib   = image_from_file("/res/navigator/lib.png")
+  icon_text  = image_from_file("/res/navigator/text.png")
   icon_video = image_from_file("/res/navigator/video.png")
+  icon_web   = image_from_file("/res/navigator/web.png")
   icon_other = image_from_file("/res/navigator/unknown.png")
   // init menus
   mselect = new_menu("Open", 1)
