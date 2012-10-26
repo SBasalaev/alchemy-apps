@@ -1,7 +1,7 @@
 Source: libfiletype
 Package: libfiletype1
 Section: libs
-Version: 1.0.2-1
+Version: 1.1.1-1
 Summary: library to detect file type
 Author: Sergey Basalaev
 Maintainer: sbasalaev@gmail.com

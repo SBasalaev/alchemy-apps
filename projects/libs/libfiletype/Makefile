@@ -10,7 +10,7 @@ libfiletype.so:
  chmod +x libfiletype.so
 
 clean:
- rm ${TARGET} libfiletype.so filetype.o
+ rm -f ${TARGET} libfiletype.so
 
 install: all
  install ${TARGET} libfiletype.so /lib
