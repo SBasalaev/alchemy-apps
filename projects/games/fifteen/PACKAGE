@@ -1,7 +1,9 @@
 Package: fifteen
-Version: 1.0-2
+Source: fifteen
+Version: 1.0.1-1
 Section: games
-Depends: libcore2, libui0.1
+Depends: libcore3, libui1
 Summary: fifteen puzzle game
-License: GPL v3
-Copyright: (c) 2012, Sergey Basalaev
+License: GPL-3
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
