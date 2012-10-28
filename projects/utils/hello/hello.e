@@ -2,6 +2,6 @@
 
 use "io"
 
-def main(args: Array) {
+def main(args: [String]) {
   println("Hello, world!")
 }
