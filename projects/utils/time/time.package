@@ -1,0 +1,9 @@
+Source: time
+Package: time
+Section: utils
+Version: 1.0.4-1
+Summary: measures time of program execution
+Depends: libcore3
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: GPL-3
