@@ -11,4 +11,5 @@ base64 -d [file]
   If no file given then stdin is used.
 
 ChangeLog:
+[2012-10-28] Port to libcore 3.0
 [2012-01-23] Port to libcore 2.0

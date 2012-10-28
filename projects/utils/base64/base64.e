@@ -1,5 +1,5 @@
 /* base64 encoder/decoder
- * Version 1.0.2
+ * Version 1.1
  * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
@@ -7,11 +7,17 @@
 use "io"
 use "string"
 
+const VERSION = "base64 1.1"
+const HELP = "base64 encoder/decoder\n" +
+             "Usage:\n" +
+             "base64 [input]\n to encode\n" +
+             "base64 -d [input]\n to decode"
+
 const CODING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-def enc(b: Int): Int = strchr(CODING, b)
+def enc(b: Int): Int = CODING.ch(b)
 
-def dec(ch: Int): Int = strindex(CODING, ch)
+def dec(ch: Int): Int = CODING.indexof(ch)
 
 def encode() {
   var buf = new BArray(3)
@@ -56,17 +62,30 @@ def decode() {
   }
 }
 
-def main(args: Array) {
-  if (args.len == 0) {
-    encode()
-  } else if (args[0] == "-d") {
-    if (args.len != 1) {
-      setin(fopen_r(to_str(args[1])))
+def main(args: [String]) {
+  // parse args
+  var quit = false
+  var dodec = false
+  var input = ""
+  for (var i=0, i < args.len, i+=1) {
+    var arg = args[i]
+    if (arg == "-h") {
+      println(HELP)
+      quit = true
+    } else if (arg == "-v") {
+      println(VERSION)
+      quit = true
+    } else if (arg == "-d") {
+      dodec = true
+    } else {
+      input = arg
     }
-    decode()
-  } else {
-    setin(fopen_r(to_str(args[0])))
-    encode()
   }
-  flush()
+  // process
+  if (!quit) {
+    if (input != "") setin(fopen_r(input))
+    if (dodec) decode()
+    else encode()
+    flush()
+  }
 }
