@@ -1,13 +1,15 @@
 /* Arh utility
- * Version 1.0.3
+ * Version 1.0.4
  * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "dataio.eh"
 
-const VERSION = "arh 1.0.3"
+const VERSION = "arh 1.0.4"
 const HELP = "Usage:\narh c archive files...\narh t archive\narh x archive"
+
+const BUF_SIZE = 1024
 
 //attribute flags
 const A_DIR = 16
@@ -19,115 +21,114 @@ def arhpath(path: String): String
   = relpath("./"+abspath("/"+path))
 
 def arhlist(in: IStream) {
-  var f = freadutf(in)
+  var f = in.readutf()
   while (f != null) {
     print(f)
-    fskip(in, 8)
-    var attrs = freadubyte(in)
+    in.skip(8)
+    var attrs = in.readubyte()
     if ((attrs & 16) != 0) {
       println("/")
     } else {
       println("")
-      fskip(in, freadint(in))
+      in.skip(in.readint())
     }
-    f = freadutf(in)
+    f = in.readutf()
   }
 }
 
 def unarh(in: IStream) {
-  var f = freadutf(in)
+  var f = in.readutf()
   while (f != null) {
     f = arhpath(f)
-    fskip(in,8)
-    var attrs = freadubyte(in)
+    in.skip(8)
+    var attrs = in.readubyte()
     if ((attrs & A_DIR) != 0) {
       if (!exists(f)) mkdir(f)
     } else {
       var out = fopen_w(f)
-      var len = freadint(in)
+      var len = in.readint()
       if (len > 0) {
-        var buf = new BArray(4096)
-        while (len > 4096) {
-          freadarray(in, buf, 0, 4096)
-          fwritearray(out, buf, 0, 4096)
-          len = len - 4096
+        var buf = new BArray(BUF_SIZE)
+        while (len > BUF_SIZE) {
+          in.readarray(buf, 0, BUF_SIZE)
+          out.writearray(buf, 0, BUF_SIZE)
+          len = len - BUF_SIZE
         }
-        freadarray(in, buf, 0, len)
-        fwritearray(out, buf, 0, len)
+        in.readarray(buf, 0, len)
+        out.writearray(buf, 0, len)
       }
-      fflush(out)
-      fclose(out)
+      out.flush()
+      out.close()
     }
     set_read(f, (attrs & A_READ) != 0)
     set_write(f, (attrs & A_WRITE) != 0)
     set_exec(f, (attrs & A_EXEC) != 0)
-    f = freadutf(in)
+    f = in.readutf()
   }
 }
 
 def arhwrite(out: OStream, f: String) {
-  fwriteutf(out, arhpath(f))
-  fwritelong(out, fmodified(f))
+  out.writeutf(arhpath(f))
+  out.writelong(fmodified(f))
   var attrs = 0
   if (can_read(f)) attrs = attrs | A_READ
   if (can_write(f)) attrs = attrs | A_WRITE
   if (can_exec(f)) attrs = attrs | A_EXEC
   if (is_dir(f)) {
-    fwritebyte(out, attrs | A_DIR)
+    out.writebyte(attrs | A_DIR)
     var subs = flist(f)
     for (var i=0, i<subs.len, i=i+1) {
       arhwrite(out, f+"/"+subs[i])
     }
   } else {
-    fwritebyte(out, attrs)
+    out.writebyte(attrs)
     var len = fsize(f)
-    fwriteint(out, len)
+    out.writeint(len)
     if (len > 0) {
       var filein = fopen_r(f)
-      var buf = new BArray(4096)
-      var l = freadarray(filein, buf, 0, 4096)
+      var buf = new BArray(BUF_SIZE)
+      var l = filein.readarray(buf, 0, BUF_SIZE)
       while (l > 0) {
-        fwritearray(out, buf, 0, l)
-        l = freadarray(filein, buf, 0, 4096)
+        out.writearray(buf, 0, l)
+        l = filein.readarray(buf, 0, BUF_SIZE)
       }
-      fclose(filein)
+      filein.close()
     }
   }
 }
 
-def main(args: Array): Int {
+def main(args: [String]): Int {
+  // parse options
+  var quit = false
+  var exitcode = 0
   if (args.len == 0) {
-    fprintln(stderr(), "arh: no command")
-    1
+    stderr().println("arh: no command")
+    exitcode = 1
   } else {
     var cmd = args[0]
     if (cmd == "v" || cmd == "-v") {
       println(VERSION)
-      0
     } else if (cmd == "h" || cmd == "-h") {
       println(HELP)
-      0
     } else if (args.len < 2) {
-      fprintln(stderr(), "arh: no archive")
-      1
+      stderr().println("arh: no archive")
+      exitcode = 1
     } else if (cmd == "t" || cmd == "-t") {
-      arhlist(fopen_r(to_str(args[1])))
-      0
+      arhlist(fopen_r(args[1]))
     } else if (cmd == "x" || cmd == "-x") {
-      unarh(fopen_r(to_str(args[1])))
-      0
+      unarh(fopen_r(args[1]))
     } else if (cmd == "c" || cmd == "-c") {
-      var out = fopen_w(to_str(args[1]))
-      for (var i=2, i<args.len, i=i+1) {
-        arhwrite(out, to_str(args[i]))
+      var out = fopen_w(args[1])
+      for (var i=2, i<args.len, i += 1) {
+        arhwrite(out, args[i])
       }
-      fflush(out)
-      fclose(out)
-      0
+      out.flush()
+      out.close()
     } else {
-      fprint(stderr(), "arh: unknown command: ")
-      fprintln(stderr(), cmd)
-      1
+      stderr().print("arh: unknown command: ")
+      stderr().println(cmd)
+      exitcode = 1
     }
   }
+  exitcode
 }
