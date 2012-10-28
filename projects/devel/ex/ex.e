@@ -1,5 +1,5 @@
 /* Wrapper for ec/el
- * Version 1.0.2
+ * Version 1.3
  * (C) 2012, Sergey Basalaev
  * Licensed under GPL v3
  */
@@ -9,8 +9,19 @@ use "list.eh"
 use "string.eh"
 use "sys.eh"
 
-const VERSION = "ex 1.1"
-const HELP = ""
+const VERSION = "ex 1.3"
+const HELP = "Compiler for Alchemy OS\n" +
+             "Options:\n" +
+             "-o <name> Use this name for output\n" +
+             "-I<path> Search headers also in this path\n" +
+             "-l<lib> Link with given library\n" +
+             "-L<path> Search libraries also in this path\n" +
+             "-O Compile with optimizations\n" +
+             "-O0 Compile without optimizations\n" +
+             "-g Write debugging info\n" +
+             "-s<soname> Add soname to library\n" +
+             "-W<cat> Turn on warning category\n" +
+             "-Wno-<cat> Turn off warning category"
 
 def main(args: [String]): Int {
   /* initializing */
@@ -54,7 +65,7 @@ def main(args: [String]): Int {
         waitout = true
       } else if ("lLs".indexof(opt) >= 0) {
         elflags.add(arg)
-      } else if ("ItO".indexof(opt) >= 0) {
+      } else if ("IOgWt".indexof(opt) >= 0) {
         ecflags.add(arg)
       } else {
         stderr().println("Unknown option: "+arg)
