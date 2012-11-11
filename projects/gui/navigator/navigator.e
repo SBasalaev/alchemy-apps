@@ -63,7 +63,7 @@ def text_dialog(title: String, default: String): String {
 def yesno_dialog(title: String, msg: String): Bool {
   var yes = new_menu("Yes", 1)
   var no = new_menu("No", 2)
-  var box = new_textbox(msg)
+  var box = new_msgbox(msg, null)
   box.set_title(title)
   box.add_menu(yes)
   box.add_menu(no)

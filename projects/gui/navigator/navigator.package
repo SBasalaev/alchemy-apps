@@ -1,6 +1,6 @@
 Package: navigator
 Source: navigator
-Version: 0.3.5-1
+Version: 0.3.6-1
 Section: gui
 Depends: libcore3, libui1, libfiletype1, edit, imgview, fileinfo, coreutils
 Summary: file manager for Alchemy OS
