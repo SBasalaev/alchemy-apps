@@ -10,7 +10,7 @@ use "ui.eh"
 use "stdscreens.eh"
 
 const HELP = "Usage: edit file"
-const VERSION = "edit 0.9"
+const VERSION = "edit 0.9.2"
 
 def readfile(f: String): String {
   if (exists(f)) {
@@ -34,12 +34,12 @@ def writefile(f: String, text: String) {
 const ALERT_TIMEOUT = 1500
 
 def show_alert(msg: String) {
-  var alert = new_textbox(msg)
+  var alert = new_msgbox(msg, null)
   alert.set_title("Edit")
   alert.add_menu(new_menu("Close", 1))
   var back = ui_get_screen()
   ui_set_screen(alert)
-  for (var i=0, i< ALERT_TIMEOUT / 100, i=i+1) {
+  for (var i=0, i< ALERT_TIMEOUT / 100, i += 1) {
     var e = ui_read_event()
     if (e != null && e.source == alert && e.kind == EV_MENU) {
       i = ALERT_TIMEOUT / 100 // quit
