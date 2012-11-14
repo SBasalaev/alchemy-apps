@@ -107,7 +107,9 @@ def buildindex(pkgindex: [List], pm: PkgManager) {
 }
 
 def main(args: [String]) {
-  ui_set_screen(new_textbox("Building package index..."))
+  ui_set_app_title("Alpaca")
+
+  ui_set_screen(new_msgbox("Building package index...", null))
   // loading icons
   icon_inst = image_from_file("/res/alpaca/installed.png")
   icon_upd = image_from_file("/res/alpaca/update.png")
@@ -157,35 +159,35 @@ def main(args: [String]) {
           if (show_package(spec, instspec)) {
             var name = spec.get("Package")
             if (instspec == null) {
-              ui_set_screen(new_textbox("Installing package "+name+"..."))
+              ui_set_screen(new_msgbox("Installing package "+name+"...", null))
               //pkg_install(pm, new Array{name})
               exec_wait("terminal", new [String]{"-k", "pkg", "install", name})
             } else if (instspec != spec) {
-              ui_set_screen(new_textbox("Updating package "+name+"..."))
+              ui_set_screen(new_msgbox("Updating package "+name+"...", null))
               //pkg_install(pm, new Array{name})
               exec_wait("terminal", new [String]{"-k", "pkg", "install", name})
             } else {
-              ui_set_screen(new_textbox("Removing package "+name+"..."))
+              ui_set_screen(new_msgbox("Removing package "+name+"...", null))
               //pkg_remove(pm, new Array{name})
               exec_wait("terminal", new [String]{"-k", "pkg", "remove", name})
             }
-            ui_set_screen(new_textbox("Building package index..."))
+            ui_set_screen(new_msgbox("Building package index...", null))
             buildindex(pkgindex, pkg_init())
             ui_set_screen(catscr)
           }
         }
       } else if (e.value == mrefresh) {
-        ui_set_screen(new_textbox("Downloading package lists..."))
+        ui_set_screen(new_msgbox("Downloading package lists...", null))
         //pkg_refresh(pm)
         exec_wait("terminal", new [String]{"-k", "pkg", "refresh"})
-        ui_set_screen(new_textbox("Building package index..."))
+        ui_set_screen(new_msgbox("Building package index...", null))
         buildindex(pkgindex, pkg_init())
         ui_set_screen(catscr)
       } else if (e.value == mupdate) {
-        ui_set_screen(new_textbox("Updating all packages..."))
+        ui_set_screen(new_msgbox("Updating all packages...", null))
         //pkg_install(pm, pkg_list_installed())
         exec_wait("terminal", new [String]{"-k", "pkg", "update"})
-        ui_set_screen(new_textbox("Building package index..."))
+        ui_set_screen(new_msgbox("Building package index...", null))
         buildindex(pkgindex, pkg_init())
         ui_set_screen(catscr)
       }

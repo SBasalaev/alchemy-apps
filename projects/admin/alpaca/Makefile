@@ -3,7 +3,7 @@ alpaca: alpaca.e
  ex alpaca.e -o alpaca -lui -lpkg.1
 
 clean:
- rm alpaca.o alpaca
+ rm -f alpaca
 
 install: alpaca
  install alpaca /bin

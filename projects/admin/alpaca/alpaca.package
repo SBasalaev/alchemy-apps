@@ -1,6 +1,6 @@
 Package: alpaca
 Source: alpaca
-Version: 0.2.4-2
+Version: 0.2.5-1
 Section: admin
 Depends: libcore3, libui1, libpkg1, pkg, terminal
 Summary: GUI for package manager
