@@ -6,46 +6,47 @@
 use "ui"
 use "canvas"
 use "graphics"
+use "strbuf"
 use "string"
 use "sys"
 
 /* Returns descriptive string for the pressed key. */
 def keystr(key: Int): String {
-  var sb = new_sb()
-  sb_append(sb, "Key code: ")
-  sb_append(sb, key)
+  var sb = new_strbuf()
+  sb.append("Key code: ")
+  sb.append(key)
   if (key >= ' ') {
-    sb_append(sb, ", Char: '")
-    sb_addch(sb, key)
-    sb_addch(sb, '\'')
+    sb.append(", Char: '")
+    sb.addch(key)
+    sb.addch('\'')
   }
-  to_str(sb)
+  sb.tostr()
 }
 
-def main(args: Array) {
+def main(args: [String]) {
   /* Create canvas screen */
   var cnv = new_canvas(false)
-  screen_set_title(cnv, "Key input example")
+  cnv.set_title("Key input example")
   ui_set_screen(cnv)
   /* Draw initial text */
-  var g = canvas_graphics(cnv)
-  set_color(g, 0)
-  draw_string(g, "No key pressed", 5, 5)
-  draw_string(g, "To quit press #", 5, 30)
-  canvas_refresh(cnv)
+  var g = cnv.graphics()
+  g.set_color(0)
+  g.draw_string("No key pressed", 5, 5)
+  g.draw_string("To quit press #", 5, 30)
+  cnv.refresh()
   /* Read keys in a loop */
-  var key = canvas_read_key(cnv)
+  var key = canvas.read_key()
   while (key != '#') {
-    var newkey = canvas_read_key(cnv)
+    var newkey = cnv.read_key()
     if (newkey != 0 && newkey != key) {
       /* Clear screen */
-      set_color(g, 0xffffff)
-      fill_rect(g, 0, 0, screen_width(cnv), screen_height(cnv))
+      g.set_color(0xffffff)
+      g.fill_rect(0, 0, cnv.width, cnv.height)
       /* Draw new text */
-      set_color(g, 0)
-      draw_string(g, keystr(newkey), 5, 5)
-      draw_string(g, "To quit press #", 5, 30)
-      canvas_refresh(cnv)
+      g.set_color(0)
+      g.draw_string(keystr(newkey), 5, 5)
+      g.draw_string("To quit press #", 5, 30)
+      cnv.refresh()
       key = newkey
     }
     sleep(100)

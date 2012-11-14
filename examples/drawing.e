@@ -8,24 +8,24 @@ use "canvas"
 use "graphics"
 use "sys"
 
-def main(args: Array) {
+def main(args: [String]) {
   /* Creating canvas screen */
   var cnv = new_canvas(false)
-  screen_set_title(cnv, "Drawing example")
+  cnv.set_title("Drawing example")
   ui_set_screen(cnv)
   /* Drawing */
-  var g = canvas_graphics(cnv)
-  set_color(g, 0xffff00) // yellow
-  fill_arc(g, 20, 20, 50, 50, 0, 360)
-  set_color(g, 0) // black
-  draw_arc(g, 20, 20, 50, 50, 0, 360)
-  draw_arc(g, 30, 30, 30, 30, 225, 90)
-  fill_rect(g, 33, 34, 4, 4)
-  fill_rect(g, 53, 34, 4, 4)
-  draw_string(g, "Press any key", 15, 70)
-  canvas_refresh(cnv)
+  var g = cnv.graphics()
+  g.set_color(0xffff00) // yellow
+  g.fill_arc(20, 20, 50, 50, 0, 360)
+  g.set_color(0) // black
+  g.draw_arc(20, 20, 50, 50, 0, 360)
+  g.draw_arc(30, 30, 30, 30, 225, 90)
+  g.fill_rect(33, 34, 4, 4)
+  g.fill_rect(53, 34, 4, 4)
+  g.draw_string("Press any key", 15, 70)
+  cnv.refresh()
   /* Waiting for key press */
-  while (canvas_read_key(cnv) == 0) {
+  while (cnv.read_key() == 0) {
     sleep(50)
   }
 }

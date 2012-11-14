@@ -1,7 +1,7 @@
-/* Simplest example of E program */
+/* Simplest example of Ether program */
 
 use "io"
 
-def main(args: Array) {
+def main(args: [String]) {
   println("Hello, world!")
 }

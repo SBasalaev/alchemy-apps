@@ -2,9 +2,9 @@
  * name and then greets you.
  */
 
-use "textio"
+use "io"
 
-def main(args: Array) {
+def main(args: [String]) {
   println("What is your name?")
   var name = readline()
   println("Hello, "+name+"!")
