@@ -1,10 +1,10 @@
-def rd(ei: Item, scr: Screen)
+def rd(ei: EditItem, scr: Screen)
 {
   var evnt = ui_read_event()
-  endtxt = edititem_get_text(ei)
+  endtxt = ei.get_text()
   while (endtxt==srchtxt && evnt==null && n==1000) {
     evnt = ui_read_event()
-    endtxt = edititem_get_text(ei)
+    endtxt = ei.get_text()
   }
   if (evnt != null) {
     var ev = cast(Menu)evnt.value
@@ -22,7 +22,7 @@ def rd(ei: Item, scr: Screen)
   if (endtxt=="1")
     cntrl=1
   if (cntrl==1)
-    item_set_label(ei,"function name")
+    ei.set_label("function name")
   if(cntrl==2)
-    item_set_label(ei,"Header name")
+    ei.set_label("Header name")
 }

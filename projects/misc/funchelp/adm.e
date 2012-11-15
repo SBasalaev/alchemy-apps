@@ -1,9 +1,9 @@
 def adm(scad: Screen)
 {
   me = new_menu("exit",2)
-  screen_add_menu(scad, me)
+  scad.add_menu(me)
   mab = new_menu("about", 1)
-  screen_add_menu(scad, mab)
+  scad.add_menu(mab)
   mst = new_menu("setting", 0)
-  screen_add_menu(scad, mst)
+  scad.add_menu(mst)
 }

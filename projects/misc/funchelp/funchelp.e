@@ -1,7 +1,8 @@
 use "ui"
+use "form"
 use "abt.e"
 
-var f: Screen
+var f: Form
 var cntrl: Int
 var endtxt: String
 var srchtxt: String
@@ -17,30 +18,30 @@ use "rd.e"
 use "adm.e"
 use "sys"
 
-def main(a: Array) {
+def main(a: [String]) {
   if(cntrl != 2)
     cntrl = 1
   f = new_form()
   var e = new_edititem("Function name", "", EDIT_ANY, 20)
-  form_add(f, e)
+  f.add(e)
   ui_set_screen(f)
   adm(f)
   var hlist = flist("/inc")
-  screen_set_title(f, "funchelp")
+  f.set_title("funchelp")
   var t: Item
   var ev: Menu
   var htxt: String
   while (cntrl != 0) {
     n=0
-    srchtxt = edititem_get_text(e)
+    srchtxt = e.get_text()
     rmitm(f, 1)
     var ans = ""
     var hindx = 0
-    for (hindx = 0, hindx < hlist.len && srchtxt != "" && cntrl != 0 && endtxt == srchtxt, hindx = hindx+1) {
-      var hname = to_str(hlist[hindx])
+    for (hindx = 0, hindx < hlist.len && srchtxt != "" && cntrl != 0 && endtxt == srchtxt, hindx += 1) {
+      var hname = hlist[hindx]
       if (cntrl == 1) {
       htxt = open("/inc/"+hname)
-      var fnlist = strsplit(htxt, ';')
+      var fnlist = htxt.split(';')
       ans = srch(fnlist, e, ' ', '(')
     }
 
@@ -49,7 +50,7 @@ def main(a: Array) {
 
     if (n==2 && cntrl==2)
     {
-      ans = substr(ans, 2, strlen(ans)-1)
+      ans = ans[2: ans.len()-1]
       hname = ans
       ans = open("/inc/"+hname)
     }
@@ -60,7 +61,7 @@ def main(a: Array) {
       t = new_textitem(hname, ans)
       if (cntrl==2 && n != 2)
       t = new_textitem(" ", ans)
-      form_add(f, t)
+      f.add(t)
     }
     if (cntrl==2)
       hindx = hlist.len
@@ -71,8 +72,8 @@ def main(a: Array) {
     {
       if(n==1)
       {
-        form_remove(f,1)
-        form_add(f,new_textitem("No Match Found",""))
+        f.remove(1)
+        f.add(new_textitem("No Match Found",""))
       }
       n = 1000
       rd(e,f)

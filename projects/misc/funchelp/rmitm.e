@@ -1,6 +1,6 @@
-def rmitm(fm: Screen, rsltno: Int)
+def rmitm(fm: Form, rsltno: Int)
 {
-  var fs = form_size(fm)
-  for (fs=fs-1, fs > rsltno-1, fs=fs-1)
-    form_remove(fm,fs)
+  var fs = fm.size()
+  for (fs=fs-1, fs > rsltno-1, fs-=1)
+    fm.remove(fs)
 }
