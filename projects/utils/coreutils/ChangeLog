@@ -1,3 +1,5 @@
+[2012-11-15] fix mkdir -p
+
 == coreutils 0.5 ==
 [2012-10-15] add -p to mkdir
 [2012-10-13] add -r to cp and rm

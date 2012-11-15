@@ -57,7 +57,7 @@ def main(args: [String]): Int {
       for (var i=0, i < len && exitcode == 0, i += 1) {
         var dir = files[i].tostr()
         if (mkparents) {
-          mkdirtree(args[i])
+          mkdirtree(dir)
         } else if (exists(dir)) {
           stderr().println("File already exists: "+dir)
           exitcode = 1

@@ -44,6 +44,9 @@ def main(args: [String]): Int {
       recursive = true
     } else if (arg == "-f") {
       nofail = true
+    } else if (arg == "-rf") {
+      nofail = true
+      recursive = true
     } else if (arg.ch(0) == '-') {
       stderr().println("Unknown option: "+arg)
       exitcode = 1

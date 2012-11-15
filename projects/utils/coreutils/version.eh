@@ -1,1 +1,1 @@
-const C_VERSION = "0.5.1 (Alchemy coreutils)"
+const C_VERSION = "0.5.2 (Alchemy coreutils)"

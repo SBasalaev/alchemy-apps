@@ -1,5 +1,6 @@
+ALL=cat chmod cp date echo env install ls mkdir mv rm
 
-all: cat chmod cp date echo env install ls mkdir mv rm
+all: ${ALL}
 
 cat: cat.e
  ex cat.e -o cat
@@ -35,7 +36,14 @@ rm: rm.e
  ex rm.e -o rm
 
 clean-all: rm
- ./rm -f cat chmod cp date echo env install ls mkdir mv rm
+ ./rm -f ${ALL}
 
 install-all: all
- ./install cat chmod cp date echo env install ls mkdir mv rm /bin
+ ./install ${ALL} /bin
+
+package: all
+ ./mkdir -p bin
+ ./install ${ALL} ./bin
+ ./cat coreutils.package > PACKAGE
+ arh c coreutils.pkg PACKAGE bin
+ ./rm -r PACKAGE bin
