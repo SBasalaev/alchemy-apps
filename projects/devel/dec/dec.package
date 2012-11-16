@@ -1,0 +1,9 @@
+Source: dec
+Package: dec
+Version: 0.1-1
+Summary: Ether decompiler
+Section: devel
+Depends: libcore3
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: GPL-3
