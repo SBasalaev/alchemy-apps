@@ -1,5 +1,7 @@
-/** E decompiler.
-*/
+/* Ether decompiler.
+ * (c) 2012, Sergey Basalaev
+ * Licensed under GPL-3
+ */
 
 use "eobj.eh"
 use "opcodes.eh"

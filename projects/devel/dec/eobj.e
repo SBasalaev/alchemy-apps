@@ -1,3 +1,8 @@
+/* Ether decompiler.
+ * (c) 2012, Sergey Basalaev
+ * Licensed under GPL-3
+ */
+
 use "eobj.eh"
 use "dataio.eh"
 use "error.eh"
