@@ -1,4 +1,4 @@
-E port of Alchemy archiving tool.
+Ether port of Alchemy archiving tool.
 
 Usage:
 arh c archive files...    - create archive of given files
