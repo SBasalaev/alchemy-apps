@@ -6,7 +6,7 @@
 
 use "dataio.eh"
 
-const VERSION = "arh 1.0.4"
+const VERSION = "arh 1.1"
 const HELP = "Usage:\narh c archive files...\narh t archive\narh x archive"
 
 const BUF_SIZE = 1024
@@ -17,6 +17,13 @@ const A_READ = 4
 const A_WRITE = 2
 const A_EXEC = 1
 
+//due to differences in file systems there are cases
+//when one cannot open .arh created by someone else
+//so file attributes are hardcoded now
+// DIRECTORY drwx
+// PROGRAM   -rwx
+// FILE      -rw-
+
 def arhpath(path: String): String
   = relpath("./"+abspath("/"+path))
 
@@ -26,7 +33,7 @@ def arhlist(in: IStream) {
     print(f)
     in.skip(8)
     var attrs = in.readubyte()
-    if ((attrs & 16) != 0) {
+    if ((attrs & A_DIR) != 0) {
       println("/")
     } else {
       println("")
@@ -60,9 +67,9 @@ def unarh(in: IStream) {
       out.flush()
       out.close()
     }
-    set_read(f, (attrs & A_READ) != 0)
-    set_write(f, (attrs & A_WRITE) != 0)
     set_exec(f, (attrs & A_EXEC) != 0)
+    set_write(f, (attrs & A_WRITE) != 0)
+    set_read(f, (attrs & A_READ) != 0)
     f = in.readutf()
   }
 }
@@ -70,22 +77,26 @@ def unarh(in: IStream) {
 def arhwrite(out: OStream, f: String) {
   out.writeutf(arhpath(f))
   out.writelong(fmodified(f))
-  var attrs = 0
-  if (can_read(f)) attrs = attrs | A_READ
-  if (can_write(f)) attrs = attrs | A_WRITE
-  if (can_exec(f)) attrs = attrs | A_EXEC
+  var attrs = A_READ | A_WRITE
   if (is_dir(f)) {
     out.writebyte(attrs | A_DIR)
     var subs = flist(f)
-    for (var i=0, i<subs.len, i=i+1) {
+    for (var i=0, i<subs.len, i+=1) {
       arhwrite(out, f+"/"+subs[i])
     }
   } else {
+    var filein = fopen_r(f)
+    var magic = filein.readushort()
+    filein.close()
+    if (magic == 0xC0DE || magic == (('#' << 8)|'!')
+     || magic == (('#' << 8)|'=') || magic == (('#' << 8)|'@')) {
+      attrs |= A_EXEC
+    }
     out.writebyte(attrs)
     var len = fsize(f)
     out.writeint(len)
     if (len > 0) {
-      var filein = fopen_r(f)
+      filein = fopen_r(f)
       var buf = new BArray(BUF_SIZE)
       var l = filein.readarray(buf, 0, BUF_SIZE)
       while (l > 0) {

@@ -8,6 +8,7 @@ arh h                     - show help message and exit
 arh v                     - show arh version and exit
 
 ChangeLog:
+[2012-11-26]  Hard setting rights for archived files
 [2012-10-28]  Port to libcore 3.0
 [2012-05-31]  Use syntax features available since Alchemy 1.4
 [2012-01-23]  Port to libcore 2.0

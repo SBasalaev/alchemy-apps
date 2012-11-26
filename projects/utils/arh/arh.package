@@ -1,9 +1,10 @@
 Source: arh
 Package: arh
-Version: 1.0.4-1
+Version: 1.1-1
 Section: utils
 Summary: archiving utility
 Author: Sergey Basalaev
 Maintainer: sbasalaev@gmail.com
+Copyright: (c) 2012 Sergey Basalaev
 License: GPL-3
 Depends: libcore3
