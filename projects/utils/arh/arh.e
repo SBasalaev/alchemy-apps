@@ -1,12 +1,12 @@
 /* Arh utility
- * Version 1.0.4
+ * Version 1.1.1
  * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "dataio.eh"
 
-const VERSION = "arh 1.1"
+const VERSION = "arh 1.1.1"
 const HELP = "Usage:\narh c archive files...\narh t archive\narh x archive"
 
 const BUF_SIZE = 1024
@@ -79,7 +79,7 @@ def arhwrite(out: OStream, f: String) {
   out.writelong(fmodified(f))
   var attrs = A_READ | A_WRITE
   if (is_dir(f)) {
-    out.writebyte(attrs | A_DIR)
+    out.writebyte(attrs | A_DIR | A_EXEC)
     var subs = flist(f)
     for (var i=0, i<subs.len, i+=1) {
       arhwrite(out, f+"/"+subs[i])
