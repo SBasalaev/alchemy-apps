@@ -9,19 +9,20 @@ use "list.eh"
 use "string.eh"
 use "sys.eh"
 
-const VERSION = "ex 1.3"
+const VERSION = "ex 1.4"
 const HELP = "Compiler for Alchemy OS\n" +
              "Options:\n" +
              "-o <name> Use this name for output\n" +
              "-I<path> Search headers also in this path\n" +
              "-l<lib> Link with given library\n" +
              "-L<path> Search libraries also in this path\n" +
-             "-O Compile with optimizations\n" +
-             "-O0 Compile without optimizations\n" +
+             "-O<level> Use specified optimization level\n" +
              "-g Write debugging info\n" +
              "-s<soname> Add soname to library\n" +
+             "-c Only compile, don't link\n" +
              "-W<cat> Turn on warning category\n" +
-             "-Wno-<cat> Turn off warning category"
+             "-Wno-<cat> Turn off warning category\n" +
+             "-X<feature> Enable experimental feature"
 
 def main(args: [String]): Int {
   /* initializing */
@@ -29,7 +30,8 @@ def main(args: [String]): Int {
   var objects = new_list() // generated objects
   var ecflags = new_list() // compiler flags
   var elflags = new_list() // linker flags and passed objects
-  var outname = "a.out"
+  var outname: String = null
+  var compileonly = false
   /* parsing arguments */
   var waitout = false
   var quit = false
@@ -65,8 +67,10 @@ def main(args: [String]): Int {
         waitout = true
       } else if ("lLs".indexof(opt) >= 0) {
         elflags.add(arg)
-      } else if ("IOgWt".indexof(opt) >= 0) {
+      } else if ("IOgWtX".indexof(opt) >= 0) {
         ecflags.add(arg)
+      } else if (opt == 'c') {
+        compileonly = true
       } else {
         stderr().println("Unknown option: "+arg)
         quit = true
@@ -79,6 +83,17 @@ def main(args: [String]): Int {
     quit = true
     result = 1
   }
+  if (compileonly) {
+    if (sources.len() > 1 && outname != null) {
+      stderr().println("Conflicting options: -c and -o with multiple sources")
+      quit = true
+      result = 1
+    }
+  }
+  if (outname == null) {
+    if (compileonly) outname = objects[0].tostr()
+    else outname = "a.out"
+  }
   
   if (!quit) {
     /* prepare ec flags */
@@ -89,22 +104,25 @@ def main(args: [String]): Int {
     var count = sources.len()
     for (var i=0, i < count && result == 0, i+=1) {
       opts[0] = sources[i].tostr()
-      opts[2] = objects[i].tostr()
+      opts[2] = if (compileonly) outname else objects[i].tostr()
       result = exec_wait("ec", opts)
     }
-    /* prepare el flags */
-    if (result == 0) {
-      opts = new [String](objects.len() + elflags.len() + 2)
-      acopy(objects.toarray(), 0, opts, 0, objects.len())
-      acopy(elflags.toarray(), 0, opts, objects.len(), elflags.len())
-      opts[opts.len-2] = "-o"
-      opts[opts.len-1] = outname
-      result = exec_wait("el", opts)
-    }
-    /* clean generated objects */
-    for (var i=objects.len(), i>=0, i-=1) {
-      var obj = objects[i].tostr()
-      if (exists(obj)) fremove(obj)
+    /* link */
+    if (!compileonly) {
+      /* prepare el flags */
+      if (result == 0) {
+        opts = new [String](objects.len() + elflags.len() + 2)
+        acopy(objects.toarray(), 0, opts, 0, objects.len())
+        acopy(elflags.toarray(), 0, opts, objects.len(), elflags.len())
+        opts[opts.len-2] = "-o"
+        opts[opts.len-1] = outname
+        result = exec_wait("el", opts)
+      }
+      /* clean generated objects */
+      for (var i=objects.len(), i>=0, i-=1) {
+        var obj = objects[i].tostr()
+        if (exists(obj)) fremove(obj)
+      }
     }
   }
   result

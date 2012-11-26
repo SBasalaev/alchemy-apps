@@ -9,4 +9,11 @@ clean:
  rm ex.o ex
 
 install: ex
- install ex /bin 
+ install ex /bin
+
+package: ex
+ mkdir -p bin
+ install ex bin
+ cat ex.package > PACKAGE
+ arh c ex.pkg PACKAGE bin
+ rm -r PACKAGE bin
