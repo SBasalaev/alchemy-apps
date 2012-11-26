@@ -1,5 +1,5 @@
 
-const MAX_VMVERSION = 0x0200
+const MAX_VMVERSION = 0x0201
 const MIN_VMVERSION = 0x0200
 
 const T_NULL = '0'

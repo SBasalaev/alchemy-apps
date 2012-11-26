@@ -1,5 +1,5 @@
 /* Ether decompiler.
- * (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012 Sergey Basalaev
  * Licensed under GPL-3
  */
 

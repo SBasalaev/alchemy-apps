@@ -1,5 +1,5 @@
 /* Ether decompiler.
- * (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012 Sergey Basalaev
  * Licensed under GPL-3
  */
 
@@ -110,6 +110,8 @@ def main(args: [String]) {
               println("d2l");
             D2F:
               println("d2f");
+            I2C:
+              println("i2c");
             IADD:
               println("iadd");
             ISUB:
@@ -366,30 +368,78 @@ def main(args: [String]) {
               addr += 1
               println("calv "+(f.code[addr] & 0xff));
             }
-            NEWARRAY:
-              println("newarray");
-            ALOAD:
-              println("aload");
-            ASTORE:
-              println("astore");
-            ALEN:
-              println("alen");
+            NEWAA:
+              println("newaa");
             NEWBA:
               println("newba");
-            BALOAD:
-              println("baload");
-            BASTORE:
-              println("bastore");
-            BALEN:
-              println("balen");
             NEWCA:
               println("newca");
+            NEWSA:
+              println("newsa");
+            NEWZA:
+              println("newza");
+            NEWIA:
+              println("newia");
+            NEWLA:
+              println("newla");
+            NEWFA:
+              println("newfa");
+            NEWDA:
+              println("newda");
+            AALOAD:
+              println("aaload");
+            BALOAD:
+              println("baload");
             CALOAD:
               println("caload");
+            ZALOAD:
+              println("zaload");
+            SALOAD:
+              println("saload");
+            IALOAD:
+              println("iaload");
+            LALOAD:
+              println("laload");
+            FALOAD:
+              println("faload");
+            DALOAD:
+              println("daload");
+            AASTORE:
+              println("aastore");
+            BASTORE:
+              println("bastore");
             CASTORE:
               println("castore");
+            ZASTORE:
+              println("zastore");
+            SASTORE:
+              println("sastore");
+            IASTORE:
+              println("iastore");
+            LASTORE:
+              println("lastore");
+            FASTORE:
+              println("fastore");
+            DASTORE:
+              println("dastore");
+            AALEN:
+              println("aalen");
+            BALEN:
+              println("balen");
             CALEN:
               println("calen");
+            ZALEN:
+              println("zalen");
+            SALEN:
+              println("salen");
+            IALEN:
+              println("ialen");
+            LALEN:
+              println("lalen");
+            FALEN:
+              println("falen");
+            DALEN:
+              println("dalen");
             ACMP:
               println("acmp");
             RET_NULL:
@@ -527,8 +577,8 @@ def main(args: [String]) {
         }
         if ((f.flags & FFLAG_ERRTBL) != 0) {
           println("  Error catching table:");
-          for (var j=0, j<f.errtable.len, j += 3) {
-            println("    from "+f.errtable[j]+" to "+f.errtable[j+1]+" catch "+f.errtable[j+2]);
+          for (var j=0, j<f.errtable.len, j += 4) {
+            println("    from "+f.errtable[j]+" to "+f.errtable[j+1]+" catch "+f.errtable[j+2]+" head "+f.errtable[j+3]);
           }
         }
       }
