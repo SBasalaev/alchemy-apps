@@ -137,6 +137,7 @@ def main(args: [String]) {
   icon_video = image_from_file("/res/navigator/video.png")
   icon_web   = image_from_file("/res/navigator/web.png")
   icon_other = image_from_file("/res/navigator/unknown.png")
+  icon_up    = image_from_file("/res/navigator/up.png")
   // init menus
   mselect = new_menu("Open", 1)
   mprops = new_menu("Properties", 2)
