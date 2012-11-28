@@ -20,7 +20,7 @@ type App {
 def readdesktop(file: String): App {
   var r = utfreader(fopen_r(file))
   var line = r.readline()
-  var app = new App()
+  var app = new App { }
   while (line != null) {
     var eq = line.indexof('=')
     if (eq > 0) {
