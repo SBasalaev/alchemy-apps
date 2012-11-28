@@ -1,0 +1,8 @@
+#!/bin/sh
+echo "Installation"
+cat /cfg/init.user > /tmp/init.temp
+rm /cfg/init.user
+
+echo "w140-boot" >> /cfg/init.user
+cat /tmp/init.temp >> /cfg/init.user
+rm /tmp/init.temp /res/apps/installer.desktop

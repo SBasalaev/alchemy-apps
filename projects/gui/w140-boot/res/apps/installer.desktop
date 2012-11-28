@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Boot Installer
+Exec=terminal -k bootinstaller 

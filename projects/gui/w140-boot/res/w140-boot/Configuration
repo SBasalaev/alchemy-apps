@@ -1,0 +1,7 @@
+You have 3 options of animation. Simple is set most advanced. Actuall all image in it, are in left up corner. You should use image, witch size is size your screen. If you don't want it, delete file boot in "/boot".
+If you phone don't support image from file, there is a simply animation without image.
+
+[boot file configuration]
+First line must have some text ,"=", ang number of image. In next lines you put name of every image witch you use. If files is in folder, simple "my", line with paths yours images see "my/" with name of file.
+
+Sorry for evry mistackles, beacouse my english is in basic level.

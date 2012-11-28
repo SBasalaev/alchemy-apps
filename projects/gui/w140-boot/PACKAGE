@@ -1,0 +1,10 @@
+Package: w140-boot
+Source: w140-boot
+Version: 2.4.1-1
+Section: gui
+Depends: libcore3, libui1
+Summary: boot animation by wiktorek140
+Author: wiktorek140
+Maintainer: wiktorek140@gmail.com
+License: GPL-2
+Copyright: (C) 2012, Wiktor Strzębała
