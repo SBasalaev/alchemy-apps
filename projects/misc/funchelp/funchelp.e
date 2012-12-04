@@ -19,7 +19,7 @@ use "adm.e"
 use "sys"
 
 def main(a: [String]) {
-  if(cntrl != 2)
+  //if(cntrl != 2)
     cntrl = 1
   f = new_form()
   var e = new_edititem("Function name", "", EDIT_ANY, 20)
