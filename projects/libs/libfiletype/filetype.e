@@ -73,7 +73,7 @@ def ftype_for_file(db: FTypeDB, file: String): FileType {
   if (ftype == null && can_read(file)) {
     var in = fopen_r(file)
     var magic = in.readushort()
-    if (magic == null) ftype_for_ext(db, "/empty/")
+    if (magic == null) ftype = ftype_for_ext(db, "/empty/")
     else switch (magic) {
       0xC0DE : { ftype = ftype_for_ext(db, "/eprog/") };
       ('#'<<8)|'!' : { ftype = ftype_for_ext(db, "/script/") };

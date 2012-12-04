@@ -16,3 +16,19 @@ install: all
  install ${TARGET} libfiletype.so /lib
  install filetype.eh /inc
  install filetypes /res/libfiletype1
+
+package: all
+ # package libfiletype1
+ mkdir -p lib res/libfiletype1
+ install ${TARGET} lib
+ install filetypes res/libfiletype1
+ cat libfiletype1.package > PACKAGE
+ arh c libfiletype1.pkg PACKAGE lib res
+ rm -r lib res
+ # package libfiletype-dev
+ mkdir -p lib inc
+ install libfiletype.so lib
+ install filetype.eh inc
+ cat libfiletype-dev.package > PACKAGE
+ arh c libfiletype-dev.pkg PACKAGE lib inc
+ rm -r PACKAGE lib inc
