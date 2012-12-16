@@ -1,7 +1,7 @@
 use "crc32.eh"
 use "deflater.eh"
-use "gzipostream.eh"
-use "gzipistream.eh"
+use "gzostream.eh"
+use "gzistream.eh"
 
 use "time.eh"
 use "error.eh"
@@ -13,7 +13,7 @@ type GzipOStream {
   crc: CRC32
 }
 
-def new_gzipostream(out: OStream): GzipOStream {
+def new_gzostream(out: OStream): GzipOStream {
   var gzout = new GzipOStream {
     out = out,
     dfl = new_deflater(DEFAULT_COMPRESSION, true),
@@ -69,6 +69,10 @@ def GzipOStream.writearray(buf: BArray, off: Int, len: Int) {
   this.dfl.set_input(buf, off, len);
   this.deflate();
   this.crc.updatearray(buf, off, len);
+}
+
+def GzipOStream.write(b: Int) {
+  this.writearray(new BArray {b}, 0, 1)
 }
 
 def GzipOStream.flush() {

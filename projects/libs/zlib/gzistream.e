@@ -1,4 +1,4 @@
-use "gzipistream.eh"
+use "gzistream.eh"
 use "crc32.eh"
 use "deflater.eh"
 use "inflater.eh"
@@ -172,7 +172,7 @@ def GzipIStream.readFooter() {
   this.eos = true;
 }
 
-def new_gzipistream(in: IStream): GzipIStream {
+def new_gzistream(in: IStream): GzipIStream {
   var gz = new GzipIStream {
     in = in,
     inf = new_inflater(true),
