@@ -1,0 +1,10 @@
+Package: zlib-dev
+Source: zlib
+Version: 0.97~backport2.0-1
+Section: libdevel
+Summary: compression library - development headers
+Depends: libz1, libcore-dev
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+Copyright: (c) 2012 Sergey Basalaev
+License: GPL-2+exception
