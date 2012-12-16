@@ -1,0 +1,10 @@
+Package: gzip
+Source: gzip
+Version: 0.95-1
+Summary: compression utility
+Section: utils
+Depends: libcore3, libz1
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+Copyright: (C) 2012 Sergey Basalaev
+License: GPL-2
