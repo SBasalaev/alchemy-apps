@@ -1,6 +1,6 @@
 Package: pkglint
 Source: pkglint
-Version: 0.1-1
+Version: 0.3-1
 Section: devel
 Summary: check Alchemy OS packages for common errors
 Depends: libcore3, arh

@@ -1,7 +1,7 @@
 SOURCES=pkglint.e cfgreader.e checks.e check_spec.e check_dirs.e check_libs.e
 
 pkglint: ${SOURCES}
- ex ${SOURCES} -o pkglint -Wno-typesafe
+ ex ${SOURCES} -o pkglint -Xtry -Wall
 
 clean:
  rm -f pkglint

@@ -32,14 +32,14 @@ def is_num(str: String): Bool {
 
 def check_spec_fields(spec: Dict) {
   // check package field
-  var str: String = spec["package"]
+  var str = spec["package"].tostr()
   if (str == null) {
     report("missing required field: Package", null, TEST_ERR)
   } else if (!check_pkg_name(str)) {
     report("invalid package name: " + str, "3.1", TEST_ERR)
   }
   // check version field
-  str = spec["version"]
+  str = spec["version"].tostr()
   if (str == null) {
     report("missing required field: Version", null, TEST_ERR)
   } else if (!check_pkg_version(str)) {
@@ -48,17 +48,17 @@ def check_spec_fields(spec: Dict) {
     var hyphen = str.indexof('-')
     if (hyphen <= 0) {
       report("missing package revision number in version", "3.2", TEST_ERR)
-    } else if (!is_num(str[hyphen+1:])) {
+    } else if (!is_num(str.tostr()[hyphen+1:])) {
       report("package revision must be a number", "3.2", TEST_ERR)
     }
   }
   // check summary field
-  str = spec["summary"]
+  str = spec["summary"].tostr()
   if (str == null) {
     report("missing Summary field", "3.3", TEST_WARN)
   }
   // check section field
-  str = spec["section"]
+  str = spec["section"].tostr()
   if (str == null) {
     report("missing Section field", "3.4", TEST_WARN)
   } else {
@@ -82,24 +82,36 @@ def check_spec_fields(spec: Dict) {
     }
   }
   // check copyright field
-  str = spec["copyright"]
+  str = spec["copyright"].tostr()
   if (str == null) {
     report("missing Copyright field", "3.6", TEST_WARN)
   }
   // check author field
-  str = spec["author"]
+  str = spec["author"].tostr()
   if (str == null) {
     report("missing Author field", "3.7", TEST_WARN)
   }
   // check maintainer field
-  str = spec["maintainer"]
+  str = spec["maintainer"].tostr()
   if (str == null) {
     report("missing Maintainer field", "3.8", TEST_WARN)
   }
   // check license field
-  str = spec["license"]
+  str = spec["license"].tostr()
   if (str == null) {
     report("missing License field", "3.9", TEST_WARN)
+  }
+  // check for unusual fields
+  var knownfields = new_list()
+  knownfields.addall(["package", "source",     "version",
+                      "depends", "conflicts",  "provides",
+                      "summary", "section",    "license",
+                      "author",  "maintainer", "copyright"])
+  var keys = spec.keys()
+  for (var i=0, i<keys.len, i += 1) {
+    var key = keys[i]
+    if (knownfields.indexof(key) < 0)
+      report("unusual field in spec: " + key, "3", TEST_WARN)
   }
 }
 
