@@ -1,6 +1,6 @@
 Package: libz1
 Source: zlib
-Version: 0.98~backport2.0-1
+Version: 0.99~backport2.0-1
 Section: libs
 Summary: compression library
 Depends: libcore3

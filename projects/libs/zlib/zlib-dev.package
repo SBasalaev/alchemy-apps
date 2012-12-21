@@ -1,6 +1,6 @@
 Package: zlib-dev
 Source: zlib
-Version: 0.98~backport2.0-1
+Version: 0.99~backport2.0-1
 Section: libdevel
 Summary: compression library - development headers
 Depends: libz1, libcore-dev

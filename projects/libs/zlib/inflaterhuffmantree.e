@@ -6,7 +6,7 @@ use "error.eh"
 const MAX_BITLEN = 15;
 
 type InflaterHuffmanTree {
-  tree: CArray
+  tree: [Int]
 }
 
 def InflaterHuffmanTree.buildTree(codeLengths: BArray) {
@@ -44,7 +44,10 @@ def InflaterHuffmanTree.buildTree(codeLengths: BArray) {
   /* Now create and fill the extra tables from longest to shortest
    * bit len.  This way the sub trees will be aligned.
    */
-  this.tree = new CArray(treeSize);
+  this.tree = new [Int](treeSize);
+  for (var i=0, i<treeSize, i+=1) {
+    this.tree[i] = 0;
+  }
   var treePtr = 512;
   for (var bits = MAX_BITLEN, bits >= 10, bits -= 1) {
     var end = code & 0x1ff80;
