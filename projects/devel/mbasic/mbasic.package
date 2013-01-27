@@ -1,0 +1,10 @@
+Package: mbasic
+Source: mbasic
+Version: 0.6-1
+Section: devel
+Summary: BASIC interpreter ([not yet] MobileBASIC compatible)
+Depends: libcore3, libmb0, libui1
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+Copyright: (c) 2013 Sergey Basalaev
+License: MIT
