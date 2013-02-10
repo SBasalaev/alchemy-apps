@@ -1,0 +1,10 @@
+Package: lines
+Source: lines
+Version: 1.0-1
+Summary: Line-by-line text editor by Ilango
+Section: text 
+Depends: libui1,libcore3
+Copyright: (c) 2013, Ilango
+Author: Ilango Rajagopal
+Maintainer: Ilango Rajagopal <ilangokul@gmail.com> 
+License: GPL-2
