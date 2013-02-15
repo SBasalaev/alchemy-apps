@@ -1,6 +1,5 @@
 /* Wrapper for ec/el
- * Version 1.3
- * (C) 2012, Sergey Basalaev
+ * (C) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -9,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "sys.eh"
 
-const VERSION = "ex 1.4"
+const VERSION = "ex 1.4.1"
 const HELP = "Compiler for Alchemy OS\n" +
              "Options:\n" +
              "-o <name> Use this name for output\n" +
@@ -26,10 +25,10 @@ const HELP = "Compiler for Alchemy OS\n" +
 
 def main(args: [String]): Int {
   /* initializing */
-  var sources = new_list() // passed sources
-  var objects = new_list() // generated objects
-  var ecflags = new_list() // compiler flags
-  var elflags = new_list() // linker flags and passed objects
+  var sources = new List() // passed sources
+  var objects = new List() // generated objects
+  var ecflags = new List() // compiler flags
+  var elflags = new List() // linker flags and passed objects
   var outname: String = null
   var compileonly = false
   /* parsing arguments */
@@ -99,7 +98,7 @@ def main(args: [String]): Int {
     /* prepare ec flags */
     var opts = new [String](ecflags.len() + 3)
     opts[1] = "-o"
-    acopy(ecflags.toarray(), 0, opts, 3, ecflags.len())
+    ecflags.copyinto(0, opts, 3, ecflags.len())
     /* compile sources */
     var count = sources.len()
     for (var i=0, i < count && result == 0, i+=1) {
@@ -112,14 +111,14 @@ def main(args: [String]): Int {
       /* prepare el flags */
       if (result == 0) {
         opts = new [String](objects.len() + elflags.len() + 2)
-        acopy(objects.toarray(), 0, opts, 0, objects.len())
-        acopy(elflags.toarray(), 0, opts, objects.len(), elflags.len())
+        objects.copyinto(0, opts, 0, objects.len())
+        elflags.copyinto(0, opts, objects.len(), elflags.len())
         opts[opts.len-2] = "-o"
         opts[opts.len-1] = outname
         result = exec_wait("el", opts)
       }
       /* clean generated objects */
-      for (var i=objects.len(), i>=0, i-=1) {
+      for (var i=objects.len()-1, i>=0, i-=1) {
         var obj = objects[i].tostr()
         if (exists(obj)) fremove(obj)
       }

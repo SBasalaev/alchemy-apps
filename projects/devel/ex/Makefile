@@ -6,7 +6,7 @@ ex.o: ex.e
  ec ex.e -o ex.o
 
 clean:
- rm ex.o ex
+ rm -f ex.o ex
 
 install: ex
  install ex /bin
