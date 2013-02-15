@@ -1,8 +1,7 @@
 Package: alchemy-core
 Source: alchemy-meta
-Version: 5
-Section: metapackages
-Depends: libcore3, libui1, sh, terminal, edit, coreutils, pkg, mount
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Version: 6
+Section: admin
+Depends: libcore3, libui1, sh, terminal, edit, coreutils, pkg, pkg-arh, mount
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 Summary: this package depends on all core components of Alchemy OS, it is recommended not to remove it to ensure safe upgrades
