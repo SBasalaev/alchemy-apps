@@ -16,3 +16,16 @@ install: all
 
 clean:
  rm -f ${TARGET} libpkg.so
+
+package: all
+ mkdir lib
+ install ${TARGET} lib
+ cat libpkg1.package > PACKAGE
+ arh c libpkg1.pkg PACKAGE lib
+ rm -r lib
+ mkdir lib inc
+ install libpkg.so lib
+ install pkg.eh inc
+ cat libpkg-dev.package > PACKAGE
+ arh c libpkg-dev.pkg PACKAGE lib inc
+ rm -r PACKAGE lib inc

@@ -10,10 +10,10 @@ def pkg_init(): PkgManager;
 def pkg_refresh(pm: PkgManager);
 
 /* Installs most recent versions of packages with dependencies. */
-def pkg_install(pm: PkgManager, names: Array): Bool;
+def pkg_install(pm: PkgManager, names: [String]): Bool;
 
 /* Removes packages if nothing depends on them. */
-def pkg_remove(pm: PkgManager, names: Array);
+def pkg_remove(pm: PkgManager, names: [String]);
 
 /* Returns spec for given version of package. If version is null
  * then most recent version of package is returned.
@@ -24,10 +24,10 @@ def pkg_query(pm: PkgManager, name: String, version: String): PkgSpec;
 def pkg_query_installed(pm: PkgManager, name: String): PkgSpec;
 
 /* Returns names of all installed packages. */
-def pkg_list_installed(pm: PkgManager): Array;
+def pkg_list_installed(pm: PkgManager): [String];
 
 /* Returns names of all available packages. */
-def pkg_list_all(pm: PkgManager): Array;
+def pkg_list_all(pm: PkgManager): [String];
 
 /* Reads specified key from the spec. */
 def PkgSpec.get(key: String): String;

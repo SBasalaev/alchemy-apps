@@ -1,5 +1,5 @@
 /* Pkg library.
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under LGPL v3
  */
 
@@ -9,11 +9,11 @@ use "string.eh"
 use "textio.eh"
 
 def PkgList.get(name: String): PkgSpec {
-  cast (PkgSpec) this.specs.get(name)
+  this.specs[name].cast(PkgSpec)
 }
 
 def PkgList.put(spec: PkgSpec) {
-  this.specs.set(spec.get("Package"), spec)
+  this.specs[spec["Package"]] = spec
 }
 
 def PkgList.remove(package: String) {
@@ -21,9 +21,9 @@ def PkgList.remove(package: String) {
 }
 
 def pkglist_read(addr: String, distr: String): PkgList {
-  var list = new PkgList(url=addr, dist=distr, specs=new_dict())
+  var list = new PkgList{url=addr, dist=distr, specs=new Dict()}
   var r = utfreader(fopen_r("/cfg/pkg/db/sources/"+pkg_addr_escape(addr+distr)))
-  var sb = new_strbuf()
+  var sb = new StrBuf()
   var addspec = false
   var line = r.readline()
   while (line != null) {
@@ -34,7 +34,7 @@ def pkglist_read(addr: String, distr: String): PkgList {
       sb.addch('\n')
     } else if (addspec == true) {
       var spec = pkgspec_parse(sb.tostr())
-      sb = new_strbuf()
+      sb = new StrBuf()
       list.put(spec)
       addspec = false
     }
@@ -51,9 +51,9 @@ def pkglist_read(addr: String, distr: String): PkgList {
 def PkgList.write() {
   var packages = this.specs.keys()
   var out = fopen_w("/cfg/pkg/db/sources/"+pkg_addr_escape(this.url+this.dist))
-  for (var i=0, i<packages.len, i=i+1) {
+  for (var i=0, i<packages.len, i+=1) {
     var pkg = packages[i].tostr()
-    this.get(pkg).write(out)
+    this[pkg].write(out)
   }
   out.flush()
   out.close()

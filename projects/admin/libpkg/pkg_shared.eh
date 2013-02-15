@@ -17,11 +17,9 @@ type PkgList {
 }
 
 def pkg_addr_escape(name: String): String;
-def pkg_read_sourcelist(): Array;
-def pkg_init_lists(): Array;
-def pkg_copyall(in: IStream, out: OStream);
+def pkg_read_sourcelist(): [String];
+def pkg_init_lists(): [PkgList];
 def pkg_cmp_versions(v1: String, v2: String): Int;
-def pkg_read_addr(addr: String): IStream;
 
 type PkgManager {
   lists: [PkgList]
@@ -44,4 +42,4 @@ def pkg_arh_extract_spec(file: String): PkgSpec;
 
 def pkg_query(pm: PkgManager, name: String, version: String): PkgSpec;
 def pkg_query_installed(pm: PkgManager, name: String): PkgSpec;
-def pkg_list_installed(pm: PkgManager): Array;
+def pkg_list_installed(pm: PkgManager): [String];

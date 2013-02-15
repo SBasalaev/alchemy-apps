@@ -1,5 +1,5 @@
 /* Pkg library.
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under LGPL v3
  */
 
@@ -11,13 +11,12 @@ use "list.eh"
 def pkg_db_remove(pm: PkgManager, name: String) {
   // reading file list
   var lsfile = "/cfg/pkg/db/lists/"+name+".files"
-  var buf = new BArray(fsize(lsfile))
   var in = fopen_r(lsfile)
-  in.readarray(buf, 0, buf.len)
+  var buf = in.readfully()
   in.close()
   var list = ba2utf(buf).split('\n')
   // removing files
-  for (var i=list.len-1, i>=0, i=i-1) {
+  for (var i=list.len-1, i>=0, i-=1) {
     var file = "/"+list[i]
     if (exists(file) && (!is_dir(file) || flist(file).len == 0))
       fremove(file)
@@ -35,15 +34,15 @@ const A_READ = 4
 const A_WRITE = 2
 const A_EXEC = 1
 
-def pkg_arh_list(file: String): Array {
+def pkg_arh_list(file: String): [String] {
   var in = fopen_r(file)
   // skipping PACKAGE entry
   in.readutf()
   in.skip(9)
   in.skip(in.readint())
   // reading file names
-  var names = new_list()
-  var f = in.readutf()
+  var names = new List()
+  var f = try in.readutf() catch null
   while (f != null) {
     in.skip(8)
     var attrs = in.readubyte()
@@ -53,10 +52,12 @@ def pkg_arh_list(file: String): Array {
       names.add(f)
       in.skip(in.readint())
     }
-    f = in.readutf()
+    f = try in.readutf() catch null
   }
   in.close()
-  names.toarray()
+  var ret = new [String](names.len())
+  names.copyinto(0, ret, 0, ret.len)
+  ret
 }
 
 def pkg_unarh(file: String) {
@@ -66,7 +67,7 @@ def pkg_unarh(file: String) {
   in.skip(9)
   in.skip(in.readint())
   // unpacking in root
-  var f = in.readutf()
+  var f = try in.readutf() catch null
   while (f != null) {
     f = "/"+f
     in.skip(8)
@@ -77,7 +78,7 @@ def pkg_unarh(file: String) {
       var out = fopen_w(f)
       var len = in.readint()
       if (len > 0) {
-        var buf = new BArray(4096)
+        var buf = new [Byte](4096)
         while (len > 4096) {
           in.readarray(buf, 0, 4096)
           out.writearray(buf, 0, 4096)
@@ -92,7 +93,7 @@ def pkg_unarh(file: String) {
     set_read(f, (attrs & A_READ) != 0)
     set_write(f, (attrs & A_WRITE) != 0)
     set_exec(f, (attrs & A_EXEC) != 0)
-    f = in.readutf()
+    f = try in.readutf() catch null
   }
   in.close()
 }
@@ -101,7 +102,7 @@ def pkg_arh_unpack(pm: PkgManager, f: String) {
   // extract metadata
   var file = abspath(f)
   var spec = pkg_arh_extract_spec(file)
-  var name = spec.get("Package")
+  var name = spec["Package"]
   // warn if version decreases
   var oldspec = pm.lists[0].get(name)
   if (oldspec != null) {
@@ -133,10 +134,10 @@ def pkg_arh_unpack(pm: PkgManager, f: String) {
   pkg_unarh(file)
 }
 
-def pkg_install_seq(pm: PkgManager, names: Array): Array {
-  var seq = new_list()
-  var check = new_list()
-  for (var i=0, i<names.len,  i=i+1) {
+def pkg_install_seq(pm: PkgManager, names: [String]): [String] {
+  var seq = new List()
+  var check = new List()
+  for (var i=0, i<names.len,  i+=1) {
     if (check.indexof(names[i]) < 0) {
       check.add(names[i])
     }
@@ -144,7 +145,7 @@ def pkg_install_seq(pm: PkgManager, names: Array): Array {
   // adding all needed packages and their addresses
   var err = false
   while (check.len() > 0 && !err) {
-    var name = cast (String) check.get(0)
+    var name = check[0].cast(String)
     check.remove(0)
     if (seq.indexof(name) < 0) {
       var instspec = pkg_query_installed(pm, name)
@@ -154,7 +155,7 @@ def pkg_install_seq(pm: PkgManager, names: Array): Array {
         err = true
       } else if (instspec != newspec) {
         // adding new package
-        for (var i=1, i<pm.lists.len, i=i+1) {
+        for (var i=1, i<pm.lists.len, i+=1) {
           var list = pm.lists[i]
           if (list.get(name) == newspec) {
             i = pm.lists.len
@@ -176,13 +177,16 @@ def pkg_install_seq(pm: PkgManager, names: Array): Array {
       }
     }
   }
-  if (err)
+  if (err) {
     null
-  else
-    seq.toarray()
+  } else {
+    var ret = new [String](seq.len())
+    seq.copyinto(0, ret, 0, ret.len)
+    ret
+  }
 }
 
-def pkg_install(pm: PkgManager, names: Array): Bool {
+def pkg_install(pm: PkgManager, names: [String]): Bool {
   var seq = pkg_install_seq(pm, names)
   if (seq != null) {
     // printing package sequence
@@ -199,19 +203,19 @@ def pkg_install(pm: PkgManager, names: Array): Bool {
     write('\n')
     // downloading packages
     for (var i=0, i<seq.len, i=i+2) {
-      var addr = cast (String) seq[i+1]
-      var tmpfile = "/tmp/"+addr.substr(addr.lindexof('/')+1, addr.len())
+      var addr = seq[i+1]
+      var tmpfile = "/tmp/"+addr[addr.lindexof('/')+1:]
       println("Get: "+addr)
-      var in = pkg_read_addr(addr)
+      var in = readurl(addr)
       var out = fopen_w(tmpfile)
-      pkg_copyall(in, out)
+      out.writeall(in)
       in.close()
       out.close()
       seq[i] = tmpfile
     }
     // installing and removing archives
-    for (var i=0, i<seq.len, i=i+2) {
-      var arh = cast (String) seq[i]
+    for (var i=0, i<seq.len, i+=2) {
+      var arh = seq[i]
       pkg_arh_unpack(pm, arh)
       fremove(arh)
     }
@@ -237,17 +241,17 @@ def pkg_arh_install(pm: PkgManager, file: String): Bool {
   ok
 }
 
-def pkg_installed_rdeps(pm: PkgManager, names: Array): Array {
-  var vnames = new_list()
-  for (var i=0, i<names.len, i=i+1) {
+def pkg_installed_rdeps(pm: PkgManager, names: [String]): [String] {
+  var vnames = new List()
+  for (var i=0, i<names.len, i+=1) {
     if (vnames.indexof(names[i]) < 0) {
       vnames.add(names[i])
     }
   }
   var rdeps = new_list()
   var list = pkg_list_installed(pm)
-  for (var i=0, i<list.len, i=i+1) {
-    var name = cast(String)list[i]
+  for (var i=0, i<list.len, i+=1) {
+    var name = list[i]
     if (vnames.indexof(name) < 0) {
       var spec = pkg_query_installed(pm, name)
       var depstring = spec.get("Depends")
@@ -260,21 +264,23 @@ def pkg_installed_rdeps(pm: PkgManager, names: Array): Array {
       }
     }
   }
-  rdeps.toarray()
+  var ret = new [String](rdeps.len())
+  rdeps.copyinto(0, ret, 0, ret.len)
+  ret
 }
 
-def pkg_remove(pm: PkgManager, names: Array) {
+def pkg_remove(pm: PkgManager, names: [String]) {
   var deps = pkg_installed_rdeps(pm, names)
   if (deps.len > 0) {
     println("Cannot remove specified packages. There are still packages that depend on them:")
-    for (var i=0, i<deps.len, i=i+1) {
+    for (var i=0, i<deps.len, i+=1) {
       if (i != 0) write(',')
       write(' ')
       print(deps[i])
     }
     write('\n')
   } else {
-    for (var i=0, i<names.len, i=i+1)
+    for (var i=0, i<names.len, i+=1)
     if (pkg_query_installed(pm, names[i]) != null) {
       println("Removing package "+names[i])
       pkg_db_remove(pm, names[i].tostr())

@@ -1,5 +1,5 @@
 /* Pkg library.
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under LGPL v3
  */
 
@@ -11,30 +11,28 @@ use "sys.eh"
 use "list.eh"
 
 def pkg_addr_escape(name: String): String {
-  var sb = new_strbuf()
-  for (var i=0, i<name.len(), i=i+1) {
-    var ch = name.ch(i)
+  var sb = new StrBuf()
+  for (var i=0, i<name.len(), i+=1) {
+    var ch = name[i]
     if ( (ch >= 'a' && ch <= 'z')
       || (ch >= 'A' && ch <= 'Z')
       || (ch >= '0' && ch <= '9')
       || ch == '.' || ch == '-' || ch == '_') {
       sb.addch(ch)
     } else {
-      sb.addch('#')
-      sb.append(ch)
+      sb.addch('_')
     }
   }
   sb.tostr()
 }
 
-def pkg_read_sourcelist(): Array {
-  var buf = new BArray(fsize(SOURCELIST))
+def pkg_read_sourcelist(): [String] {
   var in = fopen_r(SOURCELIST)
-  in.readarray(buf, 0, buf.len)
+  var buf = in.readfully()
   in.close()
   var lines = ba2utf(buf).split('\n')
-  var v = new_list()
-  for (var i=0, i<lines.len, i=i+1) {
+  var v = new List()
+  for (var i=0, i<lines.len, i+=1) {
     var line = lines[i].trim()
     if (line.len() > 0 && line.ch(0) != '#') {
       if (line.indexof(':') > 0 && line.indexof(' ') > line.indexof(':')) {
@@ -44,32 +42,26 @@ def pkg_read_sourcelist(): Array {
       }
     }
   }
-  v.toarray()
+  var sources = new [String](v.len())
+  v.copyinto(0, sources, 0, sources.len)
+  sources
 }
 
-def pkg_init_lists(): Array {
+def pkg_init_lists(): [PkgList] {
   var sources = pkg_read_sourcelist()
-  var lists = new_list()
+  var lists = new List()
   lists.add(pkglist_read("installed", ""))
-  for (var i=0, i<sources.len, i=i+1) {
-    var source = cast (String) sources[i]
+  for (var i=0, i<sources.len, i+=1) {
+    var source = sources[i]
     var sp = source.indexof(' ')
-    var url = source.substr(0, sp)
-    var dist = source.substr(sp+1, source.len()).trim()
+    var url = source[:sp]
+    var dist = source[sp+1:].trim()
     var file = "/cfg/pkg/db/sources/"+pkg_addr_escape(url+dist)
     if (exists(file)) lists.add(pkglist_read(url, dist))
   }
-  lists.toarray()
-}
-
-def pkg_copyall(in: IStream, out: OStream) {
-  var buf = new BArray(4096)
-  var len = in.readarray(buf, 0, 4096)
-  while (len > 0) {
-    out.writearray(buf, 0, len)
-    len = in.readarray(buf, 0, 4096)
-  }
-  out.flush()
+  var ret = new [PkgList](lists.len())
+  lists.copyinto(0, ret, 0, ret.len)
+  ret
 }
 
 def _cmp_str(s1: String, s2: String): Int {
@@ -147,5 +139,3 @@ def pkg_cmp_versions(v1: String, v2: String): Int {
   }
   ret
 }
-
-def pkg_read_addr(addr: String): IStream = readurl(addr)
