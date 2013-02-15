@@ -285,9 +285,9 @@ def main(args: [String]): Int {
     set_exec(outname, true);
   } catch (var e) {
     if (e.code() == ERR_LINKER)
-      stderr().println("Error: "+e.msg());
+      stderr().println("Error: "+e.msg())
     else
-      stderr().println(e);
+      stderr().println(e)
     exitcode = e.code()
   }
   exitcode
