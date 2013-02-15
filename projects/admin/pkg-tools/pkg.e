@@ -1,5 +1,5 @@
 /* Package manager for Alchemy
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -7,8 +7,20 @@ use "pkg.eh"
 use "io.eh"
 use "sys.eh"
 
-const HELP = "Usage: pkg command ...\n\npkg install packages...\n install/update packages\npkg update\n update all packages\npkg remove packages...\n remove packages\npkg refresh\n refresh package lists\npkg show packages...\n show packages info\npkg list\n list available packages"
-const VERSION = "pkg 0.1.1"
+const HELP = "Usage: pkg command ...\n\n" + 
+             "pkg install packages...\n" +
+             " install/update packages\n" +
+             "pkg update\n" +
+             " update all packages\n" +
+             "pkg remove packages...\n" +
+             " remove packages\n" +
+             "pkg refresh\n" +
+             " refresh package lists\n" +
+             "pkg show packages...\n" +
+             " show packages info\n" +
+             "pkg list\n" +
+             " list available packages"
+const VERSION = "pkg 0.1.5"
 
 def _print_spec_field(spec: PkgSpec, f: String) {
   var value = spec.get(f)
@@ -31,7 +43,7 @@ def main(args: [String]) {
       println("pkg show: no packages specified")
     }
     var pm = pkg_init()
-    var fields = new [String] {"Package", "Version", "Section", "Depends", "Summary"}
+    var fields = ["Package", "Version", "Section", "Summary", "Maintainer", "Copyright", "Depends"]
     for (var i=1, i<args.len, i=i+1) {
       var spec = pkg_query(pm, args[i], null)
       if (spec == null) {
@@ -46,7 +58,7 @@ def main(args: [String]) {
     var packages = pkg_list_all(pm)
     //TODO: sort alphabetically
     for (var i=0, i<packages.len, i=i+1) {
-      if (pkg_query_installed(pm, cast(String)packages[i]) != null)  {
+      if (pkg_query_installed(pm, packages[i]) != null)  {
         print("i ")
       } else {
         print("d ")
@@ -58,7 +70,7 @@ def main(args: [String]) {
       println("pkg install: no packages specified")
     } else {
       var pm = pkg_init()
-      var names = new Array(args.len-1)
+      var names = new [String](args.len-1)
       acopy(args, 1, names, 0, names.len)
       pkg_install(pm, names)
     }
@@ -70,7 +82,7 @@ def main(args: [String]) {
       println("pkg remove: no packages specified")
     } else {
       var pm = pkg_init()
-      var names = new Array(args.len-1)
+      var names = new [String](args.len-1)
       acopy(args, 1, names, 0, names.len)
       pkg_remove(pm, names)
     }

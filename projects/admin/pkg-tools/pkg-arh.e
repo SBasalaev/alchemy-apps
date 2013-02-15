@@ -1,5 +1,5 @@
 /* Utility to work with package archives
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -7,7 +7,7 @@ use "pkg.eh"
 use "io.eh"
 
 const HELP = "Usage: pkg-arh command ...\n\npkg-arh show file\n shows archive info\npkg-arh install file\n installs archive"
-const VERSION = "pkg-arh 0.1.1"
+const VERSION = "pkg-arh 0.1.5"
 
 def _print_spec_field(spec: PkgSpec, f: String) {
   var value = spec.get(f)
@@ -28,7 +28,7 @@ def main(args: [String]) {
       println("pkg-arh show: file not specified")
     } else {
       var spec = pkg_arh_extract_spec(args[1])
-      var fields = new [String] {"Package", "Version", "Section", "Depends", "Summary"}
+      var fields = ["Package", "Version", "Section", "Summary", "Maintainer", "Copyright", "Depends"]
       for (var j=0, j<fields.len, j=j+1) _print_spec_field(spec, fields[j])
     }
   } else if (args[0] == "install") {
