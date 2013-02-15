@@ -11,17 +11,6 @@ use "version.eh"
 const VERSION = "cat " + C_VERSION
 const HELP = "Prints given files or stdin to the stdout."
 
-const BUF_SIZE = 1024
-
-def _cat(in: IStream, buf: BArray) {
-  var len = in.readarray(buf, 0, BUF_SIZE)
-  while (len > 0) {
-    writearray(buf, 0, len)
-    len = in.readarray(buf, 0, BUF_SIZE)
-  }
-  flush()
-}
-
 def main(args: [String]): Int {
   // parse args
   var quit = false
@@ -45,12 +34,13 @@ def main(args: [String]): Int {
   }
   // copy to the output
   if (!quit) {
-    var buf = new BArray(BUF_SIZE)
     if (files.len() == 0) {
-      _cat(stdin(), buf)
+      stdout().writeall(stdin())
+      stdout().flush()
     } else for (var i=0, i<files.len(), i+=1) {
       var in = fopen_r(files[i].tostr())
-      _cat(in, buf)
+      stdout().writeall(in)
+      stdout().flush()
       in.close()
     }
   }

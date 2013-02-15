@@ -1,9 +1,9 @@
 Package: coreutils
 Source: coreutils
-Version: 0.5.2-1
+Version: 0.5.3
 Section: utils
 Summary: essential utilities for Alchemy OS
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2011-2013 Sergey Basalaev
 License: GPL-3
 Depends: libcore3
