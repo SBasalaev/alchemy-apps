@@ -1,9 +1,9 @@
 Source: base64
 Package: base64
-Version: 1.1-1
+Version: 1.2
 Summary: base64 encoder/decoder
 Section: utils
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2011-2013 Sergey Basalaev
 License: GPL-3
 Depends: libcore3
