@@ -1,10 +1,9 @@
 Package: libproperties1
 Source: libproperties
-Version: 0.84-1
+Version: 0.84build2
 Section: libs
 Depends: libcore3
 Summary: library of something like java class Properties
-Author: wiktorek140
-Maintainer: wiktorek140@gmail.com
-License: GPL v3
+Maintainer: Wiktor Strzębała <wiktorek140@gmail.com>
+License: GPL-3
 Copyright: (C) 2012, Wiktor Strzębała
