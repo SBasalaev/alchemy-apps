@@ -1,9 +1,8 @@
 Source: hello
 Package: hello
 Section: misc
-Version: 1-2
+Version: 1build3
 Summary: example of Ether program
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
-License: Public Domain
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+License: PublicDomain
 Depends: libcore3

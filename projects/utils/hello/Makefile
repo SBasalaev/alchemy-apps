@@ -6,3 +6,10 @@ clean:
 
 install: hello
  install hello /bin
+
+package: hello
+ mkdir bin
+ install hello bin
+ cat hello.package > PACKAGE
+ arh c hello.pkg PACKAGE bin
+ rm -r PACKAGE bin
