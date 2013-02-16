@@ -1,10 +1,9 @@
 Source: libfiletype
 Package: libfiletype-dev
 Section: libdevel
-Version: 1.1.2-1
+Version: 1.1.2build2
 Summary: library to detect file type - development headers
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (C) 2012, Sergey Basalaev
 Depends: libfiletype1
 License: LGPL-3

@@ -1,10 +1,9 @@
 Source: libfiletype
 Package: libfiletype1
 Section: libs
-Version: 1.1.2-1
+Version: 1.1.2build2
 Summary: library to detect file type
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2012, Sergey Basalaev
 Depends: libcore3
 License: LGPL-3
