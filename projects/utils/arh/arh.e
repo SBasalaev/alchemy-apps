@@ -1,13 +1,16 @@
 /* Arh utility
- * Version 1.1.1
- * (C) 2011-2012, Sergey Basalaev
+ * Version 1.1.2
+ * (C) 2011-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "dataio.eh"
 
-const VERSION = "arh 1.1.1"
-const HELP = "Usage:\narh c archive files...\narh t archive\narh x archive"
+const VERSION = "arh 1.1.3"
+const HELP = "Usage:\n" +
+             "arh c archive files...\n" +
+             "arh t archive\n" +
+             "arh x archive"
 
 const BUF_SIZE = 1024
 
@@ -28,7 +31,7 @@ def arhpath(path: String): String
   = relpath("./"+abspath("/"+path))
 
 def arhlist(in: IStream) {
-  var f = in.readutf()
+  var f = try in.readutf() catch null
   while (f != null) {
     print(f)
     in.skip(8)
@@ -39,12 +42,13 @@ def arhlist(in: IStream) {
       println("")
       in.skip(in.readint())
     }
-    f = in.readutf()
+    f = try in.readutf() catch null
   }
 }
 
 def unarh(in: IStream) {
-  var f = in.readutf()
+  var f = try in.readutf() catch null
+  var buf = new [Byte](BUF_SIZE)
   while (f != null) {
     f = arhpath(f)
     in.skip(8)
@@ -55,7 +59,6 @@ def unarh(in: IStream) {
       var out = fopen_w(f)
       var len = in.readint()
       if (len > 0) {
-        var buf = new BArray(BUF_SIZE)
         while (len > BUF_SIZE) {
           in.readarray(buf, 0, BUF_SIZE)
           out.writearray(buf, 0, BUF_SIZE)
@@ -70,7 +73,7 @@ def unarh(in: IStream) {
     set_exec(f, (attrs & A_EXEC) != 0)
     set_write(f, (attrs & A_WRITE) != 0)
     set_read(f, (attrs & A_READ) != 0)
-    f = in.readutf()
+    f = try in.readutf() catch null
   }
 }
 
@@ -97,7 +100,7 @@ def arhwrite(out: OStream, f: String) {
     out.writeint(len)
     if (len > 0) {
       filein = fopen_r(f)
-      var buf = new BArray(BUF_SIZE)
+      var buf = new [Byte](BUF_SIZE)
       var l = filein.readarray(buf, 0, BUF_SIZE)
       while (l > 0) {
         out.writearray(buf, 0, l)
