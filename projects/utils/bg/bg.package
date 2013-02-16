@@ -1,9 +1,9 @@
 Source: bg
 Package: bg
-Version: 1.0.2-1
+Version: 1.0.2build2
 Section: utils
 Summary: run command in background
 Depends: libcore3
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2012 Sergey Basalaev
 License: GPL-3
