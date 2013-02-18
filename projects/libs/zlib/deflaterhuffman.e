@@ -39,7 +39,7 @@ def BL_ORDER(at: Int): Int = switch (at) {
 
 const bit4Reverse = "\000\010\004\014\002\012\006\016\001\011\005\015\003\013\007\017";
 
-def bitReverse(value: Int): Int {
+def bitReverse(value: Int): Short {
   (bit4Reverse[value & 0xf] << 12
     | bit4Reverse[(value >> 4) & 0xf] << 8
     | bit4Reverse[(value >> 8) & 0xf] << 4
@@ -68,16 +68,16 @@ def d_code(distance: Int): Int {
   code + distance;
 }
 
-var staticLCodes: CArray;
-var staticLLength: BArray;
-var staticDCodes: CArray;
-var staticDLength: BArray;
+var staticLCodes: [Short];
+var staticLLength: [Byte];
+var staticDCodes: [Short];
+var staticDLength: [Byte];
 
 def init_static() {
   /* See RFC 1951 3.2.6 */
   /* Literal codes */
-  staticLCodes = new CArray(LITERAL_NUM);
-  staticLLength = new BArray(LITERAL_NUM);
+  staticLCodes = new [Short](LITERAL_NUM);
+  staticLLength = new [Byte](LITERAL_NUM);
   var i = 0;
   while (i < 144) {
     staticLCodes[i] = bitReverse((0x030 + i) << 8);
@@ -101,8 +101,8 @@ def init_static() {
   }
 
   /* Distant codes */
-  staticDCodes = new CArray(DIST_NUM);
-  staticDLength = new BArray(DIST_NUM);
+  staticDCodes = new [Short](DIST_NUM);
+  staticDLength = new [Byte](DIST_NUM);
   for (i = 0, i < DIST_NUM, i += 1) {
     staticDCodes[i] = bitReverse(i << 11);
     staticDLength[i] = 5;
@@ -117,17 +117,17 @@ type DeflaterHuffman {
   distTree: Tree,
   blTree: Tree,
 
-  d_buf: CArray,
-  l_buf: BArray,
+  d_buf: [Short],
+  l_buf: [Byte],
   last_lit: Int,
   extra_bits: Int
 }
 
 type Tree {
   owner: DeflaterHuffman,
-  freqs: CArray,
-  codes: CArray,
-  length: BArray,
+  freqs: [Short],
+  codes: [Short],
+  length: [Byte],
   bl_counts: [Int],
   minNumCodes: Int,
   numCodes: Int,
@@ -135,16 +135,13 @@ type Tree {
 }
 
 def new_Tree(owner: DeflaterHuffman, elems: Int, minCodes: Int, maxLength: Int): Tree {
-  // In Alchemy 2.0 [Int] is an object array, so to be safe we fill it with zeros
-  var blcounts = new [Int](maxLength);
-  for (var i=maxLength-1, i>=0, i -= 1) blcounts[i] = 0;
   new Tree {
     owner = owner,
     minNumCodes = minCodes,
     numCodes = 0,
     maxLength = maxLength,
-    freqs = new CArray(elems),
-    bl_counts = blcounts
+    freqs = new [Short](elems),
+    bl_counts = new [Int](maxLength)
   }
 }
 
@@ -159,7 +156,7 @@ def Tree.writeSymbol(code: Int) {
   this.owner.pending.writeBits(this.codes[code] & 0xffff, this.length[code]);
 }
 
-def Tree.setStaticCodes(stCodes: CArray, stLength: BArray) {
+def Tree.setStaticCodes(stCodes: [Short], stLength: [Byte]) {
   this.codes = stCodes;
   this.length = stLength;
 }
@@ -167,7 +164,7 @@ def Tree.setStaticCodes(stCodes: CArray, stLength: BArray) {
 def Tree.buildCodes() {
   var nextCode = new [Int](this.maxLength);
   var code = 0;
-  this.codes = new CArray(this.freqs.len);
+  this.codes = new [Short](this.freqs.len);
 
   for (var bits = 0, bits < this.maxLength, bits += 1) {
     nextCode[bits] = code;
@@ -184,7 +181,7 @@ def Tree.buildCodes() {
 }
 
 def Tree.buildLength(childs: [Int]) {
-  this.length = new BArray(this.freqs.len);
+  this.length = new [Byte](this.freqs.len);
   var numNodes = childs.len / 2;
   var numLeafs = (numNodes + 1) / 2;
   var overflow = 0;
@@ -194,8 +191,6 @@ def Tree.buildLength(childs: [Int]) {
 
   /* First calculate optimal bit lengths */
   var lengths = new [Int](numNodes);
-  // In Alchemy 2.0 [Int] is an object array, so to be safe we fill it with zeros
-  for (var i=lengths.len-1, i>=0, i -= 1) lengths[i] = 0;
   lengths[numNodes-1] = 0;
   for (var i = numNodes - 1, i >= 0, i -= 1) {
     if (childs[2*i+1] != -1) {
@@ -273,8 +268,6 @@ def Tree.buildTree() {
    * the nodes 2*n+1, 2*n+2 are the child nodes of node n.
    */
   var heap = new [Int](numSymbols);
-  // In Alchemy 2.0 [Int] is an object array, so to be safe we fill it with zeros
-  for (var i=heap.len-1, i>=0, i -= 1) heap[i] = 0;
   var heapLen = 0;
   var maxCode = 0;
   for (var n = 0, n < numSymbols, n += 1) {
@@ -426,11 +419,11 @@ def Tree.calcBLFreq(blTree: Tree) {
     }
 
     if (count < min_count)
-      blTree.freqs[curlen] += count;
+      blTree.freqs[curlen] += count
     else if (curlen != 0)
-      blTree.freqs[REP_3_6] += 1;
+      blTree.freqs[REP_3_6] += 1
     else if (count <= 10)
-      blTree.freqs[REP_3_10] += 1;
+      blTree.freqs[REP_3_10] += 1
     else
       blTree.freqs[REP_11_138] += 1;
   }
@@ -488,8 +481,8 @@ def new_DeflaterHuffman(pending: PendingBuffer): DeflaterHuffman {
   if (staticLCodes == null) init_static()
   var dh = new DeflaterHuffman {
     pending = pending,
-    d_buf = new CArray(BUFSIZE),
-    l_buf = new BArray(BUFSIZE),
+    d_buf = new [Short](BUFSIZE),
+    l_buf = new [Byte](BUFSIZE),
     last_lit = 0,
     extra_bits = 0
   }
@@ -547,7 +540,7 @@ def DeflaterHuffman.compressBlock() {
   this.literalTree.writeSymbol(EOF_SYMBOL);
 }
 
-def DeflaterHuffman.flushStoredBlock(stored: BArray, stored_offset: Int, stored_len: Int, lastBlock: Bool) {
+def DeflaterHuffman.flushStoredBlock(stored: [Byte], stored_offset: Int, stored_len: Int, lastBlock: Bool) {
   this.pending.writeBits((STORED_BLOCK << 1) + if (lastBlock) 1 else 0, 3);
   this.pending.alignToByte();
   this.pending.writeShort(stored_len);
@@ -556,7 +549,7 @@ def DeflaterHuffman.flushStoredBlock(stored: BArray, stored_offset: Int, stored_
   this.reset();
 }
 
-def DeflaterHuffman.flushBlock(stored: BArray, stored_offset: Int, stored_len: Int, lastBlock: Bool) {
+def DeflaterHuffman.flushBlock(stored: [Byte], stored_offset: Int, stored_len: Int, lastBlock: Bool) {
   this.literalTree.freqs[EOF_SYMBOL] += 1;
 
   /* Build trees */

@@ -6,17 +6,12 @@ use "error.eh"
 const MAX_BITLEN = 15;
 
 type InflaterHuffmanTree {
-  tree: [Int]
+  tree: [Short]
 }
 
-def InflaterHuffmanTree.buildTree(codeLengths: BArray) {
-  // In Alchemy 2.0 [Int] is an object array, so to be safe we fill it with zeros
+def InflaterHuffmanTree.buildTree(codeLengths: [Byte]) {
   var blCount = new [Int](MAX_BITLEN+1);
   var nextCode = new [Int](MAX_BITLEN+1);
-  for (var i=MAX_BITLEN, i>=0, i-=1) {
-    blCount[i] = 0;
-    nextCode[i] = 0;
-  }
   for (var i = 0, i < codeLengths.len, i += 1) {
     var bits = codeLengths[i];
     if (bits > 0)
@@ -44,10 +39,7 @@ def InflaterHuffmanTree.buildTree(codeLengths: BArray) {
   /* Now create and fill the extra tables from longest to shortest
    * bit len.  This way the sub trees will be aligned.
    */
-  this.tree = new [Int](treeSize);
-  for (var i=0, i<treeSize, i+=1) {
-    this.tree[i] = 0;
-  }
+  this.tree = new [Short](treeSize);
   var treePtr = 512;
   for (var bits = MAX_BITLEN, bits >= 10, bits -= 1) {
     var end = code & 0x1ff80;
@@ -83,7 +75,7 @@ def InflaterHuffmanTree.buildTree(codeLengths: BArray) {
   }
 }
 
-def new_InflaterHuffmanTree(codeLengths: BArray): InflaterHuffmanTree {
+def new_InflaterHuffmanTree(codeLengths: [Byte]): InflaterHuffmanTree {
   var iht = new InflaterHuffmanTree { }
   iht.buildTree(codeLengths)
   iht
@@ -93,7 +85,7 @@ var defLT: InflaterHuffmanTree;
 var defDT: InflaterHuffmanTree;
 
 def init_static_trees() = {
-  var codeLengths = new BArray(288);
+  var codeLengths = new [Byte](288);
   var i = 0;
   while (i < 144) {
     codeLengths[i] = 8;
@@ -113,7 +105,7 @@ def init_static_trees() = {
   }
   defLT = new_InflaterHuffmanTree(codeLengths);
 
-  codeLengths = new BArray(32);
+  codeLengths = new [Byte](32);
   i = 0;
   while (i < 32) {
     codeLengths[i] = 5;

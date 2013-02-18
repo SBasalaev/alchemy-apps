@@ -2,7 +2,7 @@ use "streammanipulator.eh"
 
 type InflaterHuffmanTree;
 
-def new_InflaterHuffmanTree(codeLengths: BArray): InflaterHuffmanTree;
+def new_InflaterHuffmanTree(codeLengths: [Byte]): InflaterHuffmanTree;
 
 def defLitLenTree(): InflaterHuffmanTree;
 def defDistTree(): InflaterHuffmanTree;

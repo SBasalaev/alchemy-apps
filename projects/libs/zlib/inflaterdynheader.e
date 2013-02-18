@@ -28,8 +28,8 @@ def repBits(at: Int): Int = switch (at) {
 def BL_ORDER(at: Int): Int;
 
 type InflaterDynHeader {
-  blLens: BArray,
-  litdistLens: BArray,
+  blLens: [Byte],
+  litdistLens: [Byte],
   blTree: InflaterHuffmanTree,
   mode: Int,
   lnum: Int,
@@ -80,7 +80,7 @@ def InflaterDynHeader.decode(input: StreamManipulator): Bool {
           this.dnum += 1;
           input.dropBits(5);
           this.num = this.lnum + this.dnum;
-          this.litdistLens = new BArray(this.num);
+          this.litdistLens = new [Byte](this.num);
           this.mode = BLNUM;
         }
       }
@@ -92,7 +92,7 @@ def InflaterDynHeader.decode(input: StreamManipulator): Bool {
         } else {
           this.blnum += 4;
           input.dropBits(4);
-          this.blLens = new BArray(19);
+          this.blLens = new [Byte](19);
           this.ptr = 0;
           this.mode = BLLENS;
         }
@@ -183,13 +183,13 @@ def InflaterDynHeader.decode(input: StreamManipulator): Bool {
 }
 
 def InflaterDynHeader.buildLitLenTree(): InflaterHuffmanTree {
-  var litlenLens = new BArray(this.lnum);
-  bacopy(this.litdistLens, 0, litlenLens, 0, this.lnum);
+  var litlenLens = new [Byte](this.lnum);
+  acopy(this.litdistLens, 0, litlenLens, 0, this.lnum);
   new_InflaterHuffmanTree(litlenLens);
 }
 
 def InflaterDynHeader.buildDistTree(): InflaterHuffmanTree {
-  var distLens = new BArray(this.dnum);
-  bacopy(this.litdistLens, this.lnum, distLens, 0, this.dnum);
+  var distLens = new [Byte](this.dnum);
+  acopy(this.litdistLens, this.lnum, distLens, 0, this.dnum);
   new_InflaterHuffmanTree(distLens);
 }

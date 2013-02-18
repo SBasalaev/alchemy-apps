@@ -3,7 +3,7 @@ use "error.eh"
 use "sys.eh"
 
 type StreamManipulator {
-  window: BArray,
+  window: [Byte],
   window_start: Int,
   window_end: Int,
 
@@ -66,7 +66,7 @@ def StreamManipulator.needsInput(): Bool {
   this.window_start == this.window_end;
 }
 
-def StreamManipulator.copyBytes(output: BArray, offset: Int, length: Int): Int {
+def StreamManipulator.copyBytes(output: [Byte], offset: Int, length: Int): Int {
   if (length < 0)
     error(ERR_ILL_ARG, "length negative");
   if ((this.bits_in_buffer & 7) != 0)
@@ -88,7 +88,7 @@ def StreamManipulator.copyBytes(output: BArray, offset: Int, length: Int): Int {
     var avail = this.window_end - this.window_start;
     if (length > avail)
       length = avail;
-    bacopy(this.window, this.window_start, output, offset, length);
+    acopy(this.window, this.window_start, output, offset, length);
     this.window_start += length;
 
     if (((this.window_start - this.window_end) & 1) != 0) {
@@ -108,7 +108,7 @@ def StreamManipulator.reset() {
   this.bits_in_buffer = 0;
 }
 
-def StreamManipulator.setInput(buf: BArray, off: Int, len: Int) {
+def StreamManipulator.setInput(buf: [Byte], off: Int, len: Int) {
   if (this.window_start < this.window_end)
     error(ERR_ILL_STATE, "Old input was not completely processed");
 

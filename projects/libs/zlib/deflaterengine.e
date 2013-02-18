@@ -13,22 +13,22 @@ const TOO_FAR = 4096;
 
 type DeflaterEngine {
   ins_h: Int,
-  head: CArray,
-  prev: CArray,
+  head: [Short],
+  prev: [Short],
   matchStart: Int,
   matchLen: Int,
   prevAvailable: Bool,
   blockStart: Int,
   strstart: Int,
   lookahead: Int,
-  window: BArray,
+  window: [Byte],
   strategy: Int,
   max_chain: Int,
   max_lazy: Int,
   niceLength: Int,
   goodLength: Int,
   comprFunc: Int,
-  inputBuf: BArray,
+  inputBuf: [Byte],
   totalIn: Long,
   inputOff: Int,
   inputEnd: Int,
@@ -41,11 +41,11 @@ def new_DeflaterEngine(pending: PendingBuffer): DeflaterEngine {
   new DeflaterEngine {
     pending = pending,
     huffman = new_DeflaterHuffman(pending),
-    adler = new_adler32(),
+    adler = new Adler32(),
 
-    window = new BArray(2*WSIZE),
-    head   = new CArray(HASH_SIZE),
-    prev   = new CArray(WSIZE),
+    window = new [Byte](2*WSIZE),
+    head   = new [Short](HASH_SIZE),
+    prev   = new [Short](WSIZE),
 
     blockStart = 1,
     strstart = 1,
@@ -155,7 +155,7 @@ def DeflaterEngine.insertString(): Int {
 }
 
 def DeflaterEngine.slideWindow() {
-  bacopy(this.window, WSIZE, this.window, 0, WSIZE);
+  acopy(this.window, WSIZE, this.window, 0, WSIZE);
   this.matchStart -= WSIZE;
   this.strstart -= WSIZE;
   this.blockStart -= WSIZE;
@@ -192,7 +192,7 @@ def DeflaterEngine.fillWindow() {
     if (more > this.inputEnd - this.inputOff)
       more = this.inputEnd - this.inputOff;
 
-    bacopy(this.inputBuf, this.inputOff, this.window,
+    acopy(this.inputBuf, this.inputOff, this.window,
             this.strstart + this.lookahead, more);
     this.adler.updatearray(this.inputBuf, this.inputOff, more);
     this.inputOff += more;
@@ -272,7 +272,7 @@ def DeflaterEngine.findLongestMatch(curMatch: Int): Bool {
   this.matchLen >= MIN_MATCH;
 }
 
-def DeflaterEngine.setDictionary(buffer: BArray, offset: Int, length: Int) {
+def DeflaterEngine.setDictionary(buffer: [Byte], offset: Int, length: Int) {
   this.adler.updatearray(buffer, offset, length);
   if (length >= MIN_MATCH) {
     if (length > MAX_DIST) {
@@ -280,7 +280,7 @@ def DeflaterEngine.setDictionary(buffer: BArray, offset: Int, length: Int) {
       length = MAX_DIST;
     }
 
-    bacopy(buffer, offset, this.window, this.strstart, length);
+    acopy(buffer, offset, this.window, this.strstart, length);
 
     this.updateHash();
     length -= 1;
@@ -497,7 +497,7 @@ def DeflaterEngine.deflate(flush: Bool, finish: Bool): Bool {
   progress;
 }
 
-def DeflaterEngine.setInput(buf: BArray, off: Int, len: Int) {
+def DeflaterEngine.setInput(buf: [Byte], off: Int, len: Int) {
   if (this.inputOff < this.inputEnd)
     error(ERR_ILL_STATE, "Old input was not completely processed");
 

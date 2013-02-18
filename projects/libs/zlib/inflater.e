@@ -182,22 +182,12 @@ type Inflater {
   adler: Adler32
 }
 
-def new_inflater(nowrap: Bool): Inflater {
-  new Inflater {
-    mode = if (nowrap) DECODE_BLOCKS else DECODE_HEADER,
-    readAdler = 0,
-    neededBits = 0,
-    repLength = 0,
-    repDist = 0,
-    uncomprLen = 0,
-    isLastBlock = false,
-    totalOut = 0L,
-    totalIn = 0L,
-    nowrap = nowrap,
-    input = new_StreamManipulator(),
-    outputWindow = new_OutputWindow(),
-    adler = new_adler32()
-  }
+def Inflater.new(nowrap: Bool = false) {
+  this.mode = if (nowrap) DECODE_BLOCKS else DECODE_HEADER;
+  this.nowrap = nowrap;
+  this.input = new_StreamManipulator();
+  this.outputWindow = new_OutputWindow();
+  this.adler = new Adler32();
 }
 
 def Inflater.end() {
@@ -230,7 +220,7 @@ def Inflater.get_byteswritten(): Long {
 }
 
 def Inflater.decode(): Bool;
-def Inflater.inflate(buf: BArray, off: Int, len: Int): Int {
+def Inflater.inflate(buf: [Byte], off: Int, len: Int): Int {
   /* Check for correct buff, off, len triple */
   if (0 > off || off > off + len || off + len > buf.len)
     error(ERR_RANGE, null);
@@ -274,7 +264,7 @@ def Inflater.reset() {
   this.adler.reset();
 }
 
-def Inflater.set_dictionary(buffer: BArray, off: Int, len: Int) {
+def Inflater.set_dictionary(buffer: [Byte], off: Int, len: Int) {
   if (!this.needs_dictionary())
     error(ERR_ILL_STATE, null);
 
@@ -286,7 +276,7 @@ def Inflater.set_dictionary(buffer: BArray, off: Int, len: Int) {
   this.mode = DECODE_BLOCKS;
 }
 
-def Inflater.set_input(buf: BArray, off: Int, len: Int) {
+def Inflater.set_input(buf: [Byte], off: Int, len: Int) {
   this.input.setInput (buf, off, len);
   this.totalIn += len;
 }

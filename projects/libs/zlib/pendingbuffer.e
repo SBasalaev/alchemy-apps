@@ -4,7 +4,7 @@ use "deflaterconstants.eh"
 use "pendingbuffer.eh"
 
 type PendingBuffer {
-  buf: BArray,
+  buf: [Byte],
   start: Int,
   end: Int,
   bits: Int,
@@ -13,7 +13,7 @@ type PendingBuffer {
 
 def new_PendingBuffer(bufsize: Int): PendingBuffer {
   new PendingBuffer {
-    buf = new BArray(bufsize),
+    buf = new [Byte](bufsize),
     start = 0,
     end = 0,
     bits = 0,
@@ -50,8 +50,8 @@ def PendingBuffer.writeInt(s: Int) {
   this.end += 1;
 }
 
-def PendingBuffer.writeBlock(block: BArray, offset: Int, len: Int) {
-  bacopy(block, offset, this.buf, this.end, len);
+def PendingBuffer.writeBlock(block: [Byte], offset: Int, len: Int) {
+  acopy(block, offset, this.buf, this.end, len);
   this.end += len;
 }
 
@@ -96,7 +96,7 @@ def PendingBuffer.isFlushed(): Bool {
   this.end == 0;
 }
 
-def PendingBuffer.flush(output: BArray, offset: Int, length: Int): Int {
+def PendingBuffer.flush(output: [Byte], offset: Int, length: Int): Int {
   if (this.bitCount >= 8) {
     this.buf[this.end] = this.bits;
     this.end += 1;
@@ -105,19 +105,19 @@ def PendingBuffer.flush(output: BArray, offset: Int, length: Int): Int {
   }
   if (length > this.end - this.start) {
     length = this.end - this.start;
-    bacopy(this.buf, this.start, output, offset, length);
+    acopy(this.buf, this.start, output, offset, length);
     this.start = 0;
     this.end = 0;
   } else {
-    bacopy(this.buf, this.start, output, offset, length);
+    acopy(this.buf, this.start, output, offset, length);
     this.start += length;
   }
   length;
 }
 
-def PendingBuffer.toByteArray(): BArray {
-  var ret = new BArray(this.end - this.start);
-  bacopy(this.buf, this.start, ret, 0, ret.len);
+def PendingBuffer.toByteArray(): [Byte] {
+  var ret = new [Byte](this.end - this.start);
+  acopy(this.buf, this.start, ret, 0, ret.len);
   this.start = 0;
   this.end = 0;
   ret;

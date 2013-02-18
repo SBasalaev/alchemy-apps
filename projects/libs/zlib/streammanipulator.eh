@@ -8,6 +8,6 @@ def StreamManipulator.getAvailableBits(): Int;
 def StreamManipulator.getAvailableBytes(): Int;
 def StreamManipulator.skipToByteBoundary();
 def StreamManipulator.needsInput(): Bool;
-def StreamManipulator.copyBytes(output: BArray, offset: Int, length: Int): Int;
+def StreamManipulator.copyBytes(output: [Byte], offset: Int, length: Int): Int;
 def StreamManipulator.reset();
-def StreamManipulator.setInput(buf: BArray, off: Int, len: Int);
+def StreamManipulator.setInput(buf: [Byte], off: Int, len: Int);

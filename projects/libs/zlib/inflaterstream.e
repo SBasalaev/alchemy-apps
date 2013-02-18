@@ -1,15 +1,11 @@
 use "inflaterstream.eh"
 use "error.eh"
 
-type InflaterStream {
-  in: IStream,
-  inf: Inflater,
-  buf: BArray,
-  len: Int
-}
 
-def new_inflaterstream(in: IStream, inf: Inflater, size: Int): InflaterStream {
-  new InflaterStream(in, inf, new BArray(size), 0);
+def InflaterStream.new(in: IStream, inf: Inflater, size: Int): InflaterStream {
+  this.in = in;
+  this.inf = inf;
+  this.buf = new [Byte](size);
 }
 
 def InflaterStream.available(): Int {
@@ -37,17 +33,17 @@ def InflaterStream.fill() {
 }
 
 def InflaterStream.read(): Int {
-  var onebytebuffer = new BArray(1);
+  var onebytebuffer = new [Byte](1);
   var nread = this.readarray(onebytebuffer, 0, 1);
   if (nread > 0)
-    onebytebuffer[0] & 0xff;
+    onebytebuffer[0] & 0xff
   else
     -1;
 }
 
-def InflaterStream.readarray(b: BArray, off: Int, len: Int): Int {
+def InflaterStream.readarray(b: [Byte], off: Int, len: Int): Int {
   if (this.inf == null)
-    error(ERR_IO, "stream closed");
+    error(ERR_IO, "stream closed")
   if (len == 0) {
     0;
   } else {
@@ -83,7 +79,7 @@ def InflaterStream.skip(n: Long): Long {
     0L;
   } else {
     var buflen = if (n < 2048) n else 2048;
-    var tmpbuf = new BArray(buflen);
+    var tmpbuf = new [Byte](buflen);
 
     var skipped = 0L;
     while (n > 0L) {

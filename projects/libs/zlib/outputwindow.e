@@ -9,13 +9,13 @@ const WINDOW_SIZE = 1 << 15;
 const WINDOW_MASK = WINDOW_SIZE - 1;
 
 type OutputWindow {
-  window: BArray,
+  window: [Byte],
   window_end: Int,
   window_filled: Int
 }
 
 def new_OutputWindow(): OutputWindow {
-  new OutputWindow(new BArray(WINDOW_SIZE), 0, 0)
+  new OutputWindow(new [Byte](WINDOW_SIZE), 0, 0)
 }
 
 def OutputWindow.write(abyte: Int) {
@@ -47,7 +47,7 @@ def OutputWindow.repeat(len: Int, dist: Int) {
   var border = WINDOW_SIZE - len;
   if (rep_start <= border && this.window_end < border) {
     if (len <= dist) {
-      bacopy(this.window, rep_start, this.window, this.window_end, len);
+      acopy(this.window, rep_start, this.window, this.window_end, len);
       this.window_end += len;
     } else {
       // TODO: test if works without this, acopy handles overlaping copies!
@@ -82,7 +82,7 @@ def OutputWindow.copyStored(input: StreamManipulator, len: Int): Int {
   copied;
 }
 
-def OutputWindow.copyDict(dict: BArray, offset: Int, len: Int) {
+def OutputWindow.copyDict(dict: [Byte], offset: Int, len: Int) {
   if (this.window_filled > 0)
     error(ERR_ILL_STATE, null);
 
@@ -90,7 +90,7 @@ def OutputWindow.copyDict(dict: BArray, offset: Int, len: Int) {
     offset += len - WINDOW_SIZE;
     len = WINDOW_SIZE;
   }
-  bacopy(dict, offset, this.window, 0, len);
+  acopy(dict, offset, this.window, 0, len);
   this.window_end = len & WINDOW_MASK;
 }
 
@@ -102,10 +102,10 @@ def OutputWindow.getAvailable(): Int {
   this.window_filled;
 }
 
-def OutputWindow.copyOutput(output: BArray, offset: Int, len: Int): Int {
+def OutputWindow.copyOutput(output: [Byte], offset: Int, len: Int): Int {
   var copy_end = this.window_end;
   if (len > this.window_filled)
-    len = this.window_filled;
+    len = this.window_filled
   else
     copy_end = (this.window_end - this.window_filled + len) & WINDOW_MASK;
 
@@ -113,11 +113,11 @@ def OutputWindow.copyOutput(output: BArray, offset: Int, len: Int): Int {
   var tailLen = len - copy_end;
 
   if (tailLen > 0) {
-    bacopy(this.window, WINDOW_SIZE - tailLen, output, offset, tailLen);
+    acopy(this.window, WINDOW_SIZE - tailLen, output, offset, tailLen);
     offset += tailLen;
     len = copy_end;
   }
-  bacopy(this.window, copy_end - len, output, offset, len);
+  acopy(this.window, copy_end - len, output, offset, len);
   this.window_filled -= copied;
   if (this.window_filled < 0)
     error(ERR_ILL_STATE, null);

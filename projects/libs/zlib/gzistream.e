@@ -1,9 +1,8 @@
 use "gzistream.eh"
 use "crc32.eh"
 use "deflater.eh"
-use "inflater.eh"
+use "inflaterstream.eh"
 use "error.eh"
-use "sys.eh"
 use "string.eh"
 
 const FTEXT = 0x1;
@@ -12,20 +11,16 @@ const FEXTRA = 0x4;
 const FNAME = 0x8;
 const FCOMMENT = 0x10;
 
-type GzipIStream {
-  in: IStream,
-  inf: Inflater,
-  buf: BArray,
-  len: Int,
+type GzIStream < InflaterStream {
   crc: CRC32,
   eos: Bool,
   readGZIPHeader: Bool
 }
 
-def GzipIStream.readHeader() {
+def GzIStream.readHeader() {
   var in = this.in;
   /* 1. Check the two magic bytes */
-  var headCRC = new_crc32();
+  var headCRC = new CRC32();
   var magic = in.read();
   if (magic < 0) {
     this.eos = true;
@@ -144,12 +139,12 @@ def GzipIStream.readHeader() {
   }
 }
 
-def GzipIStream.readFooter() {
-  var footer = new BArray(8);
+def GzIStream.readFooter() {
+  var footer = new [Byte](8);
   var avail = this.inf.remaining;
   if (avail > 8)
     avail = 8;
-  bacopy(this.buf, this.len - this.inf.remaining, footer, 0, avail);
+  acopy(this.buf, this.len - this.inf.remaining, footer, 0, avail);
   var needed = 8 - avail;
   while (needed > 0) {
     var count = this.in.readarray(footer, 8-needed, needed);
@@ -172,55 +167,34 @@ def GzipIStream.readFooter() {
   this.eos = true;
 }
 
-def new_gzistream(in: IStream): GzipIStream {
-  var gz = new GzipIStream {
-    in = in,
-    inf = new_inflater(true),
-    buf = new BArray(4096),
-    len = 0,
-    crc = new_crc32(),
-    eos = false,
-    readGZIPHeader = false
-  }
-  gz.readHeader()
-  gz
+def GzIStream.new(in: IStream) {
+  super(in, new Inflater(true), 4096);
+  this.crc = new CRC32();
+  this.readHeader();
 }
 
-def GzipIStream.close() {
-  if (this.in != null)
-    this.in.close();
-  this.in = null;
+def GzIStream.close() {
+  super.close();
 }
 
-def GzipIStream.fill() {
-  this.len = this.in.readarray(this.buf, 0, this.buf.len);
-
-  if (this.len < 0)
-    error(ERR_IO, "Early EOF in GZIP data.");
-
-  this.inf.set_input(this.buf, 0, this.len);
+def GzIStream.reset() {
+  super.reset();
 }
 
-def GzipIStream.reset() {
-  error(ERR_IO, "reset() is not supported")
+def GzIStream.available(): Int {
+  super.available();
 }
 
-def GzipIStream.available(): Int {
-  if (this.inf == null)
-    error(ERR_IO, "stream is closed");
-  0;
-}
-
-def GzipIStream.read(): Int {
-  var onebytebuffer = new BArray(1);
+def GzIStream.read(): Int {
+  var onebytebuffer = new [Byte](1);
   var nread = this.readarray(onebytebuffer, 0, 1);
   if (nread > 0)
-    onebytebuffer[0] & 0xff;
+    onebytebuffer[0] & 0xff
   else
     -1;
 }
 
-def GzipIStream.readarray(buf: BArray, off: Int, len: Int): Int {
+def GzIStream.readarray(buf: [Byte], off: Int, len: Int): Int {
   if (this.in == null)
     error(ERR_IO, "stream is closed");
 
@@ -232,34 +206,16 @@ def GzipIStream.readarray(buf: BArray, off: Int, len: Int): Int {
   } else if (len == 0) {
     0;
   } else {
-    var break = false;
-    var count = 0;
-    while (!break) {
-      count = this.inf.inflate(buf, off, len);
-
-      if (count > 0) {
-        break = true;
-      } else {
-        if (this.inf.needs_dictionary() | this.inf.finished()) {
-          break = true;
-          count = -1;
-        } else if (this.inf.needs_input()) {
-          this.fill();
-        } else {
-          error(FAIL, "Don't know what to do");
-        }
-      }
-    }
-    if (count > 0)
-      this.crc.updatearray(buf, off, count);
-
+    var numRead = super.readarray(buf, off, len);
+    if (numRead > 0)
+      this.crc.updatearray(buf, off, numRead);
     if (this.inf.finished())
       this.readFooter();
-    count;
+    numRead;
   }
 }
 
-def GzipIStream.skip(n: Long): Long {
+def GzIStream.skip(n: Long): Long {
   if (this.inf == null)
     error(ERR_IO, "stream is closed");
   if (n < 0)
@@ -269,7 +225,7 @@ def GzipIStream.skip(n: Long): Long {
     0L;
   } else {
     var buflen = if (n < 2048) n else 2048;
-    var tmpbuf = new BArray(buflen);
+    var tmpbuf = new [Byte](buflen);
 
     var skipped = 0L;
     while (n > 0L) {
@@ -285,4 +241,3 @@ def GzipIStream.skip(n: Long): Long {
     skipped;
   }
 }
-

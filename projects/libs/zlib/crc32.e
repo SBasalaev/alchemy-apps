@@ -8,7 +8,7 @@ def make_crc_table() {
     var c = n;
     for (var k = 7, k >= 0, k -= 1) {
       if ((c & 1) != 0)
-        c = 0xedb88320 ^ (c >>> 1);
+        c = 0xedb88320 ^ (c >>> 1)
       else
         c = c >>> 1;
     }
@@ -18,14 +18,11 @@ def make_crc_table() {
 }
 
 type CRC32 {
-  crc: Int
+  crc: Int = 0
 }
 
-def new_crc32(): CRC32 {
+def CRC32.new(): CRC32 {
   if (crc_table == null) make_crc_table();
-  new CRC32 {
-    crc = 0
-  }
 }
 
 def CRC32.get_value(): Int {
@@ -42,7 +39,7 @@ def CRC32.update(bval: Int) {
   this.crc = ~c;
 }
 
-def CRC32.updatearray(buf: BArray, off: Int, len: Int) {
+def CRC32.updatearray(buf: [Byte], off: Int, len: Int) {
   var c = ~this.crc;
   var table = crc_table;
   while (len > 0) {

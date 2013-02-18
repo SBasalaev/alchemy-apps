@@ -29,19 +29,13 @@ type Deflater {
   engine: DeflaterEngine
 }
 
-def new_deflater(lvl: Int, nowrap: Bool): Deflater {
-  var dfl = new Deflater {
-    pending = new_PendingBuffer(PENDING_BUF_SIZE),
-    noHeader = nowrap,
-    level = 0,
-    state = 0,
-    totalOut = 0L
-  }
-  dfl.engine = new_DeflaterEngine(dfl.pending);
-  dfl.set_strategy(DEFAULT_STRATEGY);
-  dfl.set_level(lvl);
-  dfl.reset();
-  dfl
+def Deflater.new(lvl: Int = DEFAULT_COMPRESSION, nowrap: Bool = false) {
+  this.pending = new_PendingBuffer(PENDING_BUF_SIZE);
+  this.noHeader = nowrap;
+  this.engine = new_DeflaterEngine(this.pending);
+  this.set_strategy(DEFAULT_STRATEGY);
+  this.set_level(lvl);
+  this.reset();
 }
 
 def Deflater.reset() {
@@ -87,7 +81,7 @@ def Deflater.needs_input(): Bool {
   this.engine.needsInput();
 }
 
-def Deflater.set_input(input: BArray, off: Int, len: Int) {
+def Deflater.set_input(input: [Byte], off: Int, len: Int) {
   if ((this.state & IS_FINISHING) != 0)
     error(ERR_ILL_ARG, "finish()/end() already called");
   this.engine.setInput(input, off, len);
@@ -95,7 +89,7 @@ def Deflater.set_input(input: BArray, off: Int, len: Int) {
 
 def Deflater.set_level(lvl: Int) {
   if (lvl == DEFAULT_COMPRESSION)
-    lvl = 6;
+    lvl = 6
   else if (lvl < NO_COMPRESSION || lvl > BEST_COMPRESSION)
     error(ERR_ILL_ARG, null);
 
@@ -112,7 +106,7 @@ def Deflater.set_strategy(stgy: Int) {
   this.engine.setStrategy(stgy);
 }
 
-def Deflater.set_dictionary(dict: BArray, offset: Int, length: Int) {
+def Deflater.set_dictionary(dict: [Byte], offset: Int, length: Int) {
   if (this.state != INIT_STATE)
     error(ERR_ILL_STATE, null);
 
@@ -120,7 +114,7 @@ def Deflater.set_dictionary(dict: BArray, offset: Int, length: Int) {
   this.engine.setDictionary(dict, offset, length);
 }
 
-def Deflater.deflate(output: BArray, offset: Int, length: Int): Int {
+def Deflater.deflate(output: [Byte], offset: Int, length: Int): Int {
   var origLength = length;
 
   if (this.state == CLOSED_STATE)

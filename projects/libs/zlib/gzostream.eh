@@ -1,11 +1,10 @@
 use "io.eh"
 
-type GzipOStream;
+type GzOStream;
 
-def new_gzostream(out: OStream): GzipOStream;
-
-def GzipOStream.writearray(buf: BArray, off: Int, len: Int);
-def GzipOStream.write(b: Int);
-def GzipOStream.flush();
-def GzipOStream.finish();
-def GzipOStream.close();
+def GzOStream.new(out: OStream);
+def GzOStream.writearray(buf: [Byte], off: Int, len: Int);
+def GzOStream.write(b: Int);
+def GzOStream.flush();
+def GzOStream.finish();
+def GzOStream.close();

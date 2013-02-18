@@ -1,14 +1,10 @@
 use "deflaterstream.eh"
 use "error.eh"
 
-type DeflaterStream {
-  out: OStream,
-  dfl: Deflater,
-  buf: BArray
-}
-
-def new_deflaterstream(out: OStream, dfl: Deflater, size: Int): DeflaterStream {
-  new DeflaterStream(out, dfl, new BArray(size))
+def DeflaterStream.new(out: OStream, dfl: Deflater, size: Int = 4096) {
+  this.out = out;
+  this.dfl = dfl;
+  this.buf = new [Byte](size)
 }
 
 def DeflaterStream.deflate() {
@@ -17,7 +13,7 @@ def DeflaterStream.deflate() {
     var len = this.dfl.deflate(this.buf, 0, this.buf.len);
 
     if (len <= 0)
-      break = true;
+      break = true
     else
       this.out.writearray(this.buf, 0, len);
   }
@@ -27,10 +23,10 @@ def DeflaterStream.deflate() {
 }
 
 def DeflaterStream.write(b: Int) {
-  this.writearray(new BArray {b}, 0, 1)
+  this.writearray(new [Byte] {b}, 0, 1)
 }
 
-def DeflaterStream.writearray(buf: BArray, off: Int, len: Int) {
+def DeflaterStream.writearray(buf: [Byte], off: Int, len: Int) {
   this.dfl.set_input(buf, off, len);
   this.deflate();
 }
@@ -47,7 +43,7 @@ def DeflaterStream.finish() {
   while (!break && !this.dfl.finished()) {
     var len = this.dfl.deflate(this.buf, 0, this.buf.len);
     if (len <= 0)
-      break = true;
+      break = true
     else
       this.out.writearray(this.buf, 0, len);
   }

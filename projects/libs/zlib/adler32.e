@@ -4,14 +4,10 @@ use "adler32.eh"
 const BASE = 65521;
 
 type Adler32 {
-  checksum: Int
+  checksum: Int = 1
 }
 
-def new_adler32(): Adler32 {
-  new Adler32 {
-    checksum = 1
-  }
-}
+def Adler32.new() { }
 
 def Adler32.reset() {
   this.checksum = 1
@@ -27,7 +23,7 @@ def Adler32.update(bval: Int) {
   this.checksum = (s2 << 16) + s1;
 }
 
-def Adler32.updatearray(buf: BArray, off: Int, len: Int) {
+def Adler32.updatearray(buf: [Byte], off: Int, len: Int) {
   //(By Per Bothner)
   var s1 = this.checksum & 0xffff;
   var s2 = this.checksum >>> 16;
