@@ -22,14 +22,6 @@ const HELP = "Compress or decompess files.\n" +
 var catenate: Bool;
 var suffix: String;
 
-def String.starts(sub: String): Bool {
-  this.len() >= sub.len() && this[0:sub.len()] == sub
-}
-
-def String.ends(sub: String): Bool {
-  this.len() >= sub.len() && this[this.len()-sub.len():] == sub
-}
-
 /* Tests if file has one of well known gzip extensions */
 def has_gz_ext(file: String): Bool {
   var result = false
@@ -46,7 +38,7 @@ def has_gz_ext(file: String): Bool {
     var last2 = file[len-2:len].lcase()
     result = last2 == ".z" || last2 == "-z"
   }
-  result || file.ends(suffix)
+  result || file.endswith(suffix)
 }
 
 /* Returns file name without gzip extension. */
@@ -54,7 +46,7 @@ def name_nogzext(file: String): String {
   var len = file.len()
   var name: String = file + ".unpacked"
   var found = false
-  if (file.ends(suffix)) {
+  if (file.endswith(suffix)) {
     found = true
     name = file[0:len-suffix.len()]
   }
@@ -82,9 +74,9 @@ def name_nogzext(file: String): String {
   name
 }
 
-def do_compress(file: String, buf: BArray): Int {
+def do_compress(file: String, buf: [Byte]): Int {
   if (is_dir(file)) {
-    stderr().println("gzip: " + file + "is a directory -- skipped")
+    stderr().println("gzip: " + file + " is a directory -- skipped")
     WARN
   } else if (!exists(file)) {
     stderr().println("gzip: " + file + ": no such file or directory")
@@ -94,7 +86,7 @@ def do_compress(file: String, buf: BArray): Int {
     WARN
   } else {
     var in = fopen_r(file)
-    var out = new_gzostream(
+    var out = new GzOStream(
       if (!catenate) fopen_w(file + suffix)
       else stdout())
     var len: Int;
@@ -117,9 +109,9 @@ def do_compress(file: String, buf: BArray): Int {
   }
 }
 
-def do_decompress(file: String, buf: BArray): Int {
+def do_decompress(file: String, buf: [Byte]): Int {
   if (is_dir(file)) {
-    stderr().println("gzip: " + file + "is a directory -- skipped")
+    stderr().println("gzip: " + file + " is a directory -- skipped")
     WARN
   } else if (!exists(file)) {
     stderr().println("gzip: " + file + ": no such file or directory")
@@ -128,7 +120,7 @@ def do_decompress(file: String, buf: BArray): Int {
     stderr().println("gzip: " + file + " has no gzip extension -- skipped")
     WARN
   } else {
-    var in = new_gzistream(fopen_r(file))
+    var in = new GzIStream(fopen_r(file))
     var out = if (!catenate)
       fopen_w(name_nogzext(file))
       else stdout()
@@ -175,7 +167,7 @@ def main(args: [String]) {
       decompress = true
 //    } else if (arg == "-r") {
 //      recursive = true
-    } else if (arg.starts("-S")) {
+    } else if (arg.startswith("-S")) {
       suffix = arg[2:]
       if (suffix == "") {
         stderr().println("gzip: no suffix given with -S")
@@ -197,7 +189,7 @@ def main(args: [String]) {
   }
   // do the job
   if (!quit) {
-    var buf = new BArray(BUF_SIZE)
+    var buf = new [Byte](BUF_SIZE)
     for (var i=0, i < files.len(), i += 1) {
       var fun = if (decompress) do_decompress else do_compress
       exitcode += fun(files[i].tostr(), buf)

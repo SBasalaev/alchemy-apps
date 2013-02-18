@@ -1,7 +1,7 @@
 all: gzip gunzip zcat
 
 gzip: gzip.e
- ex gzip.e -o gzip -lz -Wall -Xtry
+ ex gzip.e -o gzip -lz -Wall
 
 gunzip: gunzip.e
  ex gunzip.e -o gunzip -Wall
