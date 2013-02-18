@@ -1,0 +1,9 @@
+Package: kin
+Source: kin
+Version: 1.2build2
+Section: text
+Depends: libcore3, libui1
+Summary: KIn Korean Input
+License: GPL-3
+Copyright: (c) 2012 Kyle Alexander Buan
+Maintainer: Kyle Alexander Buan <ttm.comics@gmail.com>

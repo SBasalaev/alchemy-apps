@@ -27,23 +27,23 @@ def getsyl(syl: String): String {
 // process a letter (first)
   nofirst = 0;
   toadd = 0;
-  if (s[0] == '.') data.add(0);
-  else if (s[0] == '!') data.add(0);
-  else if (s[0] == '?') data.add(0);
+  if (s[0] == '.') data.add(0)
+  else if (s[0] == '!') data.add(0)
+  else if (s[0] == '?') data.add(0)
   else {
     if (s[lcount] == 'g') {
       if (s[lcount+1] == 'g') {
         data.add(2);
         toadd = 1; }
       else data.add(1); }
-    else if (s[lcount] == 'n') data.add(3);
+    else if (s[lcount] == 'n') data.add(3)
     else if (s[lcount] == 'd') {
       if (s[lcount+1] == 'd') {
         data.add(5);
         toadd = 1; }
       else data.add(4); }
-    else if (s[lcount] == 'r' || s[lcount] == 'l') data.add(6);
-    else if (s[lcount] == 'm') data.add(7);
+    else if (s[lcount] == 'r' || s[lcount] == 'l') data.add(6)
+    else if (s[lcount] == 'm') data.add(7)
     else if (s[lcount] == 'b') {
       if (s[lcount+1] == 'b') {
         data.add(9);
@@ -59,20 +59,20 @@ def getsyl(syl: String): String {
         data.add(14);
         toadd = 1; }
       else data.add(13); }
-    else if (s[lcount] == 'c') data.add(15);
-    else if (s[lcount] == 'k') data.add(16);
-    else if (s[lcount] == 't') data.add(17);
-    else if (s[lcount] == 'p') data.add(18);
-    else if (s[lcount] == 'h') data.add(19);
+    else if (s[lcount] == 'c') data.add(15)
+    else if (s[lcount] == 'k') data.add(16)
+    else if (s[lcount] == 't') data.add(17)
+    else if (s[lcount] == 'p') data.add(18)
+    else if (s[lcount] == 'h') data.add(19)
     else {
       nofirst = -1;
       data.add(12); } }
   lcount += toadd + 1 + nofirst;
 // process a letter (second)
   toadd = 0;
-  if (s[0] == '.') data.add(0);
-  else if (s[0] == '!') data.add(0);
-  else if (s[0] == '?') data.add(0);
+  if (s[0] == '.') data.add(0)
+  else if (s[0] == '!') data.add(0)
+  else if (s[0] == '?') data.add(0)
   else {
     if (s[lcount] == 'a') {
       if (s[lcount+1] == 'e') {
@@ -134,7 +134,7 @@ def getsyl(syl: String): String {
       if (s[lcount+1] == 'i') {
         data.add(17);
         toadd = 1; } }
-    else if (s[lcount] == 'u') data.add(14);
+    else if (s[lcount] == 'u') data.add(14)
     else if (s[lcount] == 'i') data.add(21); }
   lcount += toadd + 1;
   if (lcount < s.len()-4) {
@@ -159,7 +159,7 @@ def getsyl(syl: String): String {
         data.add(21);
         toadd = 1; }
       else data.add(4); }
-    else if (s[lcount] == 'd') data.add(7);
+    else if (s[lcount] == 'd') data.add(7)
     else if (s[lcount] == 'l' || s[lcount] == 'r') {
       if (s[lcount+1] == 'g' || s[lcount+1] == 'k') {
         data.add(9);
@@ -183,7 +183,7 @@ def getsyl(syl: String): String {
         data.add(15);
         toadd = 1; }
       else data.add(8); }
-    else if (s[lcount] == 'm') data.add(16);
+    else if (s[lcount] == 'm') data.add(16)
     else if (s[lcount] == 'b') {
       if (s[lcount+1] == 's') {
         data.add(18);
@@ -194,19 +194,19 @@ def getsyl(syl: String): String {
         data.add(20);
         toadd = 1; }
       else data.add(19); }
-    else if (s[lcount] == 'j') data.add(22);
-    else if (s[lcount] == 'c') data.add(23);
-    else if (s[lcount] == 'k') data.add(24);
-    else if (s[lcount] == 't') data.add(25);
-    else if (s[lcount] == 'p') data.add(26);
-    else if (s[lcount] == 'h') data.add(27); }
+    else if (s[lcount] == 'j') data.add(22)
+    else if (s[lcount] == 'c') data.add(23)
+    else if (s[lcount] == 'k') data.add(24)
+    else if (s[lcount] == 't') data.add(25)
+    else if (s[lcount] == 'p') data.add(26)
+    else if (s[lcount] == 'h') data.add(27) }
   else {
-    if (s[0] == '!') data.add(1);
-    else if (s[0] == '?') data.add(2);
+    if (s[0] == '!') data.add(1)
+    else if (s[0] == '?') data.add(2)
     else data.add(0); }
-    if ((cast(Int)data[0])+(cast(Int)data[1])+(cast(Int)data[2]) == 0) " ";
-    else if ((cast(Int)data[0])+(cast(Int)data[1])+(cast(Int)data[2]) == 1) "! ";
-    else if ((cast(Int)data[0]) == 0 && (cast(Int)data[1]) == 0 && (cast(Int)data[2]) == 2) "? ";
+    if ((cast(Int)data[0])+(cast(Int)data[1])+(cast(Int)data[2]) == 0) " "
+    else if ((cast(Int)data[0])+(cast(Int)data[1])+(cast(Int)data[2]) == 1) "! "
+    else if ((cast(Int)data[0]) == 0 && (cast(Int)data[1]) == 0 && (cast(Int)data[2]) == 2) "? "
     else chstr((cast(Int)data[2]) + ((cast(Int)data[1])-1)*28 + ((cast(Int)data[0])-1)*588 + 44032); }
 
 def convert(l: String): String {
@@ -238,7 +238,7 @@ def main(args: [String]) {
   var lastlen = 0;
   while (!q) {
     event = ui_wait_event();
-    if (event.value == c) hangul.set_text(convert(latin.get_text()));
+    if (event.value == c) hangul.set_text(convert(latin.get_text()))
     else if (event.value == savehan) {
       var w = utfwriter(fopen_w("/home/hangul.txt"));
       w.print(hangul.get_text());
