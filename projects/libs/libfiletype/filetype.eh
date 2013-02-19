@@ -16,6 +16,8 @@ const IMAGE = "image"
 const AUDIO = "audio"
 const VIDEO = "video"
 const LIB = "lib"
+const WEB = "web"
+const ARCHIVE = "archive"
 const UNKNOWN = ""
 
 /* Loads database. */
