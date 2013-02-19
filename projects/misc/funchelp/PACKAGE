@@ -1,0 +1,9 @@
+Package: funchelp
+Source: funchelp
+Version: 1.0.3
+Depends: libcore3, libui1
+License: GPL-2
+Copyright: (c) 2012, Ashish Yadav
+Maintainer: Ashish Yadav <ay.yadav53@gmail.com>
+Section: misc
+Summary: function dictionary to help programmer

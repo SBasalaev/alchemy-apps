@@ -3,7 +3,7 @@ use "form"
 use "abt.e"
 
 var f: Form
-var cntrl: Int
+var cntrl: Int = 1
 var endtxt: String
 var srchtxt: String
 var me: Menu
@@ -19,7 +19,7 @@ use "adm.e"
 use "sys"
 
 def main(a: [String]) {
-  //if(cntrl != 2)
+  if(cntrl != 2)
     cntrl = 1
   f = new_form()
   var e = new_edititem("Function name", "", EDIT_ANY, 20)
@@ -39,6 +39,7 @@ def main(a: [String]) {
     var hindx = 0
     for (hindx = 0, hindx < hlist.len && srchtxt != "" && cntrl != 0 && endtxt == srchtxt, hindx += 1) {
       var hname = hlist[hindx]
+     if (!is_dir("/inc"+hname)) {
       if (cntrl == 1) {
       htxt = open("/inc/"+hname)
       var fnlist = htxt.split(';')
@@ -77,6 +78,7 @@ def main(a: [String]) {
       }
       n = 1000
       rd(e,f)
-    }  
+    }
+   }
   }
 }
