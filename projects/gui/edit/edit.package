@@ -1,9 +1,9 @@
 Package: edit
 Source: edit
-Version: 0.9.2-1
+Version: 0.9.2build2
 Section: text
 Summary: simple text editor
 Depends: libcore3, libui1
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2012 Sergey Basalaev
 License: GPL-3

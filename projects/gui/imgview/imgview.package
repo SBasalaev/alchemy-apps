@@ -1,9 +1,9 @@
 Package: imgview
 Source: imgview
-Version: 0.2-1
+Version: 0.2build2
 Section: gui
 Depends: libcore3, libui1
 Summary: simple image viewer
 License: GPL-3
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2012 Sergey Basalaev
