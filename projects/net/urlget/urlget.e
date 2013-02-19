@@ -1,16 +1,14 @@
-/* urlget 1.2
- * (C) 2011-2012, Sergey Basalaev
+/* urlget 1.3
+ * (C) 2011-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "io.eh"
 use "string.eh"
 
-const VERSION = "urlget 1.2"
+const VERSION = "urlget 1.3"
 const HELP = "Retrieve file by its URL.\n" +
              "Usage: urlget url [file]"
-
-const BUF_SIZE = 1024
 
 def main(args: [String]): Int {
   // parse arguments
@@ -44,12 +42,7 @@ def main(args: [String]): Int {
     } else {
       var in = readurl(url)
       var out = if (file != null) fopen_w(file) else stdout()
-      var buf = new BArray(BUF_SIZE)
-      var len = in.readarray(buf, 0, BUF_SIZE)
-      while (len > 0) {
-        out.writearray(buf, 0, len)
-        len = in.readarray(buf, 0, BUF_SIZE)
-      }
+      out.writeall(in)
       in.close()
       out.flush()
       if (file != null) out.close()

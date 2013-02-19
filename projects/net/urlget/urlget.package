@@ -1,10 +1,9 @@
 Package: urlget
 Source: urlget
-Version: 1.2-1
+Version: 1.3
 Section: net
 Summary: retrieve file from internet
 Depends: libcore3
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
-Copyright: (c) 2011-2012, Sergey Basalaev
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2011-2013 Sergey Basalaev
 License: GPL-3

@@ -5,6 +5,9 @@ urlget: urlget.e
 install: urlget
  install urlget /bin
 
+clean:
+ rm -f urlget
+
 package: urlget
  mkdir -p bin
  install urlget bin
