@@ -1,5 +1,5 @@
 /* Application menu for Alchemy GUI.
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -48,23 +48,24 @@ def readdesktop(file: String): App {
   }
 }
 
-def readapps(): Array {
+def readapps(): [App] {
   var files = flist("/res/apps/")
   var apps = new_list()
-  for (var i=0, i < files.len, i=i+1) {
+  for (var i=0, i < files.len, i+=1) {
     var app = readdesktop("/res/apps/"+files[i])
     if (app != null) apps.add(app)
   }
-  apps.toarray()
+  var ret = new [App](apps.len())
+  apps.copyinto(0, ret, 0, ret.len)
+  ret
 }
 
-def makelist(apps: Array, select: Menu): ListBox {
+def makelist(apps: [App], select: Menu): ListBox {
   var strings = new [String](apps.len)
   var icons = new [Image](apps.len)
-  for (var i=0, i < apps.len, i=i+1) {
-    var app = cast (App) apps[i]
-    strings[i] = app.name
-    icons[i] = app.icon
+  for (var i=0, i < apps.len, i+=1) {
+    strings[i] = apps[i].name
+    icons[i] = apps[i].icon
   }
   var scr = new_listbox(strings, icons, select)
   scr.set_title("Applications")
@@ -91,7 +92,7 @@ def main(args: [String]) {
     } else if (e.value == mselect) {
       var index = scr.get_index()
       if (index >= 0) {
-        var app = cast (App) apps[index]
+        var app = apps[index]
         var cmd = app.exec.split(' ')
         var cmdargs = new [String](cmd.len-1)
         acopy(cmd, 1, cmdargs, 0, cmdargs.len)
