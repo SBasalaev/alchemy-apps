@@ -1,6 +1,16 @@
 /* File manager for Alchemy.
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
+ */
+
+/* TODO:
+ * 1) rewrite this whole mess
+ *   There is no need to generate new
+ *   window for every directory, menus
+ *   can be local vars then
+ * 2) Sort file list, make sorting
+ *   configurable
+ * 3) Make submenus
  */
 
 use "io.eh"
@@ -33,6 +43,9 @@ var mdelete: Menu;
 var mnewfile: Menu;
 var mnewdir: Menu;
 var mrefresh: Menu;
+var mcut: Menu;
+var mcopy: Menu;
+var mpaste: Menu;
 var mquit: Menu;
 
 def show_modal(scr: Screen): Menu {
@@ -43,7 +56,7 @@ def show_modal(scr: Screen): Menu {
     e = ui_wait_event()
   }
   ui_set_screen(back)
-  cast(Menu)e.value
+  e.value.cast(Menu)
 }
 
 def text_dialog(title: String, default: String): String {
@@ -117,6 +130,9 @@ def showfilelist(strings: [String]): ListBox {
   box.add_menu(mdelete)
   box.add_menu(mnewfile)
   box.add_menu(mnewdir)
+  box.add_menu(mcut)
+  box.add_menu(mcopy)
+  box.add_menu(mpaste)
   box.add_menu(mrefresh)
   box.add_menu(mquit)
   ui_set_screen(box)
@@ -145,13 +161,18 @@ def main(args: [String]) {
   mdelete = new_menu("Delete", 4)
   mnewfile = new_menu("New file", 5)
   mnewdir = new_menu("New directory", 6)
-  mrefresh = new_menu("Refresh", 7)
+  mcut = new_menu("Cut", 7)
+  mcopy = new_menu("Copy", 8)
+  mpaste = new_menu("Paste", 9)
+  mrefresh = new_menu("Refresh", 10)
   mquit = new_menu("Quit", 15)
   // showing file list
   var list = filelist()
   var scr = showfilelist(list)
   // main cycle
   var e = ui_wait_event()
+  var clipboard = ""
+  var cut = false
   while (e.value != mquit) {
     var path = list[scr.get_index()]
     if (e.value == mselect) {
@@ -176,12 +197,12 @@ def main(args: [String]) {
     } else if (e.value == mrename && path != "..") {
       var newpath = text_dialog("Rename file", path)
       if (newpath != null) {
-        exec_wait("mv", new [String]{path, pathfile(newpath)})
+        exec_wait("mv", [path, pathfile(newpath)])
         list = filelist()
         scr = showfilelist(list)
       }
     } else if (e.value == mdelete && yesno_dialog("Delete file", "Delete "+path+"?")) {
-      exec_wait("rm", new [String]{path})
+      exec_wait("rm", ["-r", path])
       list = filelist()
       scr = showfilelist(list)
     } else if (e.value == mnewfile) {
@@ -198,6 +219,22 @@ def main(args: [String]) {
       }
       list = filelist()
       scr = showfilelist(list)
+    } else if (e.value == mcut) {
+      cut = true
+      clipboard = abspath(path)
+    } else if (e.value == mcopy) {
+      cut = false
+      clipboard = abspath(path)
+    } else if (e.value == mpaste) {
+      if (clipboard.len() == 0) {
+        show_modal(new_msgbox("No files to " + if (cut) "cut." else "copy." ))
+      } else if (clipboard == abspath(path)) {
+        show_modal(new_msgbox("File already exists."))
+      } else {
+        exec_wait("cp", ["-r", clipboard, get_cwd() + '/' + pathfile(clipboard)])
+        if (cut) exec_wait("rm", ["-r", clipboard])
+        clipboard = ""
+      }
     } else if (e.value == mrefresh) {
       list = filelist()
       scr = showfilelist(list)

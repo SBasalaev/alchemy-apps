@@ -1,10 +1,9 @@
 Package: navigator
 Source: navigator
-Version: 0.3.7-1
+Version: 0.3.8
 Section: gui
 Depends: libcore3, libui1, libfiletype1, edit, imgview, fileinfo, coreutils
 Summary: file manager for Alchemy OS
 License: GPL-3
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2012 Sergey Basalaev
