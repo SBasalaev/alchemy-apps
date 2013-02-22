@@ -1,0 +1,3 @@
+These programs are implemented as Java classes and are
+embedded in Alchemy OS. Binary files just contain links
+to the corresponding implementing classes.

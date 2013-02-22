@@ -1,0 +1,8 @@
+Package: mount
+Source: natives
+Version: 2.1
+Section: admin
+Summary: utilities to work with different file systems
+Copyright: (c) 2012-2013 Sergey Basalaev
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+License: GPL-3
