@@ -10,3 +10,5 @@ install: alpaca
  install alpaca.desktop /res/apps
  install alpaca.png /res/icons
  install installed.png update.png deleted.png /res/alpaca
+
+package: alpaca
