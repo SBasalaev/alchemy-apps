@@ -1,9 +1,9 @@
 Source: bf
 Package: bf
 Section: devel
-Version: 1.0.1-1
+Version: 1.0.2
 Summary: brainfuck interpreter
 Depends: libcore3
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Copyright: (c) 2012-2013 Sergey Basalaev
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3

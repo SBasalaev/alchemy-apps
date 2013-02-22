@@ -1,6 +1,6 @@
 /* brainfuck interpreter
- * Version 1.0.1
- * (C) 2012, Sergey Basalaev
+ * Version 1.0.2
+ * (C) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -9,12 +9,12 @@ use "io"
 def main(args: [String]) {
   // reading program
   var file = args[0]
-  var prog = new BArray(fsize(file))
+  var prog = new [Byte](fsize(file))
   var in = fopen_r(file)
   in.readarray(prog, 0, prog.len)
   in.close()
   // executing
-  var array = new BArray(4000)
+  var array = new [Byte](4000)
   var pos = 0 // position in array
   var ct = 0  // program counter
   while (ct < prog.len) {
