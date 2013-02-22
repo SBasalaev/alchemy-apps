@@ -1,10 +1,9 @@
 Package: libmb-dev
 Source: mbasic
-Version: 0.6-1
+Version: 0.6build2
 Section: libdevel
 Summary: BASIC interpreter (development headers)
 Depends: libmb0, libcore-dev
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2013 Sergey Basalaev
 License: MIT

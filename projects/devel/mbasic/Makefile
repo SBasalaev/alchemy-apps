@@ -6,7 +6,7 @@ mbmodules: libmb.0.so
  make -C modules
 
 mbasic: main.e libmb.0.so
- ex main.e -o mbasic -Wall -lmb.0 -L=.
+ ex main.e -o mbasic -Wall -lmb.0 -L.
 
 libmb.0.so: ${SOURCES}
  ex ${SOURCES} -o libmb.0.so -slibmb.0.so -Xtry -Wall
