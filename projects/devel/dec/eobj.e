@@ -53,22 +53,22 @@ def read_eobj(in: IStream): EObj {
         f.flags = in.readubyte();
         f.stacksize = in.readubyte();
         f.varcount = in.readubyte();
-        f.code = new BArray(in.readushort());
+        f.code = new [Byte](in.readushort());
         in.readarray(f.code, 0, f.code.len);
         if ((f.flags & FFLAG_RELOCS) != 0) {
-          f.relocations = new CArray(in.readushort());
+          f.relocations = new [Char](in.readushort());
           for (var j=0, j < f.relocations.len, j+=1) {
             f.relocations[j] = in.readushort();
           }
         }
         if ((f.flags & FFLAG_LNUM) != 0) {
-          f.lnumtable = new CArray(in.readushort());
+          f.lnumtable = new [Char](in.readushort());
           for (var j=0, j<f.lnumtable.len, j+=1) {
             f.lnumtable[j] = in.readushort();
           }
         }
         if ((f.flags & FFLAG_ERRTBL) != 0) {
-          f.errtable = new CArray(in.readushort());
+          f.errtable = new [Char](in.readushort());
           for (var j=0, j<f.errtable.len, j+=1) {
             f.errtable[j] = in.readushort();
           }

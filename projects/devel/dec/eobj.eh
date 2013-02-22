@@ -31,10 +31,10 @@ type EFunction {
  name: String,
  stacksize: Int,
  varcount: Int,
- code: BArray,
- relocations: CArray,
- lnumtable: CArray,
- errtable: CArray
+ code: [Byte],
+ relocations: [Char],
+ lnumtable: [Char],
+ errtable: [Char]
 }
 
 type EObj {

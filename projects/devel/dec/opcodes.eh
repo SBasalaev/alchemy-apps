@@ -37,7 +37,7 @@ const IUSHR       = 0x19;
 const IAND        = 0x1A;
 const IOR         = 0x1B;
 const IXOR        = 0x1C;
-const I2C         = 0x1D;
+const I2B         = 0x1D;
 const RET_NULL    = 0x1E;
 const RETURN      = 0x1F;
 const LADD        = 0x20;
@@ -137,6 +137,11 @@ const CALV_5      = 0x7D;
 const CALV_6      = 0x7E;
 const CALV_7      = 0x7F;
 
+const IINC        = 0xD3;
+const JSR         = 0xD4;
+const RET         = 0xD5;
+const IF_ACMPEQ   = 0xD6;
+const IF_ACMPNE   = 0xD7;
 const NEWZA       = 0xD8;
 const ZALOAD      = 0xD9;
 const ZASTORE     = 0xDA;
@@ -175,5 +180,5 @@ const CASTORE     = 0xFA;
 const CALEN       = 0xFB;
 const TABLESWITCH = 0xFC;
 const LOOKUPSWITCH= 0xFD;
-// 0xFE
-// 0xFF
+const I2C         = 0xFE;
+const I2S         = 0xFF;

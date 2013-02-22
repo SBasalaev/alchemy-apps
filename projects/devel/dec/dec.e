@@ -1,5 +1,5 @@
 /* Ether decompiler.
- * Copyright (c) 2012 Sergey Basalaev
+ * Copyright (c) 2012-2013 Sergey Basalaev
  * Licensed under GPL-3
  */
 
@@ -110,6 +110,10 @@ def main(args: [String]) {
               println("d2l");
             D2F:
               println("d2f");
+            I2B:
+              println("i2b");
+            I2S:
+              println("i2s");
             I2C:
               println("i2c");
             IADD:
@@ -280,6 +284,16 @@ def main(args: [String]) {
               tmp |= f.code[addr] & 0xff;
               println(tmp);
             }
+            JSR: {
+              print("jsr ");
+              addr += 1
+              var tmp = f.code[addr] << 8;
+              addr += 1
+              tmp |= f.code[addr] & 0xff;
+              println(tmp);
+            }
+            RET:
+              println("ret");
             IFNULL: {
               print("ifnull ");
               addr += 1
@@ -322,6 +336,22 @@ def main(args: [String]) {
             }
             IF_ICMPLE: {
               print("if_icmple ");
+              addr += 1
+              var tmp = f.code[addr] << 8;
+              addr += 1
+              tmp |= f.code[addr] & 0xff;
+              println(tmp);
+            }
+            IF_ACMPEQ: {
+              print("if_acmpeq ");
+              addr += 1
+              var tmp = f.code[addr] << 8;
+              addr += 1
+              tmp |= f.code[addr] & 0xff;
+              println(tmp);
+            }
+            IF_ACMPNE: {
+              print("if_acmpne ");
               addr += 1
               var tmp = f.code[addr] << 8;
               addr += 1
@@ -488,6 +518,13 @@ def main(args: [String]) {
               addr += 1
               tmp |= f.code[addr] & 0xff;
               println("sipush "+tmp);
+            }
+            IINC: {
+              addr += 1
+              var index = f.code[addr] & 0xff;
+              addr += 1
+              var add = f.code[addr];
+              println("iinc " + index + ", " + add)
             }
             POP:
               println("pop");
