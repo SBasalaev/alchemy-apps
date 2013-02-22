@@ -38,7 +38,7 @@ def CfgReader.next_section(): Dict {
   var section = new_dict()
   var line: String
   // skip empty lines
-  do line = this.next_line();
+  do { line = this.next_line(); }
   while (line != null && line.trim().len() == 0);
   // line must not start with whitespace
   if (line != null && line[0] <= ' ') {
@@ -53,7 +53,7 @@ def CfgReader.next_section(): Dict {
     var value = new_strbuf().append(line[cl+1:].trim())
     line = this.next_line();
     while (line != null && line.len() > 0 && line[0] <= ' ') {
-      if (line.trim() == ".") value.addch('\n');
+      if (line.trim() == ".") value.addch('\n')
       else value.addch('\n').append(line[1:]);
       line = this.next_line();
     }

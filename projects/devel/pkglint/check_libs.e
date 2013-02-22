@@ -71,7 +71,7 @@ def check_libname(name: String) {
     var realname = spec["package"]
     var mustname = libtopkgname(name)
     if (mustname != realname) {
-      report("Library " + name + " should be installed in package " + mustname, "4.1", TEST_WARN)
+      report("Library " + name + " should be installed in package " + mustname, "5.1", TEST_WARN)
     }
   }
 }
@@ -108,9 +108,9 @@ def check_binary(file: String) {
       var libdep = libdeps[i]
       var deppkg = libs[libdep]
       if (deppkg == null) {
-        report("Binary " + file + " depends on " + libdep + " which is not provided by any installed package", "3.5", TEST_ERR)
-      } else if (pkgdeps.indexof(deppkg) < 0) {
-        report("Binary " + file + " depends on " + libdep + " provided by " + deppkg + " but it is not in Depends", "3.5", TEST_ERR)
+        report("Binary " + file + " depends on " + libdep + " which is not provided by any installed package", "4.5", TEST_ERR)
+      } else if (pkgdeps.indexof(deppkg) < 0 && get_spec()["package"] != deppkg) {
+        report("Binary " + file + " depends on " + libdep + " provided by " + deppkg + " but it is not in Depends", "4.5", TEST_ERR)
       }
     }
   }

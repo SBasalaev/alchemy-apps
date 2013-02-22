@@ -7,7 +7,7 @@ use "string.eh"
 
 const HELP = "Check binary packages for common errors\n" +
              "Usage: pkglint file.pkg"
-const VERSION = "pkglint 0.2"
+const VERSION = "pkglint 0.5"
 
 var errlevel: Int;
 var spec: Dict;
@@ -41,7 +41,7 @@ def main(args: [String]): Int {
     fremove(pkgfile)
     // extract spec
     if (!exists("PACKAGE")) {
-      report("No PACKAGE file", "3", TEST_ERR)
+      report("No PACKAGE file", "4", TEST_ERR)
     } else {
       var r = new_cfgreader(utfreader(fopen_r("PACKAGE")), "PACKAGE")
       spec = r.next_section()

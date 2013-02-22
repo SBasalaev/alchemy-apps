@@ -19,3 +19,4 @@ def get_depends(): List;
 def check_spec();
 def check_dirs();
 def check_libs();
+def check_desktop();

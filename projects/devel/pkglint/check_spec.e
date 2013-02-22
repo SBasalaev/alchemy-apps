@@ -32,40 +32,33 @@ def is_num(str: String): Bool {
 
 def check_spec_fields(spec: Dict) {
   // check package field
-  var str = spec["package"].tostr()
+  var str = spec["package"].cast(String)
   if (str == null) {
-    report("missing required field: Package", null, TEST_ERR)
+    report("missing Package field", "4.1", TEST_ERR)
   } else if (!check_pkg_name(str)) {
-    report("invalid package name: " + str, "3.1", TEST_ERR)
+    report("invalid package name: " + str, "4.1", TEST_ERR)
   }
   // check version field
-  str = spec["version"].tostr()
+  str = spec["version"].cast(String)
   if (str == null) {
-    report("missing required field: Version", null, TEST_ERR)
+    report("missing Version field", "4.2", TEST_ERR)
   } else if (!check_pkg_version(str)) {
-    report("invalid package version: " + str, "3.2", TEST_ERR)
-  } else {
-    var hyphen = str.indexof('-')
-    if (hyphen <= 0) {
-      report("missing package revision number in version", "3.2", TEST_ERR)
-    } else if (!is_num(str.tostr()[hyphen+1:])) {
-      report("package revision must be a number", "3.2", TEST_ERR)
-    }
+    report("invalid package version: " + str, "4.2", TEST_ERR)
   }
   // check summary field
-  str = spec["summary"].tostr()
+  str = spec["summary"].cast(String)
   if (str == null) {
-    report("missing Summary field", "3.3", TEST_WARN)
+    report("missing Summary field", "4.3", TEST_WARN)
   }
   // check section field
-  str = spec["section"].tostr()
+  str = spec["section"].cast(String)
   if (str == null) {
-    report("missing Section field", "3.4", TEST_WARN)
+    report("missing Section field", "4.4", TEST_WARN)
   } else {
     var list = new_list()
     list.addall(["admin", "devel", "doc", "graphics", "games", "gui", "libdevel", "libs", "net", "sound", "text", "utils", "video", "misc"])
     if (list.indexof(str) < 0) {
-      report("unusual section: " + str, "3.4", TEST_WARN)
+      report("unusual section: " + str, "4.4", TEST_WARN)
     }
     // check if appropriate section is used for name
     var name = spec["package"].tostr()
@@ -82,36 +75,51 @@ def check_spec_fields(spec: Dict) {
     }
   }
   // check copyright field
-  str = spec["copyright"].tostr()
+  str = spec["copyright"].cast(String)
   if (str == null) {
-    report("missing Copyright field", "3.6", TEST_WARN)
-  }
-  // check author field
-  str = spec["author"].tostr()
-  if (str == null) {
-    report("missing Author field", "3.7", TEST_WARN)
+    report("missing Copyright field", "4.6", TEST_WARN)
   }
   // check maintainer field
-  str = spec["maintainer"].tostr()
+  str = spec["maintainer"].cast(String)
   if (str == null) {
-    report("missing Maintainer field", "3.8", TEST_WARN)
+    report("missing Maintainer field", "4.7", TEST_WARN)
+  } else {
+    var chk = str.indexof('<')
+    if (chk > 0) {
+      str = str[chk:]
+      chk = str.indexof('@')
+    }
+    if (chk > 0) {
+      str = str[chk:]
+      chk = str.indexof('>')
+    }
+    if (chk < 0) {
+      report("Maintainer field should be in format\nYour name <your@email>", "4.7", TEST_WARN)
+    }
   }
   // check license field
-  str = spec["license"].tostr()
+  str = spec["license"].cast(String)
   if (str == null) {
-    report("missing License field", "3.9", TEST_WARN)
+    report("missing License field", "4.8", TEST_WARN)
+  } else {
+    var licfile = "res/doc/licenses/" + spec["package"] + ".txt"
+    var list = new_list()
+    list.addall(["MIT", "BSD-2", "BSD-3", "GPL-2", "GPL-3", "LGPL-2.1", "LGPL-3", "GPL-3+exception"])
+    if (list.indexof(str) < 0 && !exists(licfile)) {
+      report("uncommon license, but no license file: " + licfile, "4.8", TEST_WARN)
+    }
   }
   // check for unusual fields
   var knownfields = new_list()
   knownfields.addall(["package", "source",     "version",
                       "depends", "conflicts",  "provides",
                       "summary", "section",    "license",
-                      "author",  "maintainer", "copyright"])
+                      "maintainer", "copyright", "homepage"])
   var keys = spec.keys()
   for (var i=0, i<keys.len, i += 1) {
     var key = keys[i]
     if (knownfields.indexof(key) < 0)
-      report("unusual field in spec: " + key, "3", TEST_WARN)
+      report("unusual field in spec: " + key, "4", TEST_WARN)
   }
 }
 
