@@ -9,4 +9,5 @@ def Complex.sub(c: Complex): Complex;
 def Complex.mul(c: Complex): Complex;
 def Complex.div(c: Complex): Complex;
 def Complex.minus(): Complex;
+def Complex.eq(c: Complex): Bool;
 def Complex.tostr(): String;

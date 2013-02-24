@@ -42,6 +42,10 @@ def Complex.minus(): Complex {
   new Complex(-this.r, -this.i)
 }
 
+def Complex.eq(c: Complex): Bool {
+  this.r == c.r && this.i == c.i
+}
+
 def Complex.tostr(): String {
   if (this.i == 0.0)
     "" + this.r
