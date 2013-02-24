@@ -6,7 +6,7 @@ type Complex {
   i: Double
 }
 
-def Complex.new(re: Double, im: Double) {
+def Complex.new(re: Double = 0.0, im: Double = 0.0) {
   this.r = re
   this.i = im
 }

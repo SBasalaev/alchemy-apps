@@ -1,6 +1,6 @@
 type Complex;
 
-def Complex.new(re: Double, im: Double);
+def Complex.new(re: Double = 0.0, im: Double = 0.0);
 def Complex.re(): Double;
 def Complex.im(): Double;
 def Complex.abs(): Double;
