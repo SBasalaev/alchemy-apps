@@ -1,10 +1,10 @@
 
 all: pkg pkg-arh
 
-pkg:
+pkg: pkg.e
  ex pkg.e -o pkg -lpkg.1
 
-pkg-arh:
+pkg-arh: pkg-arh.e
  ex pkg-arh.e -o pkg-arh -lpkg.1
 
 clean:
