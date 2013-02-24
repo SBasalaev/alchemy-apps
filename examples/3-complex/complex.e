@@ -1,26 +1,54 @@
-/* Example of work with structures and methods.
- * Also demonstrates output using
- * concatenation and using printf.
- */
+use "complex.eh"
+use "math.eh"
 
-use "io"
-
-/* Complex number */
 type Complex {
-  re: Double,
-  im: Double
+  r: Double,
+  i: Double
 }
 
-/* Sum of two complex numbers */
-def Complex.add(c: Complex): Complex =
- new Complex(this.re + c.re, this.im + c.im)
+def Complex.new(re: Double, im: Double) {
+  this.r = re
+  this.i = im
+}
 
-def main(args: [String]) {
-  var z1 = new Complex(1, 2)
-  var z2 = new Complex(3, 4)
-  var z3 = z1.add(z2)
-  /* Printing using printf */
-  printf("%0+%1i + %2+%3i", [z1.re, z1.im, z2.re, z2.im])
-  /* Printing using concatenation */
-  println(" = " + z3.re + "+" + z3.im + "i")
+def Complex.re(): Double = this.r
+def Complex.im(): Double = this.i
+
+def Complex.abs(): Double {
+  sqrt(this.r*this.r + this.i*this.i)
+}
+
+def Complex.add(c: Complex): Complex {
+  new Complex(this.r + c.r, this.i + c.i)
+}
+
+def Complex.sub(c: Complex): Complex {
+  new Complex(this.r - c.r, this.i - c.i)
+}
+
+def Complex.mul(c: Complex): Complex {
+  new Complex(
+    this.r * c.r - this.i * c.i,
+    this.r * c.i + this.i * c.r)
+}
+
+def Complex.div(c: Complex): Complex {
+  var scale = c.r * c.r + c.i * c.i
+  var cinv = new Complex(c.r / scale, -c.i / scale)
+  this.mul(cinv)
+}
+
+def Complex.minus(): Complex {
+  new Complex(-this.r, -this.i)
+}
+
+def Complex.tostr(): String {
+  if (this.i == 0.0)
+    "" + this.r
+  else if (this.r == 0.0)
+    "" + this.i + 'i'
+  else if (this.i < 0)
+    "" + this.r + this.i + 'i'
+  else
+    "" + this.r + '+' + this.i + 'i'
 }
