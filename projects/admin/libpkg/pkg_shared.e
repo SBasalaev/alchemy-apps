@@ -107,32 +107,32 @@ def pkg_cmp_versions(v1: String, v2: String): Int {
     var end1 = ofs1
     var end2 = ofs2
     /* number parts */
-    var ch = v1.ch(end1)
+    var ch = v1[end1].cast(Int)
     while (ch >= '0' && ch <= '9') {
-      end1 = end1+1
-      ch = if (end1 < len1) v1.ch(end1) else -1
+      end1 += 1
+      ch = if (end1 < len1) v1[end1] else -1
     }
-    ch = v2.ch(end2)
+    ch = v2[end2]
     while (ch >= '0' && ch <= '9') {
-      end2 = end2+1
-      ch = if (end2 < len2) v2.ch(end2) else -1
+      end2 += 1
+      ch = if (end2 < len2) v2[end2] else -1
     }
-    ret = _cmp_num(v1.substr(ofs1, end1), v2.substr(ofs2, end2))
+    ret = _cmp_num(v1[ofs1:end1], v2[ofs2:end2])
     ofs1 = end1
     ofs2 = end2
     /* text parts */
     if (ret == 0) {
-      ch = if (ofs1 < len1) v1.ch(ofs1) else -1
+      ch = if (ofs1 < len1) v1[ofs1] else -1
       while (ch > 0 && (ch < '0' || ch > '9')) {
-        end1 = end1+1
-        ch = if (end1 < len1) v1.ch(end1) else -1
+        end1 += 1
+        ch = if (end1 < len1) v1[end1] else -1
       }
-      ch = if (ofs2 < len2) v2.ch(ofs2) else -1
+      ch = if (ofs2 < len2) v2[ofs2] else -1
       while (ch > 0 && (ch < '0' || ch > '9')) {
-        end2 = end2+1
-        ch = if (end2 < len2) v2.ch(end2) else -1
+        end2 += 1
+        ch = if (end2 < len2) v2[end2] else -1
       }
-      ret = _cmp_str(v1.substr(ofs1, end1), v2.substr(ofs2, end2))
+      ret = _cmp_str(v1[ofs1:end1], v2[ofs2:end2])
       ofs1 = end1
       ofs2 = end2
     }
