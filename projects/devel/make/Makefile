@@ -1,13 +1,17 @@
 #Makefile for make
 
-make: make.o
- el make.o -o make
-
-make.o: make.e
- ec make.e
+make: make.e
+ ex make.e -o make
 
 clean:
- rm make.o make
+ rm -f make
 
 install: make
  install make /bin
+
+package: make
+ mkdir bin
+ install make bin
+ cp make.package PACKAGE
+ arh c make.pkg PACKAGE bin
+ rm -r PACKAGE bin

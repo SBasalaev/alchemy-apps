@@ -1,5 +1,5 @@
 /* Make utility for Alchemy OS
- * Copyright (c) 2012, Sergey Basalaev
+ * Copyright (c) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -10,7 +10,7 @@ use "string.eh"
 use "sys.eh"
 use "textio.eh"
 
-const VERSION = "make 1.2"
+const VERSION = "make 1.3"
 const HELP = "Usage: make [options] [targets]\n" +
              "Options:\n" +
              "-h this help\n" +
@@ -30,32 +30,31 @@ var vars: Dict
 
 /* Do variable substitution in line. */
 def substvars(line: String): String {
-  var sb = new_strbuf()
+  var sb = new StrBuf()
   while (line.len() > 0) {
     var S = line.indexof('$')
     if (S < 0 || S >= line.len()) {
       sb.append(line)
       line = ""
     } else {
-      sb.append(line.substr(0, S))
-      line = line.substr(S+1, line.len())
-      var ch = line.ch(0)
+      sb.append(line[:S])
+      line = line[S+1:]
+      var ch = line[0]
       if (ch == '$') {
         sb.addch('$')
-        line = line.substr(1,line.len())
+        line = line[1:]
       } else if (ch == '{') {
         var rbrace = line.indexof('}')
         if (rbrace < 0) rbrace = line.len()
-        var value = vars[line.substr(1, rbrace)]
+        var value = vars[line[1:rbrace]]
         if (value == null) value = ""
         sb.append(value)
-        line = line.substr(rbrace+1, line.len())
+        line = line[rbrace+1:]
       } else {
-        var chstr = new_strbuf().addch(ch).tostr()
-        var value = vars[chstr]
+        var value = vars[ch.tostr()]
         if (value == null) value = ""
         sb.append(value)
-        line = line.substr(1, line.len())
+        line = line[1:]
       }
     }
   }
@@ -64,7 +63,7 @@ def substvars(line: String): String {
 
 /* Build named target. */
 def build(target: String, silent: Bool): Bool {
-  var rule = cast (Rule) rules[target]
+  var rule = rules[target].cast(Rule)
   if (rule == null) {
     // if no rule just check if file exists
     if (exists(target)) {
@@ -84,13 +83,13 @@ def build(target: String, silent: Bool): Bool {
       var needs = !exists(target)
       if (!needs) {
         var time = fmodified(target)
-        for (var i=0, !needs && i<rule.deps.len, i=i+1) {
+        for (var i=0, !needs && i<rule.deps.len, i+=1) {
           needs = time < fmodified(rule.deps[i])
         }
       }
       // build target
       if (needs) {
-        for (var i=0, ok && i<rule.exec.len, i=i+1) {
+        for (var i=0, ok && i<rule.exec.len, i+=1) {
           if (!silent) println(rule.exec[i])
           ok = 0 == exec_wait("sh", ["-c", rule.exec[i]])
         }
@@ -110,11 +109,11 @@ def readmf(fname: String): Bool {
   var lineno = 1
   var line = r.readline()
   var rule: Rule
-  var commands = new_list()
+  var commands = new List()
   while (ok && line != null) {
-    if (line.len() == 0 || line.ch(0) == '#') {
+    if (line.len() == 0 || line[0] == '#') {
       //skip this line
-    } else if (line.ch(0) == ' ') {
+    } else if (line[0] == ' ') {
       // add command to the target
       if (rule == null) {
         stderr().println(fname+":"+lineno+": Commands before first target. Stop.")
@@ -123,28 +122,38 @@ def readmf(fname: String): Bool {
         commands.add(substvars(line.trim()))
       }
     } else if (line.indexof('=') > 0) {
+      // end target
+      if (rule != null) {
+        rule.exec = new [String](commands.len())
+        commands.copyinto(0, rule.exec, 0, rule.exec.len)
+        rules[rule.target] = rule
+        commands = new List()
+        if (def_rule == null) def_rule = rule
+        vars.remove("@")
+        vars.remove("<")
+      }
       // add variable
       var eq = line.indexof('=')
-      vars[line.substr(0,eq).trim()] = substvars(line.substr(eq+1,line.len()).trim())
+      vars[line[:eq].trim()] = substvars(line[eq+1:].trim())
     } else if (line.indexof(':') > 0) {
       // start new target
       if (rule != null) {
-        rule.exec = commands.toarray()
+        rule.exec = new [String](commands.len())
+        commands.copyinto(0, rule.exec, 0, rule.exec.len)
         rules[rule.target] = rule
-        commands = new_list()
+        commands = new List()
         if (def_rule == null) def_rule = rule
+        vars.remove("<")
+        vars.remove("@")
       }
       var cl = line.indexof(':')
-      rule = new Rule(
-        target = substvars(line.substr(0,cl)),
-        deps = substvars(line.substr(cl+1, line.len())).split(' ')
-      )
-      rule = new Rule(
-        target = substvars(line.substr(0,cl)),
-        deps = substvars(line.substr(cl+1, line.len())).split(' ')
-      )
+      var target = substvars(line[:cl])
+      var deps = substvars(line[cl+1:])
+      vars["<"] = target
+      vars["@"] = deps
+      rule = new Rule { target = target, deps = deps.split(' ') }
     } else if (line.find("include ") == 0) {
-      var incl_name = line.substr(8, line.len()).trim()
+      var incl_name = line[8:].trim()
       if (exists(incl_name)) {
         ok = readmf(incl_name)
       } else {
@@ -159,7 +168,8 @@ def readmf(fname: String): Bool {
     lineno += 1
   }
   if (rule != null) {
-    rule.exec = commands.toarray()
+    rule.exec = new [String](commands.len())
+    commands.copyinto(0, rule.exec, 0, rule.exec.len)
     rules[rule.target] = rule
     if (def_rule == null) def_rule = rule
   }
@@ -169,12 +179,12 @@ def readmf(fname: String): Bool {
 
 def main(args: [String]): Int {
   // init
-  rules = new_dict()
-  vars = new_dict()
+  rules = new Dict()
+  vars = new Dict()
   var result = 0
   var exit = false
   // parse args
-  var targets = new_list()
+  var targets = new List()
   var todir = ""
   var silent = false
   var readdir = false
