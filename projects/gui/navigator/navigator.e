@@ -229,12 +229,16 @@ def main(args: [String]) {
       if (clipboard.len() == 0) {
         show_modal(new_msgbox("No files to " + if (cut) "cut." else "copy." ))
       } else if (clipboard == abspath(path)) {
-        show_modal(new_msgbox("File already exists."))
+        var box = new MsgBox("File already exists.")
+        box.add_menu(new Menu("Close", 1, MT_OK))
+        show_modal(box)
       } else {
         exec_wait("cp", ["-r", clipboard, get_cwd() + '/' + pathfile(clipboard)])
         if (cut) exec_wait("rm", ["-r", clipboard])
         clipboard = ""
       }
+      list = filelist()
+      scr = showfilelist(list)
     } else if (e.value == mrefresh) {
       list = filelist()
       scr = showfilelist(list)
