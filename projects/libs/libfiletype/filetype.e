@@ -69,19 +69,26 @@ def ftype_for_file(db: FTypeDB, file: String): FileType {
       ftype = ftype_for_ext(db, ext)
     }
   }
+  // check empty file
+  if (ftype == null && fsize(file) < 2) {
+    ftype = ftype_for_ext(db, "/empty/")
+  }
   // check contents, TODO: make this optional
   if (ftype == null && can_read(file)) {
     var in = fopen_r(file)
     var magic = in.readushort()
-    if (magic == null) ftype = ftype_for_ext(db, "/empty/")
-    else switch (magic) {
+    switch (magic) {
       0xC0DE : { ftype = ftype_for_ext(db, "/eprog/") };
       ('#'<<8)|'!' : { ftype = ftype_for_ext(db, "/script/") };
       ('#'<<8)|'@' : { ftype = ftype_for_ext(db, "/nprog/") };
       ('#'<<8)|'=' : { ftype = ftype_for_ext(db, "/link/") };
       else: {
         var b = in.read()
-        while (b == '\r' || b == '\n' || b == '\t' || b >= ' ' && b < 127) b = in.read()
+        var count = 128
+        while (count > 0 && b == '\r' || b == '\n' || b == '\t' || b >= ' ' && b < 127) {
+          b = in.read()
+          count -= 1
+        }
         if (b < 0) {
           ftype = ftype_for_ext(db, "/text/")
         } else {
