@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Music Player
+Exec=mpl /home
+Icon=/res/mpl/audio.png
