@@ -1,0 +1,8 @@
+To-dos
+
+0.1.33:
+    Bugs:
+        No exit after done processing
+    Add:
+        Save output to BMP
+        Sub-pixel antialiasing for 1-bit images

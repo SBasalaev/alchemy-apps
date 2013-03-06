@@ -3,12 +3,14 @@
 use "list"
 use "image"
 use "canvas"
+use "graphics"
 use "form"
 use "ui"
 
 use "color_math.eh"
 
-var tile_size: Int
+var tile_size_x: Int
+var tile_size_y: Int
 var img_x: Int
 var img_y: Int
 var accuracy: Int
@@ -20,12 +22,15 @@ var k: Color
 
 // images
 var img: Image
+var img_graph: Graphics
 var tile: Image
 
 //menus
 var mnuOK: Menu
 var mnuAbout: Menu
 var mnuExit: Menu
+var mnuAdd: Menu
+var mnuRemove: Menu
 
 // UI Items
 var txtFile: EditItem
@@ -69,3 +74,4 @@ var canv_graph: Graphics
 var main_menu: Form
 var about_scr: Form
 var txtCaption: EditItem
+var chkDither: CheckItem

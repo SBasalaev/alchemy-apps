@@ -13,6 +13,23 @@ def List.lowest(): Int {
          r = i } }
    r }
 
+def List.lowest_positive(): Int {
+   var r = 0
+   var t = 0
+   var s: Int = this[0]
+   for (i=1, i<this.len(), i+=1) {
+      t = this[i]
+      if (s>t && t>0) {
+         s = this[i]
+         r = i } }
+   r }
+
+def List.next_lower(start: Int): Int {
+   var di = new_list()
+   for (i=0, i<this.len(), i+=1) {
+      di.add(start-(cast(Int)this[i])) }
+   di.lowest_positive() }
+
 def List.highest(): Int {
    var r = 0
    var s: Int = this[0]
@@ -28,6 +45,6 @@ def List.fill(n: Int, v: Int) {
 
 def List.increment(at: Int, amount: Int) {
    if (this[at] != null) {
-      this.set(at, (cast(Int)(this[at])) + amount) }
+      this[at] = (cast(Int)(this[at])) + amount }
    else {
       this[at] = 1 } }
