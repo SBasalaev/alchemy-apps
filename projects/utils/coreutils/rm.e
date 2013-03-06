@@ -1,5 +1,5 @@
 /* Alchemy coreutils
- * (C) 2011-2012, Sergey Basalaev
+ * (C) 2011-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -8,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "cp " + C_VERSION
+const VERSION = "rm " + C_VERSION
 const HELP = "Removes files and directories.\n" +
              "Options:\n" +
              "-r remove directories recursively\n" +

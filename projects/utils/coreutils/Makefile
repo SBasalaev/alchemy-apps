@@ -1,4 +1,4 @@
-ALL=cat chmod cp date echo env install ls mkdir mv rm
+ALL=cat chmod cp date echo env install ls mkdir mv rm touch
 
 all: ${ALL}
 
@@ -34,6 +34,9 @@ mv: mv.e
 
 rm: rm.e
  ex rm.e -o rm
+
+touch: touch.e
+ ex touch.e -o touch
 
 clean-all: rm
  ./rm -f ${ALL}

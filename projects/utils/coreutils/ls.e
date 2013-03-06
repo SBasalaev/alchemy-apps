@@ -1,5 +1,5 @@
 /* Alchemy coreutils
- * (C) 2011-2012, Sergey Basalaev
+ * (C) 2011-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 

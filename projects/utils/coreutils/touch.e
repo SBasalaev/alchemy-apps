@@ -5,18 +5,17 @@
 
 use "io.eh"
 use "list.eh"
-use "string.eh"
 use "version.eh"
 
-const VERSION = "cat " + C_VERSION
-const HELP = "Prints given files or stdin to the stdout."
+const VERSION = "touch " + C_VERSION
+const HELP = "Update file timestamp."
 
 def main(args: [String]): Int {
   // parse args
   var quit = false
   var exitcode = 0
-  var files = new_list()
-  for (var i=0, i<args.len && !quit, i+=1) {
+  var files = new List()
+  for (var i=0, i < args.len, i += 1) {
     var arg = args[i]
     if (arg == "-h") {
       println(HELP)
@@ -24,7 +23,7 @@ def main(args: [String]): Int {
     } else if (arg == "-v") {
       println(VERSION)
       quit = true
-    } else if (arg.ch(0) == '-') {
+    } else if (arg[0] == '-') {
       stderr().println("Unknown option: "+arg)
       exitcode = 1
       quit = true
@@ -32,16 +31,18 @@ def main(args: [String]): Int {
       files.add(arg)
     }
   }
-  // copy to the output
+  // touch files
   if (!quit) {
-    if (files.len() == 0) {
-      stdout().writeall(stdin())
-      stdout().flush()
-    } else for (var i=0, i<files.len(), i+=1) {
-      var in = fopen_r(files[i].tostr())
-      stdout().writeall(in)
-      stdout().flush()
-      in.close()
+    var len = files.len()
+    if (len == 0) {
+      stderr().println("touch: no arguments")
+      exitcode == 1
+    } else {
+      for (var i=0, i<len, i += 1) {
+        var out = fopen_a(files[i].cast(String))
+        out.flush()
+        out.close()
+      }
     }
   }
   exitcode
