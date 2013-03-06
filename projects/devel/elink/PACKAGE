@@ -1,6 +1,6 @@
 Package: elink
 Source: elink
-Version: 2.1
+Version: 2.1.1
 Section: devel
 Summary: linker for Alchemy OS
 Depends: libcore3

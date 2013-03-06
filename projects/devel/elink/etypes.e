@@ -1,5 +1,10 @@
 use "etypes.eh"
 
+def Entry.new(kind: Int, value: Any) {
+  this.kind = kind
+  this.value = value
+}
+
 def Entry.eq(other: Entry): Bool {
   if (other == null) {
     false
@@ -8,65 +13,39 @@ def Entry.eq(other: Entry): Bool {
   }
 }
 
-def NullEntry.new(): NullEntry {
-  new NullEntry {
-    kind = E_NULL
-  }
+def NullEntry.new() {
+  super(E_NULL, null)
 }
 
-def IntEntry.new(i: Int): IntEntry {
-  new IntEntry {
-    kind = E_INT,
-    value = i
-  }
+def IntEntry.new(i: Int) {
+  super(E_INT, i)
 }
 
-def LongEntry.new(l: Long): LongEntry {
-  new LongEntry {
-    kind = E_LONG,
-    value = l
-  }
+def LongEntry.new(l: Long) {
+  super(E_LONG, l)
 }
 
-def FloatEntry.new(f: Float): FloatEntry {
-  new FloatEntry {
-    kind = E_FLOAT,
-    value = f
-  }
+def FloatEntry.new(f: Float) {
+  super(E_FLOAT, f)
 }
 
-def DoubleEntry.new(d: Double): DoubleEntry {
-  new DoubleEntry {
-    kind = E_DOUBLE,
-    value = d
-  }
+def DoubleEntry.new(d: Double) {
+  super(E_DOUBLE, d)
 }
 
-def StringEntry.new(str: String): StringEntry {
-  new StringEntry {
-    kind = E_STRING,
-    value = str
-  }
+def StringEntry.new(str: String) {
+  super(E_STRING, str)
 }
 
-def UndefEntry.new(symbol: String): UndefEntry {
-  new UndefEntry {
-    kind = E_UNDEF,
-    value = symbol
-  }
+def UndefEntry.new(symbol: String) {
+  super(E_UNDEF, symbol)
 }
 
-def ExternEntry.new(symbol: String, info: LibInfo): ExternEntry {
-  new ExternEntry {
-    kind = E_EXTERN,
-    value = symbol,
-    info = info
-  }
+def ExternEntry.new(symbol: String, info: LibInfo) {
+  super(E_EXTERN, symbol)
+  this.info = info
 }
 
-def ProcEntry.new(symbol: String): ProcEntry {
-  new ProcEntry {
-    kind = E_PROC,
-    value = symbol
-  }
+def ProcEntry.new(symbol: String) {
+  super(E_PROC, symbol)
 }

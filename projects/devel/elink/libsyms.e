@@ -26,12 +26,12 @@ def loadFromNative(in: IStream): LibInfo {
   };
   var vsym = new List()
   if (symbolfile != null) {
-    var symstream = readurl("res:/" + symbolfile);
+    var symstream = readurl("res:" + symbolfile);
     var buf = new [Byte](symstream.available());
     symstream.readarray(buf, 0, buf.len);
     symstream.close();
     var syms = ba2utf(buf).split('\n');
-    vsym.addall(syms);
+    vsym.addfrom(syms, 0, syms.len);
   }
   info.symbols = vsym;
   info;
