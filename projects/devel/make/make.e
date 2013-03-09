@@ -10,7 +10,7 @@ use "string.eh"
 use "sys.eh"
 use "textio.eh"
 
-const VERSION = "make 1.3"
+const VERSION = "make 1.4"
 const HELP = "Usage: make [options] [targets]\n" +
              "Options:\n" +
              "-h this help\n" +
@@ -149,8 +149,8 @@ def readmf(fname: String): Bool {
       var cl = line.indexof(':')
       var target = substvars(line[:cl])
       var deps = substvars(line[cl+1:])
-      vars["<"] = target
-      vars["@"] = deps
+      vars["<"] = deps
+      vars["@"] = target
       rule = new Rule { target = target, deps = deps.split(' ') }
     } else if (line.find("include ") == 0) {
       var incl_name = line[8:].trim()
@@ -208,6 +208,9 @@ def main(args: [String]): Int {
         stderr().println("make: Unknown option: "+arg)
         result = 2
         exit = true
+      } else if (arg.indexof('=') > 0) {
+        var eq = arg.indexof('=')
+        vars[arg[:eq]] = arg[eq+1:]
       } else {
         targets.add(arg)
       }
