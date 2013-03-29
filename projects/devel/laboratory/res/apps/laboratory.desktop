@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Exec=laboratory
+Name=Laboratory
+Icon=/res/laboratory/icons/laboratory.png
+Categories=Development;IDE;

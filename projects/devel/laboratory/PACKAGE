@@ -1,0 +1,9 @@
+Package: laboratory
+Source: laboratory
+Version: 0.2
+Section: devel
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+License: GPL-3
+Depends: libcore3, libui1, make, terminal, coreutils
+Summary: integrated development environment
+Copyright: (c) 2013 Sergey Basalaev
