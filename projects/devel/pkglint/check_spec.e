@@ -68,8 +68,9 @@ def check_spec_fields(spec: Dict) {
       report("Package name suggests that section should be doc", null, TEST_WARN)
     } else if (suffix == "-dev") {
       if (name[:3] == "lib") {
-        report("Package name suggests that section should be libdevel", null, TEST_WARN)
-      } else {
+        if (str != "libdevel")
+          report("Package name suggests that section should be libdevel", null, TEST_WARN)
+      } else if (str != "devel") {
         report("Package name suggests that section should be devel", null, TEST_WARN)
       }
     }

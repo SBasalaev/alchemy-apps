@@ -53,7 +53,7 @@ def main(args: [String]): Int {
         for (var i=0, i < deparray.len, i += 1) {
           deparray[i] = deparray[i].trim()
         }
-        depends.addall(deparray)
+        depends.addfrom(deparray, 0, deparray.len)
       }
     }
     // perform checks
