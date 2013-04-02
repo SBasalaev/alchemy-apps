@@ -1,0 +1,9 @@
+Package: libdialog1
+Source: libdialog
+Section: libs
+Version: 1.0
+Depends: libcore3, libui1
+Summary: common dialogs - runtime library
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: LGPL-3

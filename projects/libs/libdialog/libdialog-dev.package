@@ -1,0 +1,9 @@
+Package: libdialog-dev
+Source: libdialog
+Section: libdevel
+Version: 1.0
+Depends: libdialog1, libui-dev
+Summary: common dialogs - development headers
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: LGPL-3
