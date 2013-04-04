@@ -7,11 +7,14 @@ use "ui_edit"
 use "string"
 use "error" 
 use "sys" 
+use "temp.eh"
 
 var li:ListBox
+var code:Bool
 var e:EditBox
 var go:EditBox 
 var sir:EditBox
+var ten:ListBox
 var event:UIEvent
 var edit:Menu
 var add:Menu
@@ -21,6 +24,7 @@ var cut:Menu
 var gt:Menu
 var searc:Menu
 var file:String
+var temp:Menu
 var copy:Menu
 var paste:Menu
 var buff:String 
@@ -44,6 +48,7 @@ def writ() {
 var wri:Writer = utfwriter(fopen_w(file))
 var i:Int
  for (i=0,i<li.len()-1,i+=1) { wri.println(li.get_string(i)) wri.flush() }
+ if (li.get_string(li.len()-1).trim() != "") wri.println(li.get_string(li.len()-1))
 wri.close()
   }
   
@@ -90,43 +95,55 @@ while(!end) {
  event = ui_wait_event()
  if (event.value == add) li.insert(li.index," ",null)
  else if(event.value == edit) ed()
+ 
  else if (event.value ==save) { var tmp:Int=li.index
  ui_set_screen(new_msgbox("Saving file...",null))
  writ()
  red()
  ui_set_screen(li)
  li.index=tmp }
+ 
  else if (event.value == close) end=true
  else if (event.value == cut) { buff=li.get_string(li.index) li.delete(li.index) }
  else if (event.value == copy) buff=li.get_string(li.index)
  else if (event.value == paste) li.set(li.index,li.get_string(li.index)+buff,null)
  else if (event.value == gt) edi()
  else if (event.value == searc) search()
+ else if (event.value==temp) templa(ten,li)
   }
  }
 
 def main(a:[String]):Int {
- if (a.len== 0) { println("Line-by-line text editor:\nSyntax:\nlines <filename>\nlines +<line no.> <filename>") 0}
- else if (a[0] == "-h" ) { println("Line-by-line text editor:\nSyntax:\nlines <filename>\nlines +<line no.> <filename>") 0}
+ if (a.len== 0) { println("Line-by-line text editor:\nSyntax:\nlines <filename>\nlines <filename> [options]\nOptions:\n+<line no.>  Go to a specific line\n-c         Open in code editing mode") 0}
+ else if (a[0] == "-h" ) { println("Line-by-line text editor:\nSyntax:\nlines <filename>\nlines <filename> [options]\nOptions:\n+<line no.>  Go to a specific line\n-c         Open in code editing mode") 0}
  else {
 var line:Int=0
- if (a[0][:1] == "+") { line=a[0][1:].toint()-1 file=a[1] }
- else { file = a[0] }
+code=false
+ 
+ for (var i:Int=0, i<a.len, i+=1) {
+  if (a[i]=="-c" || a[i].endswith(".e")) code=true
+  if (a[i][:1]=="+") line=a[i][1:].toint()
+  if (!(a[i].startswith("+") || a[i].startswith("-")) ) file =a[i] }
+ 
 ui_set_app_title(pathfile(file)+" - Lines")
-edit=new_menu("Edit",1)
+edit=new Menu("Edit",1)
+add=new_menu("Add",4)
 li=new_listbox(new [String](0),null,edit)
+ten=new_listbox(new [String](0),null,add)
 e=new_editbox(EDIT_ANY)
 go=new_editbox(EDIT_NUMBER)
 sir=new_editbox(EDIT_ANY)
 gt=new_menu("Goto",3)
 searc=new_menu("Search",2)
-add=new_menu("Add",4)
-cut=new_menu("Cut",5)
-copy=new_menu("Copy",6)
-paste=new_menu("Paste",7)
-save=new_menu("Save",8)
-close=new_menu("Close",9)
+temp=new Menu("Templates",5)
+cut=new_menu("Cut",6)
+copy=new_menu("Copy",7)
+paste=new_menu("Paste",8)
+save=new_menu("Save",9)
+close=new_menu("Close",10)
+ 
 li.add_menu(searc)
+if(code) li.add_menu(temp)
 li.add_menu(add)
 li.add_menu(gt)
 li.add_menu(cut)
@@ -138,6 +155,8 @@ go.add_menu(gt)
 go.add_menu(close)
 e.add_menu(save)
 e.add_menu(close)
+ten.title="Templates"
+ten.add_menu(close)
 sir.title="Search"
 sir.add_menu(searc)
 sir.add_menu(close)
