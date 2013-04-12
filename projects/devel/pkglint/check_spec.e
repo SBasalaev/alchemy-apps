@@ -112,7 +112,7 @@ def check_spec_fields(spec: Dict) {
   }
   // check for unusual fields
   var knownfields = new_list()
-  knownfields.addall(["package", "source",     "version",
+  knownfields.addall(["package", "source", "author", "version",
                       "depends", "conflicts",  "provides",
                       "summary", "section",    "license",
                       "maintainer", "copyright", "homepage"])
