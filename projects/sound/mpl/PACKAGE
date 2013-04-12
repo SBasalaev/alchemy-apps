@@ -1,10 +1,10 @@
 Package: mpl
 Source: mpl
-Version: 2.0.4
+Version: 2.0.5
 Section: sound
 Depends: libcore3, libui1,libmedia1
 Summary: Music player
 License: GPL-3
-Author: Swapnil
-Maintainer: Swapnil <jack_5@asia.com>
-Copyright: (c) 2013 Swapnil
+Author: jack_5@asia.com
+Maintainer: jack_5@asia.com
+Copyright: (c) 2013 jack_5@asia.com
