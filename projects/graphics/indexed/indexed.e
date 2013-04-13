@@ -18,8 +18,9 @@ b18 - Code cleanup, implement save_palette
 b19 - Shows processing speed, can cancel processing
 b20 - Image scaling options
 b21 - Various usability improvements
-b22 - Human error tolerance, some bugfixes
+b22 - Some human error tolerance, some bugfixes
 b23 - Subpixel antialiasing for greyscale images, ordered dithering
+b24 - Separation of pixel and BMP libraries and some error dialogs.
 */
 
 use "io"
@@ -34,11 +35,12 @@ use "list"
 use "string"
 use "math"
 use "time"
+use "dialog"
 
-use "extras.e"
-use "bmpwrite.e"
+use "color.eh"
+use "bmpwrite.eh"
 
-const VERSION = "b23"
+const VERSION = "b24"
 
 def square_img(c: Int, s: Int): Image {
     var i = new Image(s, s)
@@ -297,6 +299,7 @@ def main(args: [String]) {
     ui_set_app_title("Indexed")
     
     // Menus
+    var choosefile = new Menu("Choose file", 0)
     var add = new Menu("Add", 0)
     var edit = new Menu("Edit", 1)
     var remove = new Menu("Remove", 2)
@@ -315,6 +318,7 @@ def main(args: [String]) {
     var fNamescale = new RadioItem("Scaling:", ["Downscale only", "Always", "Never"])
     fNamescale.set_index(0)
     fName.set_title("Indexed "+VERSION)
+    fName.add_menu(choosefile)
     fName.add_menu(okay)
     fName.add_menu(exit)
     fName.add(fNamepath)
@@ -357,9 +361,16 @@ def main(args: [String]) {
     var response = ""
     ui_set_screen(fName)
     while (maincont) {
-       colcont = true
-        if (wait_menu() == "Okay") {
-            ui_set_screen(palEdit)
+        colcont = true
+        response = wait_menu()
+        if (response == "Choose file") {
+            fNamepath.set_text(run_filechooser("Select image", "/home", ["*.jpg", "*.jpeg", "*.JPG", "*.JPEG", "*.bmp", "*.BMP", "*.png", "*.PNG", "*.gif", "*.GIF"])) }
+        else if (response == "Okay") {
+            if (exists(fNamepath.get_text())) {
+                ui_set_screen(palEdit) }
+            else {
+                run_alert("Error", "File not found")
+                colcont = false }
             while (colcont) {
                 response = wait_menu()
                 if (response == "Add") {
