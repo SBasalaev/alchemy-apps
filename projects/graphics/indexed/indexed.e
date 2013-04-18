@@ -21,6 +21,8 @@ b21 - Various usability improvements
 b22 - Some human error tolerance, some bugfixes
 b23 - Subpixel antialiasing for greyscale images, ordered dithering
 b24 - Separation of pixel and BMP libraries and some error dialogs.
+b25 - Analyze image colors
+b26 - Bug fixes to b25
 */
 
 use "io"
@@ -40,7 +42,7 @@ use "dialog"
 use "color.eh"
 use "bmpwrite.eh"
 
-const VERSION = "b24"
+const VERSION = "b26"
 
 def square_img(c: Int, s: Int): Image {
     var i = new Image(s, s)
@@ -218,6 +220,107 @@ def ordered_image(img: Image, imgg: Graphics, x_size: Int, y_size: Int, disp: Ca
         disp.refresh() }
     if (cont) msg("100%", dg) else msg("Cancelled", dg) }
 
+def align(num: Int, from: Int, to: Int): Int {
+    var percent: Double = (num.cast(Double)) / 255.0
+    var equivalent: Int = percent * (to-from)
+    equivalent + from }
+
+def analyze_colors(img: Image, x_size: Int, y_size: Int, disp: Canvas, dg: Graphics): Image {
+    var dimg = new Image(240, 300)
+    var dgrp = dimg.graphics()
+    dgrp.set_color(0)
+    dgrp.fill_rect(0, 0, 240, 320)
+    dgrp.set_color(0xFFFFFF)
+    dgrp.draw_line(119, 0, 119, 300)
+    dgrp.draw_line(0, 149, 240, 149)
+    dgrp.set_color(0xFF0000)
+    dgrp.draw_rect(120, 150, 70, 70)
+    dgrp.draw_line(120, 220, 170, 270)
+    dgrp.draw_line(120, 150, 170, 200)
+    dgrp.draw_line(190, 150, 240, 200)
+    dgrp.draw_line(190, 220, 240, 270)
+    dgrp.draw_rect(170, 200, 69, 70)
+    dgrp.set_color(0xFF0000)
+    dgrp.draw_line(120, 150, 170, 200)
+    dgrp.draw_rect(170, 200, 69, 70)
+    dgrp.set_font(8)
+    dgrp.set_color(0x00FF00)
+    dgrp.draw_string("Front", 0, 0)
+    dgrp.set_color(0xFF0000)
+    dgrp.draw_string("Top", 120, 0)
+    dgrp.set_color(0x0000FF)
+    dgrp.draw_string("Left", 0, 151)
+    dgrp.set_color(0xFFFFFF)
+    dgrp.draw_string("3D", 120, 271)
+    var pix: Color
+    var px: Int
+    var py: Int
+    var pz: Int
+    var pixint: Int
+    var t: Int
+    var e: UIEvent
+    var cont = true
+    for (var y = 0, (y<y_size) && cont, y+=1) {
+        t = systime()
+        e = ui_read_event()
+        if (e != null) if (e.kind == EV_MENU) cont = false
+        for (var x=0, x<x_size, x+=1) {
+            pix = img.get_pix(x, y, x_size, y_size)
+            pixint = pix.toint()
+
+            py = align(pix.r, 148, 0)
+            px = align(pix.b, 0, 118)
+            dgrp.set_color(pixint&0xFF00FF)
+            dgrp.draw_line(px, py, px, py)
+
+            px = align(pix.b, 120, 240)
+            py = align(pix.g, 0, 148)
+            dgrp.set_color(pixint&0x00FFFF)
+            dgrp.draw_line(px, py, px, py)
+
+            px = align(pix.g, 0, 118)
+            py = align(pix.r, 300, 150)
+            dgrp.set_color(pixint&0xFFFF00)
+            dgrp.draw_line(px, py, px, py)
+
+            px = align(pix.b, 122, 188)
+            py = align(pix.r, 218, 148)
+            pz = align(pix.g, 0, 48)
+            px += pz
+            py += pz
+            dgrp.set_color(pixint)
+            dgrp.draw_line(px, py, px, py) }
+        msg(((y*100)/y_size).tostr()+"%, ", dg)
+        dg.draw_image(dimg, 0, 20)
+        disp.refresh() }
+    dgrp.set_color(0xFF0000)
+    dgrp.draw_line(120, 150, 170, 200)
+    dgrp.draw_rect(170, 200, 69, 70)
+    dgrp.set_font(8)
+    dgrp.set_color(0x00FF00)
+    dgrp.draw_string("Front", 0, 0)
+    dgrp.set_color(0xFF0000)
+    dgrp.draw_string("Top", 120, 0)
+    dgrp.set_color(0x0000FF)
+    dgrp.draw_string("Left", 0, 151)
+    dgrp.set_color(0xFFFFFF)
+    dgrp.draw_string("3D", 120, 271)
+    dgrp.set_color(0xFF0000)
+    dgrp.draw_line(120, 150, 170, 200)
+    dgrp.draw_rect(170, 200, 69, 70)
+    dgrp.set_font(8)
+    dgrp.set_color(0x00FF00)
+    dgrp.draw_string("Front", 0, 0)
+    dgrp.set_color(0xFF0000)
+    dgrp.draw_string("Top", 120, 0)
+    dgrp.set_color(0x0000FF)
+    dgrp.draw_string("Left", 0, 151)
+    dgrp.set_color(0xFFFFFF)
+    dgrp.draw_string("3D", 120, 271)
+    if (cont) msg("100%", dg) else msg("Cancelled", dg)
+    dg.draw_image(dimg, 0, 20)
+    disp.refresh()
+    dimg }
 
 def bnw_image(img: Image, imgg: Graphics, x_size: Int, y_size: Int, disp: Canvas, dg: Graphics) {
     var oldpixel = new Color(0, 0, 0)
@@ -255,11 +358,11 @@ def subpixel_image(srcimg: Image, dstimg: Image, dstimgg: Graphics, x_size: Int,
             oldpixel.b = 0xFF & (srcimg.get_pix(x+2, y+2, x_size, y_size).toint())
             dstimgg.set_color(oldpixel.toint())
             dstimgg.draw_line(x/3, y/3, x/3, y/3)
-            dg.set_color(oldpixel.r.tocolor())
+            dg.set_color(oldpixel.r.tocolor()&0xFF0000)
             dg.draw_line(x, y+20, x, y+22)
-            dg.set_color(oldpixel.g.tocolor())
+            dg.set_color(oldpixel.g.tocolor()&0x00FF00)
             dg.draw_line(x+1, y+20, x+1, y+22)
-            dg.set_color(oldpixel.b.tocolor())
+            dg.set_color(oldpixel.b.tocolor()&0x0000FF)
             dg.draw_line(x+2, y+20, x+2, y+22) }
         msg(((y*100)/y_size).tostr()+"%, "+(systime()-t).tostr()+"ms/line", dg)
         disp.refresh() }
@@ -299,19 +402,19 @@ def main(args: [String]) {
     ui_set_app_title("Indexed")
     
     // Menus
-    var choosefile = new Menu("Choose file", 0)
+    var okay = new Menu("Okay", 0)
     var add = new Menu("Add", 0)
     var edit = new Menu("Edit", 1)
     var remove = new Menu("Remove", 2)
     var load = new Menu("Load", 3)
     var save = new Menu("Save", 4)
-    var okay = new Menu("Okay", 5)
+    var choosefile = new Menu("Choose file", 5)
     var exit = new Menu("Exit", 6)
     
     // filename input
     var fName = new Form()
     var fNamepath = new EditItem("Image path:", "/home/", 0, 100)
-    var fNamemode = new RadioItem("Mode:", ["Indexed color", "Sub-pixel monochrome"])
+    var fNamemode = new RadioItem("Mode:", ["Indexed color", "Analyze colors", "Sub-pixel monochrome"])
     var fNamedithermode = new RadioItem("Dithering:", ["Floyd-Steinberg", "Ordered", "None"])
     var fNamewidth = new EditItem("Scale to width:", "240", 2, 4)
     var fNameheight = new EditItem("Scale to height:", "300", 2, 4)
@@ -327,7 +430,7 @@ def main(args: [String]) {
     fName.add(fNamewidth)
     fName.add(fNameheight)
     fName.add(fNamescale)
-    
+
     // Palette editor
     var palEdit = new ListBox(["#000000", "#FFFFFF"], [square_img(0, 32), square_img(0xFFFFFF, 32)], edit)
     palEdit.set_title("Edit palette")
@@ -372,7 +475,7 @@ def main(args: [String]) {
                 run_alert("Error", "File not found")
                 colcont = false }
             while (colcont) {
-                response = wait_menu()
+                if (fNamemode.get_index() != 0) response = "Okay" else response = wait_menu()
                 if (response == "Add") {
                     add_color(pal, palEdit) }
                 else if (response == "Edit") {
@@ -405,7 +508,7 @@ def main(args: [String]) {
                         if (fNamedithermode.get_index() == 0) reduce_image(img, imgg, x_size, y_size, disp, dg, true, pal)
                         else if (fNamedithermode.get_index() == 1) ordered_image(img, imgg, x_size, y_size, disp, dg, pal)
                         else reduce_image(img, imgg, x_size, y_size, disp, dg, false, pal) }
-                    else {
+                    else if (fNamemode.get_index() == 2) {
                         bnw_image(img, imgg, x_size, y_size, disp, dg)
                         tempimg = new Image(x_size, y_size)
                         tempimgg = tempimg.graphics()
@@ -415,6 +518,10 @@ def main(args: [String]) {
                         subpixel_image(tempimg, img, imgg, x_size, y_size, disp, dg)
                         x_size /= 3
                         y_size /= 3 }
+                    else if (fNamemode.get_index() == 1) {
+                        img = analyze_colors(img, x_size, y_size, disp, dg)
+                        x_size = 240
+                        y_size = 300 }
                     disp.add_menu(save)
                     while (dispcont) {
                         response = wait_menu()
