@@ -33,7 +33,7 @@ def readdesktop(file: String): App {
       } else if (key == "Icon") {
         if (value.ch(0) != '/') value = "/res/icons/"+value
         if (exists(value)) {
-          app.icon = image_from_file(value)
+          app.icon = try { image_from_file(value) } catch { null }
         }
       }
     }
@@ -52,7 +52,7 @@ def readapps(): [App] {
   var files = flist("/res/apps/")
   var apps = new_list()
   for (var i=0, i < files.len, i+=1) {
-    var app = readdesktop("/res/apps/"+files[i])
+    var app = try { readdesktop("/res/apps/"+files[i]) } catch { null }
     if (app != null) apps.add(app)
   }
   var ret = new [App](apps.len())

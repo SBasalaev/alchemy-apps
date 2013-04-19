@@ -1,6 +1,6 @@
 Package: appmenu
 Source: appmenu
-Version: 0.3.1build2
+Version: 0.3.2
 Section: gui
 Depends: libcore3, libui1
 Summary: application menu
