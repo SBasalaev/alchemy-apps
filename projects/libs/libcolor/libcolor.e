@@ -1,4 +1,6 @@
 // color, image & list operations
+// v1.0 - first lib release
+// v1.1 - more accurate colors and a bit faster
 
 use "list"
 use "math"
@@ -11,7 +13,9 @@ type Color {
     b: Int = 0 }
 
 def Color.abs(): Int {
-    sqrt( ((this.r)*(this.r)) + ((this.g)*(this.g)) + ((this.b)*(this.b)) ) * 10 }
+    ((this.r)*(this.r)) + 
+    ((this.g)*(this.g)) + 
+    ((this.b)*(this.b)) }
 
 def Color.sub(c: Color): Color {
     new Color(this.r-c.r, this.g-c.g, this.b-c.b) }
@@ -36,18 +40,33 @@ def Color.luminosity(): Color {
 def Color.closest_index(pal: List): Int {
 // differences
     var pl = pal.len()
-    var diff = new List()
+    var diff = new [Int](pl)
     for (var i=0, i<pl, i+=1) {
-        diff.add((this.sub(pal[i].cast(Color))).abs()) }
-    diff.lowest() }
+        diff[i] = (this.sub(pal[i].cast(Color))).abs() }
+    var r: Int=diff[0]
+    var index=0
+    var s=diff.len
+    for (var i=0, i<s, i+=1) {
+        if (r>diff[i]) {
+            r=diff[i]
+            index=i } }
+   index }
 
 def Color.closest(pal: List): Color {
 // differences
     var pl = pal.len()
-    var diff = new List()
+    var diff = new [Int](pl)
     for (var i=0, i<pl, i+=1) {
-        diff.add((this.sub(pal[i].cast(Color))).abs()) }
-    pal[diff.lowest()] }
+        diff[i] = this.sub(pal[i].cast(Color)).abs() }
+    pal[ {
+        var r: Int=diff[0]
+        var index=0
+        var s=diff.len
+        for (var i=0, i<s, i+=1) {
+            if (r>diff[i]) {
+                r=diff[i]
+                index=i } }
+        index } ] }
 
 def Image.get_pix_real(x: Int, y: Int): Color {
     var a = [0]
