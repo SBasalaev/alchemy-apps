@@ -1,0 +1,9 @@
+Package: libzip-dev
+Source: libzip
+Version: 0.95
+Section: libdevel
+Summary: library for creating, reading and modifying zip archives (headers)
+Depends: libzip1
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (C) 2013 Sergey Basalaev
+License: GPL-2+exception
