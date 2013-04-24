@@ -59,9 +59,7 @@ def Deflater.get_bytesread(): Long {
   this.engine.getTotalIn();
 }
 
-use "io"
 def Deflater.get_byteswritten(): Long {
-stderr().println("byteswritten = " + this.totalOut);
   this.totalOut;
 }
 

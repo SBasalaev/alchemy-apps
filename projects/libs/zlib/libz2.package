@@ -1,6 +1,6 @@
 Package: libz2
 Source: zlib
-Version: 0.99
+Version: 0.99.1
 Section: libs
 Summary: compression library
 Depends: libcore3
