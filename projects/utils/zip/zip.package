@@ -1,0 +1,9 @@
+Package: zip
+Source: zip
+Version: 0.1
+Summary: compress and archive files
+Section: utils
+License: GPL-2+exception
+Copyright: (c) 2013 Sergey Basalaev
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Depends: libcore3, libzip1
