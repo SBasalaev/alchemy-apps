@@ -601,21 +601,24 @@ def main(args: [String]) {
         if ((f.flags & FFLAG_RELOCS) != 0) {
           print("  Relocations:");
           for (var j=0, j < f.relocations.len, j+= 1) {
-            print(" @"+f.relocations[j]);
+            print(" @"+f.relocations[j].cast(Int));
           }
           write('\n');
         }
         if ((f.flags & FFLAG_LNUM) != 0) {
-          println("  Source: "+obj.cpool[f.lnumtable[0]]);
+          println("  Source: "+obj.cpool[f.lnumtable[0]].value);
           println("  Line number table:");
           for (var j=1, j<f.lnumtable.len, j += 2) {
-            println("    line "+f.lnumtable[j]+": "+f.lnumtable[j+1]);
+            println("    line "+f.lnumtable[j].cast(Int)+": "+f.lnumtable[j+1].cast(Int));
           }
         }
         if ((f.flags & FFLAG_ERRTBL) != 0) {
           println("  Error catching table:");
           for (var j=0, j<f.errtable.len, j += 4) {
-            println("    from "+f.errtable[j]+" to "+f.errtable[j+1]+" catch "+f.errtable[j+2]+" head "+f.errtable[j+3]);
+            println("    from " + f.errtable[j].cast(Int)
+                  + " to " + f.errtable[j+1].cast(Int)
+                  + " catch " + f.errtable[j+2].cast(Int)
+                  + " head " + f.errtable[j+3].cast(Int));
           }
         }
       }

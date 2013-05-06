@@ -1,6 +1,6 @@
 Source: dec
 Package: dec
-Version: 0.3
+Version: 0.4
 Summary: Ether decompiler
 Section: devel
 Depends: libcore3
