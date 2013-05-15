@@ -1,0 +1,10 @@
+Package: theme
+Source: theme
+Version: 1.0.0
+Section: utils
+Depends: libcore3,libui1,libmedia1,libcolor0,libdialog1,zip
+Summary: Nokia theme creator for j2me devices
+License: GPL-3
+Author: jack_5@asia.com
+Maintainer: jack <jack_5@asia.com>
+Copyright: (c) 2013 jack_5@asia.com
