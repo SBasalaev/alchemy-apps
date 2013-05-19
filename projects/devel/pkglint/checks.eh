@@ -20,3 +20,4 @@ def check_spec();
 def check_dirs();
 def check_libs();
 def check_desktop();
+def check_files();

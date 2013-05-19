@@ -1,0 +1,26 @@
+== Implemented check suites ==
+
+check_spec - Tests package specification (PACKAGE)
+  * Tests if Package and Version fields are present and in correct format
+  * Tests if other required fields are present
+  * Tests if Maintainer field is in format "name <email>"
+  * Warns if license is not one of usual and license file is missing
+
+check_dirs - Matches directory structure against FHS
+  * root must not contain any files or directories but specified by FHS
+  * /bin directory must not contain any subdirectories
+  * package must not install anything in /cfg, /tmp or /home
+
+check_libs - Checks binary files
+  * /bin and /lib must not contain only files in executable format
+  * name of shared library package should obey convention
+  * shared libraries in /lib must have a soname
+
+check_desktop - Checks .desktop files in /res/apps
+  * Warns if package does not provide program or icon referenced in .desktop
+
+check_files - Check for files that usually should be in a package
+  * Windows thumbnail databases
+  * Mac OS X store files and resource forks
+  * Version control files for svn, git and hg
+

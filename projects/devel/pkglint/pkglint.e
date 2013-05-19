@@ -7,7 +7,7 @@ use "string.eh"
 
 const HELP = "Check binary packages for common errors\n" +
              "Usage: pkglint file.pkg"
-const VERSION = "pkglint 0.5"
+const VERSION = "pkglint 0.5.3"
 
 var errlevel: Int;
 var spec: Dict;
@@ -28,15 +28,15 @@ def main(args: [String]): Int {
     println(VERSION)
   } else {
     // unpack package to temp directory
-    if (!exists(args[0])) error(TEST_FATAL, "Fatal: file does not exist")
+    if (!exists(args[0])) error(TEST_FATAL, "[FATAL] file does not exist")
     var workdir = "/tmp/pkglint"
-    if (exists(workdir)) error(TEST_FATAL, "Fatal: /tmp/pkglint already exists")
+    if (exists(workdir)) error(TEST_FATAL, "[FATAL] /tmp/pkglint already exists")
     mkdir(workdir)
     var pkgfile = workdir + "/" + pathfile(args[0])
     fcopy(args[0], pkgfile)
     set_cwd(workdir)
     if (exec_wait("arh", ["x", pkgfile]) != 0) {
-      error(TEST_FATAL, "Fatal: failed to unpack " + args[0])
+      error(TEST_FATAL, "[FATAL] failed to unpack " + args[0])
     }
     fremove(pkgfile)
     // extract spec
@@ -61,7 +61,10 @@ def main(args: [String]): Int {
       check_spec()
       check_dirs()
       check_libs()
-    } catch {
+      check_files()
+    } catch (var er) {
+      stderr().println(er)
+      stderr().println("[FATAL] pkglint crashed, please report")
       errlevel = TEST_ERR
     }
     // remove temp directory
