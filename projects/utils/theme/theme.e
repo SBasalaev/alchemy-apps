@@ -1,5 +1,5 @@
 
-/*ex theme.e -o theme -lui -ldialog -lcolor -lmedia*/
+/*ex theme.e -o theme -lui -ldialog -lcolor -lmedia -lbmpwrite*/
 
 use "canvas"
 use "color"
@@ -17,6 +17,7 @@ use "sys"
 use "textio"
 use "ui"
 use "time"
+use "bmpwrite"
 
 var currentPath:String
 var options:ListBox
@@ -37,6 +38,10 @@ var records_count:Int
 var memorycard:Bool
 var backmenu:Menu
 var theme_name:String
+var color_values:[Int]
+var sci:Image
+var scig:Graphics
+var t:Long
 
 def Check_Drive()
 {
@@ -64,7 +69,7 @@ ui_set_screen(msbx)
 
 def rodni_helper(x:Int,y:Int,imag:Image)//Remove_Old_Draw_New_Image_helper
 {
-g.fill_rect(x,y,64,64);g.draw_image(imag,x,y)
+ g.fill_rect(x,y,64,64);g.draw_image(imag,x,y)
 }
 
 def Remove_Old_Draw_New_Image(imgname:Image)
@@ -168,7 +173,7 @@ switch(a_code)
 }
 
 //code written in next method is modified version of code written in indexed-b24
-//now it returns only resize image
+//now it returns only resized image
 def load_and_resize_image(immgg: Image, width: Float, height: Float): Image
 {
  var tempimg = immgg
@@ -192,16 +197,16 @@ def load_and_resize_image(immgg: Image, width: Float, height: Float): Image
  img
 }
 
-def drawimage_fromfile(i:Int,num:Int,x:Int,y:Int)
+def drawimage_fromfile(gr:Graphics,i:Int,num:Int,x:Int,y:Int)
 {
  var img=image_from_file(new_icons[num])
  if((get_image_x(img)<=64)&&(get_image_y(img)<=64))
  {
-  g.draw_image(img,x,y)
+  gr.draw_image(img,x,y)
  }
  else
  {
-  g.draw_image(load_and_resize_image(img,64,64),x,y)
+  gr.draw_image(load_and_resize_image(img,64,64),x,y)
  }
  img=null
  imagename[i]=new_icons[num]
@@ -217,6 +222,7 @@ def fillrect_drawstring(num:Int,x:Int,y:Int,img:Image)
  g.draw_image(img,x+24,y+24)
  g.set_color(0xffffff)
  g.draw_string(name[num],x,y)
+ name=null
 }
 
 def Init_canvas()
@@ -280,7 +286,7 @@ def Select_Icons(posn:Int)
  for(var i=1,i<=11,i+=1)
  {
   if(new_icons[j]==null){addimg=image_from_file("/res/alpaca/installed.png");fillrect_drawstring(i,px,py,addimg);addimg=null}
-  else {drawimage_fromfile(i,j,px,py)}
+  else {drawimage_fromfile(g,i,j,px,py)}
   px+=74
   if(i==3||i==6||i==9)
   {
@@ -540,8 +546,8 @@ def Select_wallpaper(msg:String,size:String,num:Int)
  {
   new_icons[num]=timagename
  }
- c=null
  g=null
+ c=null
  ui_set_screen(prev_scr)
 }
 
@@ -549,7 +555,7 @@ def Other_Icons()//32 to 40
 {
  var select=new_menu("Select",1,MT_OK)
  var exit=new_menu("Home",2,MT_CANCEL)
- var iconname=["Camera","Audio Messages","Brew","Cdmacust","Extras","Goto","Voice Portal","Instant Messenger","Sport"]
+ var iconname=["Camera","Audio Messages","Instant Messenger","Brew","Cdmacust","Extras","Goto","Voice Portal","Sport"]
  var othericons=new_listbox(iconname,null,select)
  othericons.add_menu(exit)
  othericons.set_title("select Icons for : ")
@@ -560,18 +566,19 @@ def Other_Icons()//32 to 40
   ev=ui_wait_event()
   if(ev.value==select)
   {
+   var size="=48x48"
    var index=othericons.get_index()
    switch(index)
    {
-    0:Select_wallpaper(iconname[0],"=48x48",32)//camera
-    1:Select_wallpaper(iconname[1],"=48x48",33)//audio msg
-    2:Select_wallpaper(iconname[2],"=48x48",34)//brew
-    3:Select_wallpaper(iconname[3],"=48x48",35)//cdnacust
-    4:Select_wallpaper(iconname[4],"=48x48",36)//extra
-    5:Select_wallpaper(iconname[5],"=48x48",37)//goto
-    6:Select_wallpaper(iconname[6],"=48x48",38)//vice portal
-    7:Select_wallpaper(iconname[7],"=48x48",39)//Instant Messenger
-    8:Select_wallpaper(iconname[8],"=48x48",40)//sport
+    0:Select_wallpaper(iconname[0],size,32)//camera
+    1:Select_wallpaper(iconname[1],size,33)//audio msg
+    2:Select_wallpaper(iconname[2],size,39)//Instant Messenger
+    3:Select_wallpaper(iconname[3],size,34)//brew
+    4:Select_wallpaper(iconname[4],size,35)//cdnacust
+    5:Select_wallpaper(iconname[5],size,36)//extra
+    6:Select_wallpaper(iconname[6],size,37)//goto
+    7:Select_wallpaper(iconname[7],size,38)//vice portal
+    8:Select_wallpaper(iconname[8],size,40)//sport
    }
   }
  }while(ev.value!=exit)
@@ -579,52 +586,7 @@ def Other_Icons()//32 to 40
  ui_set_screen(options)
 }
 
-def To_hex_helper(n:Int):String
-{
- var nn:String
- nn=""+n
- switch(n)
- {
-  10:nn="A"
-  11:nn="B"
-  12:nn="C"
-  13:nn="D"
-  14:nn="E"
-  15:nn="F"
- }
- nn
-}
-
-def To_hex(n:Int):String
-{
- var hexnum:String
- if(n==0||n==null){hexnum="00"}
- else if(n<16){hexnum="0"+""+To_hex_helper(n)}
- else
- {
-  hexnum=""
-  var num=n
-  var d:Int
-  var r:Int
-  if(n>255){num=255} 
-  do
-  {
-   d=num/16
-   if(d!=0)
-   {
-    hexnum=hexnum+""+To_hex_helper(d)
-   }
-   else
-   {
-    hexnum=hexnum+""+To_hex_helper(num%16)
-   }
-   num=num%16
-  }while(d!=0)
- }
- hexnum
-}
-
-//code written in next method original version of code written in indexed-b24
+//code written in next method original code written in indexed-b24
 def square_img(c: Int, s: Int): Image {
     var i = new Image(s, s)
     var gg = i.graphics()
@@ -635,7 +597,7 @@ def square_img(c: Int, s: Int): Image {
 
 //code written in next method is modified version of code written in indexed-b24
 //now it returns color in hexadeciamal format (as String)
-def get_color(title:String): String {
+def get_color(title:String): Int {
     var colpick = new Form()
     colpick.set_title(title)
     var red = new EditItem("Red:", "0", 2, 3)
@@ -656,7 +618,8 @@ def get_color(title:String): String {
     if(red.get_text().len()==0){red.set_text("0")}
     if(green.get_text().len()==0){green.set_text("0")}
     if(blue.get_text().len()==0){blue.set_text("0")}
-    ""+To_hex(red.get_text().toint())+""+To_hex(green.get_text().toint())+""+To_hex(blue.get_text().toint())
+    new Color(red.get_text().toint(),green.get_text().toint(),blue.get_text().toint()).toint()
+    //""+red.get_text().toint().tohex()+green.get_text().toint().tohex()+blue.get_text().toint().tohex()
 }
 
 
@@ -671,13 +634,6 @@ def Select_colors()//41 to 57
  selectcolor.add_menu(save)
  selectcolor.set_title("select Colors for : ")
  var tcolr=new [String](17)//temporary variable
- var k=0
- for(var i=41,i<=57,i+=1)
- {
-  tcolr[k]=new_icons[i]
-  k+=1
- }
- k=null
  ui_set_screen(selectcolor)
  var ev:UIEvent
  do
@@ -715,7 +671,11 @@ def Select_colors()//41 to 57
   var j=0
   for(var i=41,i<=57,i+=1)
   {
-  new_icons[i]=tcolr[j]
+   if(tcolr[j]!=null)
+   {
+    new_icons[i]=tcolr[j].toint().tohex()
+    color_values[j]=tcolr[j].toint()
+   }
   j+=1
   }
  }
@@ -837,7 +797,6 @@ def Create_theme_descriptor_helper()
   }
   j+=1
  }
-
 //if animated icons are not define
 //then use simple icons as animated icons
  j=58
@@ -846,7 +805,6 @@ def Create_theme_descriptor_helper()
  if(new_icons[j]==null){new_icons[j]=new_icons[i]}
  j+=1
  }
- 
 //grid menu animated icons
  j=58
  for(var i=27,i<=87,i+=6)
@@ -973,18 +931,19 @@ def Create_theme_descriptor(savePath:String)
  fremove("/tmp/theme_descriptor.xml")
  try{play_tone(100,200,100)}catch{}
  sleep(100)
- run_alert("Theme Created","theme created successfully...\nclick 'ok' to go back.",null,60000)
+ run_alert("Theme Created","theme created successfully.\nClick 'ok' to go back.",null,60000)
  ui_set_screen(options)
 }
 
 def PreviewHelpMenu(Option:String,Open:String,Back:String)
 {
- g.set_color(0x000000)
- g.set_font(SIZE_MED|STYLE_BOLD)
- g.draw_string(Open,95,297)
- g.set_font(SIZE_MED|STYLE_PLAIN)
- g.draw_string(Option,0,297)
- g.draw_string(Back,200,297)
+ if(color_values[2]!=null) scig.set_color(color_values[2])
+ else scig.set_color(0x000000)
+ scig.set_font(SIZE_MED|STYLE_BOLD)
+ scig.draw_string(Open,95,297)
+ scig.set_font(SIZE_MED|STYLE_PLAIN)
+ scig.draw_string(Option,0,297)
+ scig.draw_string(Back,200,297)
  c.refresh()
 }
 
@@ -998,10 +957,12 @@ def PreviewHelp(title:String)
  imagename=new [String](50)
 }
 
-def PreviewWait()
+def PreviewWait(prevname:String)
 {
- c.refresh()
+ var scrnsht=new_menu("Screenshot [0]",2,MT_OK)
+ c.add_menu(scrnsht)
  var ev:UIEvent
+ c.refresh()
  do
  {
   ev=ui_wait_event()
@@ -1013,25 +974,48 @@ def PreviewWait()
    {
     ev.value=backmenu
    }
+   else if(k==KEY_0)
+   {
+    ev.value=scrnsht
+   }
+  }
+  if(ev.value==scrnsht)
+  {
+   var savePath=run_dirchooser("Select folder to save image",currentPath)
+   if(savePath!=null)
+   {
+    var img_name=run_editbox("Image name",prevname,EDIT_ANY,30)
+    if(img_name!=null)
+    {
+     if(!img_name.endswith(".bmp"))
+     {
+      img_name+=".bmp"
+     }
+     try{save_bmp(sci,false,null,savePath+"/"+img_name,true)}catch{}
+    }
+   }
   }
  }while(ev.value!=backmenu)
  backmenu=null
+ scig=null
+ sci=null
  g=null
  c=null
 }
 
 def Clock_battery(hr:String,mnt:String)
 {
- g.set_font(SIZE_MED|STYLE_PLAIN)
- g.set_color(0x00FF00)
- g.fill_roundrect(40,3,25,16,7,10)
- g.set_color(0x000000)
- g.draw_string(hr+":"+mnt,185,0)
- g.draw_rect(12,15,1,4)
- g.draw_rect(17,12,1,7)
- g.draw_rect(22,9,1,10)
- g.draw_rect(27,5,1,14)
- g.draw_roundrect(40,3,25,16,7,10)
+ scig.set_font(SIZE_MED|STYLE_PLAIN)
+ scig.set_color(0x00FF00)
+ scig.fill_roundrect(40,3,25,16,7,10)
+ if(color_values[1]!=null) scig.set_color(color_values[1])
+ else scig.set_color(0x000000)
+ scig.draw_string(hr+":"+mnt,185,0)
+ scig.draw_rect(12,15,1,4)
+ scig.draw_rect(17,12,1,7)
+ scig.draw_rect(22,9,1,10)
+ scig.draw_rect(27,5,1,14)
+ scig.draw_roundrect(40,3,25,16,7,10)
 }
 
 def draw_status_and_key_area_bg()
@@ -1039,21 +1023,15 @@ def draw_status_and_key_area_bg()
  if(new_icons[21]!=null)
  {
   var i=image_from_file(new_icons[21])
-  if(get_image_y(i)>48)
-  {
-   g.draw_image(load_and_resize_image(i,get_image_x(i),48),0,0)
-  }
-  else
-  {
-  g.draw_image(i,0,0)
-  }
- i=null
+  if(get_image_y(i)>48) scig.draw_image(load_and_resize_image(i,get_image_x(i),48),0,0)
+  else scig.draw_image(i,0,0)
+  i=null
  }
+ if(new_icons[20]!=null) scig.draw_image(image_from_file(new_icons[20]),0,294)
  var px=0
- if(new_icons[20]!=null){g.draw_image(image_from_file(new_icons[20]),px,294)}
  for(var i=22,i<=24,i+=1)
  {
-  if(new_icons[i]!=null){g.draw_image(image_from_file(new_icons[i]),px,294)}
+  if(new_icons[i]!=null){scig.draw_image(image_from_file(new_icons[i]),px,294)}
   px+=80
  }
  px=null
@@ -1061,43 +1039,61 @@ def draw_status_and_key_area_bg()
 
 def MenuPreview()
 {
+ sci=new_image(240,320)
+ scig=sci.graphics()
  var prevscrn=ui_get_screen()
  PreviewHelp("Menu Preview")
- if(new_icons[17]!=null){g.draw_image(image_from_file(new_icons[17]),0,0);c.refresh()}
+ if(new_icons[17]!=null){scig.draw_image(image_from_file(new_icons[17]),0,0);g.draw_image(sci,0,0);c.refresh()}
  draw_status_and_key_area_bg()
  if(new_icons[12]!=null)
  {
   var i=image_from_file(new_icons[12])
   if(get_image_x(i)>74||get_image_y(i)>80)
   {
-   g.draw_image(load_and_resize_image(i,74,80),82,135)
+   scig.draw_image(load_and_resize_image(i,74,80),82,135)
   }
   else
   {
-   g.draw_image(i,82,135)
+   scig.draw_image(i,82,135)
   }
-  c.refresh()
   i=null
  }
- if(new_icons[20]!=null){g.draw_image(image_from_file(new_icons[20]),0,294);c.refresh()}
+ if(new_icons[20]!=null){scig.draw_image(image_from_file(new_icons[20]),0,294)}
  var px=0
  for(var i=22,i<=24,i+=1)
  {
-  if(new_icons[i]!=null){g.draw_image(image_from_file(new_icons[i]),px,294)}
+  if(new_icons[i]!=null){scig.draw_image(image_from_file(new_icons[i]),px,294)}
   px+=80
  }
  PreviewHelpMenu("Option","Open","Back")
- var t=systime()
  Clock_battery(""+hour(t),""+minute(t))
- g.draw_string("Menu",2,24)
- g.draw_string("5",225,25)
+ if(color_values[0]!=null) scig.set_color(color_values[0])
+ else scig.set_color(0x0000FF)
+ scig.draw_string("Menu",2,24)
+ scig.draw_string("5",225,25)
+ var name=["","messages","contacts","call log","settings","gallery","media","web","organizer","apps"]
+ if(color_values[4]!=null) scig.set_color(color_values[4])
+ else scig.set_color(0x0000FF)
+ scig.set_font(SIZE_SMALL|STYLE_PLAIN)
  px=10
  var py=50
  for(var i=1,i<=9,i+=1)
  {
   if(new_icons[i]!=null)
   {
-   drawimage_fromfile(i,i,px,py);c.refresh()
+   drawimage_fromfile(scig,i,i,px,py)
+   scig.draw_string(name[i],px,py+60)
+   if(i==5)
+   {
+    if(color_values[5]!=null)
+    {
+     var tempcol=scig.get_color()
+     scig.set_color(color_values[5])
+     scig.draw_string(name[5],px,py+60)
+     scig.set_color(tempcol)
+     tempcol=null
+    }
+   }
   }
   px+=78
   if(i==3||i==6)
@@ -1107,25 +1103,26 @@ def MenuPreview()
   }
  }
  imagename=null
- PreviewWait()
+ g.draw_image(sci,0,0)
+ PreviewWait("MenuPreview.bmp")
+ name=null
  ui_set_screen(prevscrn)
 }
 
 def CalPreview()
 {
+ sci=new_image(240,320)
+ scig=sci.graphics()
  var prevscrn=ui_get_screen()
  PreviewHelp("Calender Preview")
- if(new_icons[16]!=null){g.draw_image(image_from_file(new_icons[16]),0,0);c.refresh()}
- var px=0
+ if(new_icons[16]!=null){scig.draw_image(image_from_file(new_icons[16]),0,0);g.draw_image(sci,0,0);c.refresh()}
  draw_status_and_key_area_bg()
- c.refresh()
- px=null
  var days=["","Su","Mo","Tu","W","Th","Fr","Sa"]
  var mon_days=[31,28,31,30,31,30,31,31,30,31,30,31]
  var mon=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"]
  var start_pos=[2,5,5,1,3,6,1,4,0,2,5,0]
- var t=systime()
- if(year(t)%4==0){mon_days[1]=29}
+ if(year(t)%4==0) mon_days[1]=29
+ if(year(t)%100==0&&year(t)%400!=0) mon_days[1]=28
  if(year(t)>2013)
  {
   var nyr=year(t)
@@ -1148,61 +1145,107 @@ def CalPreview()
   }
  }
  Clock_battery(""+hour(t),""+minute(t))
- g.set_font(SIZE_MED|STYLE_PLAIN)
- g.draw_string(mon[month(t)]+" "+year(t),2,26)
- px=2
+ scig.set_font(SIZE_MED|STYLE_PLAIN)
+ if(color_values[0]!=null) scig.set_color(color_values[0])
+ else scig.set_color(0x0000FF)
+ scig.draw_string(mon[month(t)]+" "+year(t),2,26)
+ var px=2
  var py=50
- g.set_color(0xFF0000)
+ scig.set_color(0xFF0000)
  for(var i=1,i<8,i+=1)
  {
-  if(i==2) g.set_color(0x000000)
-  g.draw_string(days[i],px,py)
+  if(i==2) scig.set_color(0x000000)
+  scig.draw_string(days[i],px,py)
   px+=35
  }
- g.set_color(0x000000)
- g.draw_line(5,50,235,50)
- g.draw_line(5,70,235,70)
- g.set_font(SIZE_MED|STYLE_BOLD)
+ scig.set_color(0x000000)
+ scig.draw_line(5,50,235,50)
+ scig.draw_line(5,70,235,70)
+ scig.set_font(SIZE_MED|STYLE_BOLD)
  px=5+(35*start_pos[month(t)])
  py=75
  for(var i=1,i<=mon_days[month(t)],i+=1)
  {
-  if(i==day(t)){g.set_color(0xFF0000);g.draw_rect(px-2,py,26,25)}
-  if(px==2){g.set_color(0xFF0000)}
-  else {g.set_color(0x000000)}
-  g.draw_string(""+i,px,py)
+  if(i==day(t))
+  {
+   if(color_values[6]!=null) scig.set_color(color_values[6])
+   else scig.set_color(0x00FF00)
+   scig.draw_rect(px-2,py,26,25)
+  }
+  if(px==2){scig.set_color(0xFF0000)}
+  else {scig.set_color(0x000000)}
+  scig.draw_string(""+i,px,py)
   px+=35
   if(px>230){px=2;py+=25}
  }
- g.set_color(0x000000)
- g.draw_line(5,230,235,230)
- g.draw_string("(no notes)",75,240)
+ scig.set_color(0x000000)
+ scig.draw_line(5,230,235,230)
+ scig.draw_string("(no notes)",75,240)
  PreviewHelpMenu("Option","View","Exit")
- PreviewWait()
+ g.draw_image(sci,0,0)
+ PreviewWait("Calpreview.bmp")
  ui_set_screen(prevscrn)
 }
 
 def WallPreview()
 {
+ sci=new_image(240,320)
+ scig=sci.graphics()
  var prevscrn=ui_get_screen()
  PreviewHelp("Wallpaper Preview")
  if(new_icons[14]!=null)
  {
   if(!new_icons[14].endswith(".swf")&&!new_icons[14].endswith(".SWF"))
   {
-  g.draw_image(image_from_file(new_icons[14]),0,0);c.refresh()
+  scig.draw_image(image_from_file(new_icons[14]),0,0)
+  g.draw_image(sci,0,0);c.refresh()
   }
  }
- var px=0
  draw_status_and_key_area_bg()
- px=null
- var t=systime()
  Clock_battery(""+hour(t),""+minute(t))
  PreviewHelpMenu("Go to","Menu","apps")
- g.draw_string("Operator Name",2,21)
+ if(color_values[0]!=null) scig.set_color(color_values[0])
+ else scig.set_color(0x0000FF)
+ scig.draw_string("Operator Logo",2,21)
  var mon=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"]
- g.draw_string(""+day(t)+" "+mon[month(t)]+" "+year(t),2,50)
- PreviewWait()
+ if(color_values[3]!=null) scig.set_color(color_values[3])
+ else scig.set_color(0x0000FF)
+ scig.draw_string(""+day(t)+" "+mon[month(t)]+" "+year(t),2,50)
+ g.draw_image(sci,0,0)
+ PreviewWait("Wallpreview.bmp")
+ ui_set_screen(prevscrn)
+}
+
+def MusicPlayerPreview()
+{
+ sci=new_image(240,320)
+ scig=sci.graphics()
+ var prevscrn=ui_get_screen()
+ PreviewHelp("Music Player Preview")
+ if(new_icons[18]!=null)
+ {
+  if(!new_icons[18].endswith(".swf")&&!new_icons[18].endswith(".SWF"))
+  {
+   scig.draw_image(image_from_file(new_icons[18]),0,0)
+   g.draw_image(sci,0,0);c.refresh()
+  }
+ }
+ draw_status_and_key_area_bg()
+ Clock_battery(""+hour(t),""+minute(t))
+ PreviewHelpMenu("Option","","back")
+ scig.draw_image(image_from_file("/res/Themes/player.png"),0,0)
+ scig.draw_image(image_from_file("/res/Themes/navi.png"),81,237)
+ scig.draw_image(image_from_file("/res/Themes/pause.png"),100,257)
+ if(color_values[0]!=null) scig.set_color(color_values[0])
+ else scig.set_color(0x0000FF)
+ scig.draw_string("Music player",2,21)
+ if(color_values[3]!=null) scig.set_color(color_values[3])
+ else scig.set_color(0x0000FF)
+ scig.draw_string("Alchemy OS",20,83)
+ scig.set_font(SIZE_LARGE|STYLE_PLAIN)
+ scig.draw_string("Theme creator",25,50)
+ g.draw_image(sci,0,0)
+ PreviewWait("Playerpreview.bmp")
  ui_set_screen(prevscrn)
 }
 
@@ -1210,10 +1253,11 @@ def Preview()
 {
  var select=new_menu("Select",1,MT_OK)
  var exit=new_menu("Home",2,MT_CANCEL)
- var prevname=["Menu Preview","Calender Preview","Wallpaper Preview"]
+ var prevname=["Menu Preview","Calender Preview","Wallpaper Preview","Music Player Preview"]
  var preview=new_listbox(prevname,null,select)
  preview.add_menu(exit)
  preview.set_title("Select to see preview : ")
+ t=systime()
  ui_set_screen(preview)
  var ev:UIEvent
  do
@@ -1227,6 +1271,7 @@ def Preview()
     0:MenuPreview()
     1:CalPreview()
     2:WallPreview()
+    3:MusicPlayerPreview()
    }
   }
  }while(ev.value!=exit)
@@ -1243,6 +1288,7 @@ currentPath="/"
 memorycard=false
 new_icons=new [String](69)
 //set default font color
+color_values=new[Int](17)
 for(var i=41,i<=57,i+=1)
 {
  new_icons[i]="000000"
@@ -1257,7 +1303,7 @@ var create=new_menu("Create theme",3)
 var help=new_menu("Help",4)
 var setting=new_menu("Setting",5)
 var preview=new_menu("Theme Preview",6)
-var nms=["Menu Icons","Animated Icons","Other Icons","Grid View Menu Highlight","Note Background","Main Default Background ","Wallpaper","Screensaver","Calender Background","Menu Background","MusicPlayer Background","Radio Background","Softkey Area Background","Left Softkey Background","Middle Softkey Background","Right Softkey Background","Status Area Background","Wait Graphics","List View Highlight","Forms Selected Highlight","Forms Unselected Highlight","Startup Image ","Shutdown Image","Font Colors"]
+var nms=["Font Colors","Menu Icons","Animated Icons","Other Icons","Grid View Menu Highlight","List View Highlight","Note Background","Main Default Background ","Wallpaper","Screensaver","Calender Background","Menu Background","MusicPlayer Background","Radio Background","Softkey Area Background","Left Softkey Background","Middle Softkey Background","Right Softkey Background","Status Area Background","Wait Graphics","Forms Selected Highlight","Forms Unselected Highlight","Startup Image ","Shutdown Image"]
 options=new_listbox(nms,null,select)
 options.add_menu(exit)
 options.add_menu(create)
@@ -1274,30 +1320,30 @@ do
  {
   switch(options.get_index())
   {
-   0:Select_Icons(1)//menu icons
-   1:Select_Icons(58)//Animated Icons
-   2:Other_Icons()
-   3:Select_wallpaper(nms[3],"=74x80",12)		//Grid View Menu Highlight
-   4:Select_wallpaper(nms[4],"=236x114",13)	//Note Background
-   5:Select_wallpaper(nms[5],"="+wh,31)		//Main Default Background
-   6:Select_wallpaper(nms[6],"="+wh,14)		//Wallpaper
-   7:Select_wallpaper(nms[7],"="+wh,15)		//Screensaver
-   8:Select_wallpaper(nms[8],"="+wh,16)		//Calender Background
-   9:Select_wallpaper(nms[9],"="+wh,17)		//grid Menu Background
-   10:Select_wallpaper(nms[10],"="+wh,18)		//MusicPlayer Background
-   11:Select_wallpaper(nms[11],"="+wh,19)		//Radio Background
-   12:Select_wallpaper(nms[12],"="+wd+"x26",20)	//Softkey Area Background
-   13:Select_wallpaper(nms[13],"=80x22",22)	//Left Softkey Background
-   14:Select_wallpaper(nms[14],"=80x22",23)	//Middle Softkey Background
-   15:Select_wallpaper(nms[15],"=80x22",24)	//Right Softkey Background
-   16:Select_wallpaper(nms[16],"="+wd+"x48",21)	//Status Area Background
-   17:Select_wallpaper(nms[17],"=any",25)		//Wait Graphics
-   18:Select_wallpaper(nms[18],"=224x48",26)	//List View Highlight
-   19:Select_wallpaper(nms[19],"=224x48",27)	//Forms Selected Highlight
-   20:Select_wallpaper(nms[20],"=224x48",28)	//Forms Unselected Highlight
-   21:Select_wallpaper(nms[21],"="+wh,29)		//Startup Image
-   22:Select_wallpaper(nms[22],"="+wh,30)		//Shutdown Image
-   23:Select_colors()
+   0:Select_colors()
+   1:Select_Icons(1)					//menu icons
+   2:Select_Icons(58)					//Animated Icons
+   3:Other_Icons()
+   4:Select_wallpaper(nms[4],"=74x80",12)		//Grid View Menu Highlight
+   5:Select_wallpaper(nms[5],"=224x48",26)	//List View Highlight
+   6:Select_wallpaper(nms[6],"=236x114",13)	//Note Background
+   7:Select_wallpaper(nms[7],"="+wh,31)		//Main Default Background
+   8:Select_wallpaper(nms[8],"="+wh,14)		//Wallpaper
+   9:Select_wallpaper(nms[9],"="+wh,15)		//Screensaver
+   10:Select_wallpaper(nms[10],"="+wh,16)		//Calender Background
+   11:Select_wallpaper(nms[11],"="+wh,17)		//grid Menu Background
+   12:Select_wallpaper(nms[12],"="+wh,18)		//MusicPlayer Background
+   13:Select_wallpaper(nms[13],"="+wh,19)		//Radio Background
+   14:Select_wallpaper(nms[14],"="+wd+"x26",20)	//Softkey Area Background
+   15:Select_wallpaper(nms[15],"=80x22",22)	//Left Softkey Background
+   16:Select_wallpaper(nms[16],"=80x22",23)	//Middle Softkey Background
+   17:Select_wallpaper(nms[17],"=80x22",24)	//Right Softkey Background
+   18:Select_wallpaper(nms[18],"="+wd+"x48",21)	//Status Area Background
+   19:Select_wallpaper(nms[19],"=any",25)		//Wait Graphics
+   20:Select_wallpaper(nms[20],"=224x48",27)	//Forms Selected Highlight
+   21:Select_wallpaper(nms[21],"=224x48",28)	//Forms Unselected Highlight
+   22:Select_wallpaper(nms[22],"="+wh,29)		//Startup Image
+   23:Select_wallpaper(nms[23],"="+wh,30)		//Shutdown Image
   }
  }
  else if(ev.value==create)
@@ -1310,7 +1356,7 @@ do
    {
     if(!theme_name.endswith(".nth"))
     {
-     theme_name.concat(".nth")
+     theme_name+=".nth"
     }
     Create_theme_descriptor(savePath)
    }
@@ -1322,6 +1368,10 @@ do
   "It creates themes in '.nth' format.\n"+
   "\nWarning : Do not select images with same name for different icons or images.\n"+
   "\nResizing of images is for preview purpose only. Original image will not be resized.\n"+
+  "\nPreview Mode : This option shows preview of font colors, menu icons, status bg image, softkey bg images, "+
+  "grid view highlight, calendar, wallpaper, music player, etc.\n"+
+  "\nScreenshots : This feature is available only in preview mode.\nTo take screenshot, "+
+  "press 0 key or select screenshots from menu. Then select destination and theme name.\n"+
   "\nMenu Icons : Icons for menu in grid view. Should be of size 43x43.\n"+
   "\nAnimated Icons : Icons to display selected menu in grid view. Should be of size 64x64.\n"+
   "If Animated Icons are not selected then 'Menu Icons' will be used as Animated Icons.\n"+
@@ -1345,6 +1395,8 @@ do
   {
    evnt=ui_wait_event()
   }while(evnt.value!=back)
+  helptext=null
+  helpscreen=null
   ui_set_screen(options)
  }
  else if(ev.value==setting)
@@ -1385,4 +1437,7 @@ if(exists("/tmp/memorycard"))
   fremove("/tmp/memorycard")
  }catch{}
 }
+nms=null
+new_icons=null
+options=null
 }

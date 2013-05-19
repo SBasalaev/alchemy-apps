@@ -1,9 +1,9 @@
 Package: theme
 Source: theme
-Version: 1.0.0
+Version: 1.0.2
 Section: utils
-Depends: libcore3,libui1,libmedia1,libcolor0,libdialog1,zip
-Summary: Nokia theme creator for j2me devices
+Depends: libcore3,libui1,libmedia1,libcolor0,libdialog1,libbmpwrite0,zip
+Summary: Theme creator for j2me (n_s40)(240x320) devices with take screenshot and preview feature
 License: GPL-3
 Author: jack_5@asia.com
 Maintainer: jack <jack_5@asia.com>
