@@ -21,24 +21,9 @@ clean:
  rm -f mbasic libmb.0.so libmb.so
  make -C modules clean
 
-package: all
- # mbasic
- mkdir -p bin lib/mbasic
- install mbasic bin
- install modules/ui.so lib/mbasic
- cat mbasic.package > PACKAGE
- arh c mbasic.pkg PACKAGE bin lib
- rm -r bin lib
- # libmb0
- mkdir -p lib
- install libmb.0.so lib
- cat libmb0.package > PACKAGE
- arh c libmb.pkg PACKAGE lib
- rm -r lib
- # libmb-dev
- mkdir -p lib inc
- install libmb.so lib
- install mbasic.eh inc
- cat libmb-dev.package > PACKAGE
- arh c libmb-dev.pkg PACKAGE lib inc
- rm -r PACKAGE lib inc
+install:
+ mkdir -p ${DESTDIR}/lib/mbasic ${DESTDIR}/bin ${DESTDIR}/inc
+ install mbasic ${DESTDIR}/bin
+ install modules/ui.so ${DESTDIR}/lib/mbasic
+ install libmb.0.so libmb.so ${DESTDIR}/lib
+ install mbasic.eh ${DESTDIR}/inc

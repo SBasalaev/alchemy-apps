@@ -1,9 +1,30 @@
-Package: mbasic
 Source: mbasic
-Version: 0.6build2
+Version: 0.7
 Section: devel
-Summary: BASIC interpreter ([not yet] MobileBASIC compatible)
-Depends: libcore3, libmb0, libui1
+Author: Sergey Basalaev
 Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2013 Sergey Basalaev
 License: MIT
+Build-Depends: make, ex, libcore-dev, libui-dev
+
+Package: mbasic
+Summary: BASIC interpreter (almost MobileBASIC compatible)
+Depends: ${libdeps}
+Files:
+ bin/*
+ lib/mbasic/*
+
+Package: libmb-dev
+Section: libdevel
+Summary: BASIC interpreter (development headers)
+Depends: libmb0, libcore-dev
+Files:
+ inc/*
+ lib/libmb.so
+
+Package: libmb0
+Section: libs
+Summary: BASIC interpreter (shared library)
+Depends: ${libdeps}
+Files:
+ lib/libmb.0.so

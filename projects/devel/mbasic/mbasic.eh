@@ -7,8 +7,9 @@ const VM_RUN = 1
 const VM_EXIT = 2
 
 def new_basicvm(usestd: Bool): BasicVM;
+const `BasicVM.new` = new_basicvm;
 def BasicVM.reset();
-def BasicVM.run(label: Int): Int;
+def BasicVM.run(label: Int = 0): Int;
 def BasicVM.parse(text: String): Bool;
 def BasicVM.get_state(): Int;
 def BasicVM.set_ivar(name: String, value: Int);

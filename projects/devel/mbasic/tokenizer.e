@@ -59,7 +59,7 @@ def is_wordchar(ch: Int): Bool {
   (ch >= 'a' && ch <= 'z') ||
   (ch >= 'A' && ch <= 'Z') ||
   (ch >= '0' && ch <= '9') ||
-  (ch == '%') || (ch == '$')
+  (ch == '%') || (ch == '$') || (ch == '#')
 }
 
 /* Reads next token and returns its type. */

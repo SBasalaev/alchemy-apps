@@ -6,7 +6,7 @@ use "string.eh"
 /* Prints bytecoded expression at the given offset.
  * Returns offset after last expression bytecode.
  */
-def BasicVM.listexpr(command: BArray, offset: Int): Int {
+def BasicVM.listexpr(command: [Byte], offset: Int): Int {
   offset += 1
   switch (command[offset-1]) {
     PARENS: {
@@ -241,11 +241,21 @@ def BasicVM.list(from: Int, to: Int) {
           write(' ')
           ofs = this.listexpr(cmd, ofs)
         }
-        LIST_FROMTO: {
+        LIST_RANGE: {
           print("LIST")
           write(' ')
           ofs = this.listexpr(cmd, ofs)
           print(", ")
+          ofs = this.listexpr(cmd, ofs)
+        }
+        LOAD: {
+          print("LOAD")
+          write(' ')
+          ofs = this.listexpr(cmd, ofs)
+        }
+        SAVE: {
+          print("SAVE")
+          write(' ')
           ofs = this.listexpr(cmd, ofs)
         }
         PRINT: {
@@ -258,7 +268,51 @@ def BasicVM.list(from: Int, to: Int) {
           write(' ')
           ofs = this.listexpr(cmd, ofs)
           print(", ")
-          print(this.varvalues[cmd[ofs] & 0xff])
+          print(this.varnames[cmd[ofs] & 0xff])
+          ofs += 1
+        }
+        OPEN: {
+          print("OPEN#")
+          write(' ')
+          ofs = this.listexpr(cmd, ofs)
+          print(", ")
+          ofs = this.listexpr(cmd, ofs)
+          print(", ")
+          ofs = this.listexpr(cmd, ofs)
+        }
+        CLOSE: {
+          print("CLOSE#")
+          write(' ')
+          ofs = this.listexpr(cmd, ofs)
+        }
+        PUT: {
+          print("PUT#")
+          write(' ')
+          ofs = this.listexpr(cmd, ofs)
+          print(", ")
+          ofs = this.listexpr(cmd, ofs)
+        }
+        GET: {
+          print("GET#")
+          write(' ')
+          ofs = this.listexpr(cmd, ofs)
+          print(", ")
+          print(this.varnames[cmd[ofs] & 0xff])
+          ofs += 1
+        }
+        FPRINTI, FPRINTF, FPRINTS: {
+          print("PRINT#")
+          write(' ')
+          ofs = this.listexpr(cmd, ofs)
+          print(", ")
+          ofs = this.listexpr(cmd, ofs)
+        }
+        FINPUTI, FINPUTF, FINPUTS: {
+          print("INPUT#")
+          write(' ')
+          ofs = this.listexpr(cmd, ofs)
+          print(", ")
+          print(this.varnames[cmd[ofs] & 0xff])
           ofs += 1
         }
         SETIVAR, SETFVAR, SETSVAR: {

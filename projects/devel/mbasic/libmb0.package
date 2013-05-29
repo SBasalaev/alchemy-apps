@@ -1,9 +1,0 @@
-Package: libmb0
-Source: mbasic
-Version: 0.6build2
-Section: libs
-Summary: BASIC interpreter (shared library)
-Depends: libcore3
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2013 Sergey Basalaev
-License: MIT

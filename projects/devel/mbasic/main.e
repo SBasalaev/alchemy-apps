@@ -3,18 +3,18 @@ use "textio.eh"
 use "string.eh"
 use "list.eh"
 
-const VERSION = "mbasic 0.6"
-const HELP = "BASIC interpreter\n" +
-             "Execute script:\nmbasic [opts] file [args]\n" +
+const VERSION = "MBASIC 0.7"
+const HELP = "MBASIC interpreter\n" +
              "Run interactively:\nmbasic [options]\n" +
-             "Options:\n" +
-             "-nostd  do not load standard functions"
+             "Load program:\nmbasic file [args]\n" +
+             "Run program:\nmbasic -run file [args]\n" +
+             "Run command:\nmbasic -c 'command' [args]"
 
 def main(args: [String]) {
   // parse args
-  var usestd = true
+  var runprog = false
   var infile = ""
-  var arglist = new_list()
+  var arglist = new List()
   var exit = false
   for (var i=0, i<args.len, i+=1) {
     var arg = args[i]
@@ -25,8 +25,8 @@ def main(args: [String]) {
       } else if (arg == "-v") {
         println(VERSION)
         exit = true
-      } else if (arg == "-nostd") {
-        usestd = false
+      } else if (arg == "-run") {
+        runprog = true
       } else {
         infile = arg
       }
@@ -37,27 +37,47 @@ def main(args: [String]) {
   // load source
   var input: Reader;
   if (infile == "") {
+    // interactive mode
     input = utfreader(stdin())
+    println(VERSION)
+    runprog = false
+  } else if (infile == "-") {
+    // non-interactive stdin
+    input = utfreader(stdin())
+  } else if (infile == "-c") {
+    // execute first argument as a command
+    if (arglist.len() == 0) {
+      stderr().println("mbasic: -c requires argument")
+      exit = true
+    } else {
+      var cmd = arglist[0].cast(String)
+      arglist.remove(0)
+      input = utfreader(istream_from_ba(cmd.utfbytes()))
+    }
   } else {
-    var buf = new BArray(fsize(infile))
+    // load file
     var in = fopen_r(infile)
-    in.readarray(buf, 0, buf.len)
+    var buf = in.readfully()
     in.close()
     input = utfreader(istream_from_ba(buf))
   }
   // prepare VM
-  var vm = new_basicvm(usestd)
-  vm.set_ivar("ARGC%", arglist.len())
-  vm.addfunction("ARGS$", "i", 's', arglist.get)
-  // execute
-  var line = input.readline()
-  if (line != null && line.len() > 0 && line[0] == '#')
-    line = input.readline()
-  while (line != null) {
-    vm.parse(line)
-    if (vm.state == VM_EXIT)
-      line = null
-    else
+  if (!exit) {
+    var vm = new BasicVM(true)
+    vm.set_ivar("ARGC%", arglist.len())
+    vm.addfunction("ARGS$", "i", 's', arglist.get)
+    // read commands from the command line
+    var line = input.readline()
+    if (line != null && line.len() > 0 && line[0] == '#')
       line = input.readline()
+    while (line != null) {
+      vm.parse(line)
+      if (vm.state == VM_EXIT)
+        line = null
+      else
+        line = input.readline()
+    }
+    // run
+    if (runprog && vm.state != VM_EXIT) vm.run()
   }
 }

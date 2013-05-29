@@ -450,7 +450,7 @@ def BasicVM.parseline(line: String): Bool {
             if (toexpr == null) {
               ok = false
             } else {
-              bcode.write(LIST_FROMTO)
+              bcode.write(LIST_RANGE)
               fromexpr.writeto(bcode)
               toexpr.writeto(bcode)
             }
@@ -463,6 +463,18 @@ def BasicVM.parseline(line: String): Bool {
         // PRINT expr
         bcode.write(PRINT)
         var expr = this.parseexpr(this.stackpos)
+        if (expr == null) ok = false
+        else expr.writeto(bcode)
+      } else if (cmdname == "LOAD") {
+        // LOAD file$
+        bcode.write(LOAD)
+        var expr = this.parsestringexpr(this.stackpos)
+        if (expr == null) ok = false
+        else expr.writeto(bcode)
+      } else if (cmdname == "SAVE") {
+        // SAVE file$
+        bcode.write(SAVE)
+        var expr = this.parsestringexpr(this.stackpos)
         if (expr == null) ok = false
         else expr.writeto(bcode)
       } else if (cmdname == "INPUT") {
@@ -487,6 +499,119 @@ def BasicVM.parseline(line: String): Bool {
           }
           expr.writeto(bcode)
           bcode.write(varidx)
+        }
+      } else if (cmdname == "OPEN#") {
+        // OPEN# channel, url, mode
+        bcode.write(OPEN)
+        var expr = this.parseintexpr(this.stackpos)
+        if (expr == null) ok = false
+        else expr.writeto(bcode)
+        if (ok && (t.next() != TT_OPERATOR || t.value != ",")) {
+          println("Comma expected, got " + t.value)
+          ok = false
+        }
+        if (ok) {
+          expr = this.parsestringexpr(this.stackpos)
+          if (expr == null) ok = false
+          else expr.writeto(bcode)
+          if (ok && (t.next() != TT_OPERATOR || t.value != ",")) {
+            println("Comma expected, got " + t.value)
+            ok = false
+          }
+          if (ok) {
+            expr = this.parsestringexpr(this.stackpos)
+            if (expr == null) ok = false
+            else expr.writeto(bcode)
+          }
+        }
+      } else if (cmdname == "CLOSE#") {
+        // CLOSE# channel
+        bcode.write(CLOSE)
+        var expr = this.parseintexpr(this.stackpos)
+        if (expr == null) ok = false
+        else expr.writeto(bcode)
+      } else if (cmdname == "GET#") {
+        // GET# channel, var
+        bcode.write(GET)
+        var expr = this.parseintexpr(this.stackpos)
+        if (expr == null) ok = false
+        else expr.writeto(bcode)
+        if (ok && (t.next() != TT_OPERATOR || t.value != ",")) {
+          println("Comma expected, got " + t.value)
+          ok = false
+        }
+        if (ok && t.next() != TT_WORD) {
+          println("Variable name expected, got " + t.value)
+          ok = false
+        }
+        if (ok) {
+          var varname = t.value
+          var varidx = this.get_varindex(varname, true)
+          if (varname[varname.len()-1] == '%') {
+            bcode.write(varidx)
+          } else {
+            println("Integer variable expected in GET#")
+            ok = false
+          }
+        }
+      } else if (cmdname == "INPUT#") {
+        // INPUT# channel, var
+        var expr = this.parseintexpr(this.stackpos)
+        if (expr == null) ok = false
+        if (ok && (t.next() != TT_OPERATOR || t.value != ",")) {
+          println("Comma expected, got " + t.value)
+          ok = false
+        }
+        if (ok && t.next() != TT_WORD) {
+          println("Variable name expected, got " + t.value)
+          ok = false
+        }
+        if (ok) {
+          var varname = t.value
+          var varidx = this.get_varindex(varname, true)
+          switch (varname[varname.len()-1]) {
+            '%': bcode.write(FINPUTI)
+            '$': bcode.write(FINPUTS)
+            else: bcode.write(FINPUTF)
+          }
+          expr.writeto(bcode)
+          bcode.write(varidx)
+        }
+      } else if (cmdname == "PUT#") {
+        // PUT# channel, byte
+        bcode.write(PUT)
+        var expr = this.parseintexpr(this.stackpos)
+        if (expr == null) ok = false
+        else expr.writeto(bcode)
+        if (ok && (t.next() != TT_OPERATOR || t.value != ",")) {
+          println("Comma expected, got " + t.value)
+          ok = false
+        }
+        if (ok) {
+          expr = this.parseintexpr(this.stackpos)
+          if (expr == null) ok = false
+          else expr.writeto(bcode)
+        }
+      } else if (cmdname == "PRINT#") {
+        // PRINT# channel, expr
+        var chexpr = this.parseintexpr(this.stackpos)
+        if (chexpr == null) ok = false
+        if (ok && (t.next() != TT_OPERATOR || t.value != ",")) {
+          println("Comma expected, got " + t.value)
+          ok = false
+        }
+        if (ok) {
+          var expr = this.parseintexpr(this.stackpos)
+          if (expr == null) ok = false
+          if (ok) {
+            switch (expr.rettype()) {
+              ET_INT: bcode.write(FPRINTI)
+              ET_FLOAT: bcode.write(FPRINTF)
+              ET_STRING: bcode.write(FPRINTS)
+            }
+            chexpr.writeto(bcode)
+            expr.writeto(bcode)
+          }
         }
       } else if (cmdname == "GOTO") {
         bcode.write(GOTO)
@@ -545,7 +670,7 @@ def BasicVM.parseline(line: String): Bool {
       } else if (cmdname == "NEXT") {
         bcode.write(NEXT)
         if (t.next() != TT_WORD || t.value[t.value.len()-1] != '%') {
-          println("Integer variable expected in THEN")
+          println("Integer variable expected in NEXT")
           ok = false
         } else {
           bcode.write(this.get_varindex(t.value, true))
@@ -575,7 +700,7 @@ def BasicVM.parseline(line: String): Bool {
         bcode.write(idx)
         for (var i=0, ok && i < bf.args.len(), i+=1) {
           if (i!=0 && (t.next() != TT_OPERATOR || t.value != ",")) {
-            println("Expected comma, got " + t.value)
+            println("Comma expected, got " + t.value)
             ok = false
           }
           if (ok) switch (bf.args[i]) {
@@ -698,7 +823,7 @@ def BasicVM.parseline(line: String): Bool {
             acopy(this.labels, 0, newlabels, 0, index)
             acopy(this.labels, index, newlabels, index+1, this.size-index)
             this.labels = newlabels
-            var newprog = new [BArray](this.size * 2)
+            var newprog = new [[Byte]](this.size * 2)
             acopy(this.program, 0, newprog, 0, index)
             acopy(this.program, index, newprog, index+1, this.size-index)
             this.program = newprog

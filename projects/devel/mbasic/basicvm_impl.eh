@@ -21,17 +21,23 @@ type BasicVM {
   varvalues: [Array],
   labels: [Int],
   forframes: Dict,
-  program: [BArray],
+  program: [[Byte]],
   stack: [Any],
   stackpos: Int,
   functions: List,
   commands: List,
   tokenizer: Tokenizer,
-  usestd: Bool
+  usestd: Bool,
+  channels: [Any],
+  channelstates: [Byte]
 }
 
+const CHANNEL_CLOSED = 0
+const CHANNEL_INPUT = 1
+const CHANNEL_OUTPUT = 2
+
 /* Executes bytecoded command. */
-def BasicVM.exec(command: BArray);
+def BasicVM.exec(command: [Byte]);
 /* Finds index of command with given label. */
 def BasicVM.indexof(label: Int): Int;
 /* Prints program list within given labels inclusively. */

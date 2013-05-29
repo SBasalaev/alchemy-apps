@@ -2,7 +2,8 @@ use "bytecode.eh"
 use "basicvm_impl.eh"
 
 use "list.eh"
-use "io.eh"
+use "textio.eh"
+use "dataio.eh"
 use "error.eh"
 use "math.eh"
 use "string.eh"
@@ -22,25 +23,27 @@ def BasicVM.reset() {
   this.size = 0
   this.current = 0
   this.state = VM_IDLE
-  this.modules = new_list()
-  this.constants = new_list()
+  this.modules = new List()
+  this.constants = new List()
   this.labels = new [Int](16)
-  this.forframes = new_dict()
-  this.program = new [BArray](16)
+  this.forframes = new Dict()
+  this.program = new [[Byte]](16)
   this.stack = new [Any](256)
   this.stackpos = 0
   this.varnames = new [String](256)
   this.varvalues = new [Array](256)
   this.varcount = 0
-  this.commands = new_list()
-  this.functions = new_list()
+  this.commands = new List()
+  this.functions = new List()
   if (this.usestd) this.addstdfunctions()
+  this.channels = new [Any](10)
+  this.channelstates = new [Byte](10)
 }
 
 /* Executes bytecoded expression that starts at the specified offset.
  * Returns position after last expression code.
  */
-def BasicVM.execexpr(command: BArray, ofs: Int, stackpos: Int): Int {
+def BasicVM.execexpr(command: [Byte], ofs: Int, stackpos: Int): Int {
   var stack = this.stack
   ofs += 1
   switch (command[ofs-1]) {
@@ -333,12 +336,12 @@ def BasicVM.execexpr(command: BArray, ofs: Int, stackpos: Int): Int {
 
 type ForFrame {
   cmdindex: Int,
-  forcmd: BArray,
+  forcmd: [Byte],
   dataofs: Int
 }
 
 /* Executes bytecoded command. */
-def BasicVM.exec(command: BArray) {
+def BasicVM.exec(command: [Byte]) {
   var ofs = 0
   var stack = this.stack
   var stackpos = this.stackpos
@@ -353,17 +356,45 @@ def BasicVM.exec(command: BArray) {
       }
       LIST_LINE: {
         ofs = this.execexpr(command, ofs, stackpos)
-        var lnum = cast (Int) stack[stackpos]
+        var lnum = stack[stackpos].cast(Int)
         this.list(lnum, lnum)
       }
-      LIST_FROMTO: {
+      LIST_RANGE: {
         ofs = this.execexpr(command, ofs, stackpos)
         ofs = this.execexpr(command, ofs, stackpos+1)
-        this.list(cast (Int) stack[stackpos], cast (Int) stack[stackpos+1])
+        this.list(stack[stackpos].cast(Int), stack[stackpos+1].cast(Int))
       }
       PRINT: {
         ofs = this.execexpr(command, ofs, stackpos)
         println(stack[stackpos])
+      }
+      LOAD: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        this.reset()
+        var filein = utfreader(fopen_r(stack[stackpos].cast(String)))
+        var line = filein.readline()
+        if (line != null && line.len() > 0 && line[0] == '#') {
+          line = filein.readline()
+        }
+        while (line != null) {
+          this.parse(line)
+          if (this.state == VM_EXIT) {
+            line = null
+          } else {
+            line = filein.readline()
+          }
+        }
+        filein.close()
+      }
+      SAVE: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        var oldout = stdout()
+        var newout = fopen_w(stack[stackpos].cast(String))
+        setout(newout)
+        println("#!/bin/mbasic -run")
+        this.list(0, 65535)
+        setout(oldout)
+        newout.close()
       }
       INPUTI: {
         ofs = this.execexpr(command, ofs, stackpos)
@@ -398,6 +429,119 @@ def BasicVM.exec(command: BArray) {
         ofs += 1
         var input = readline()
         svar[0] = input
+      }
+      OPEN: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        ofs = this.execexpr(command, ofs, stackpos+1)
+        ofs = this.execexpr(command, ofs, stackpos+2)
+        var channel = stack[stackpos].cast(Int)
+        var file = stack[stackpos+1].cast(String)
+        var mode = stack[stackpos+2].cast(String)
+        if (this.channelstates[channel] != CHANNEL_CLOSED) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is already opened")
+        }
+        if (mode == "INPUT") {
+          this.channels[channel] = fopen_r(file)
+          this.channelstates[channel] = CHANNEL_INPUT
+        } else if (mode == "OUTPUT") {
+          this.channels[channel] = fopen_w(file)
+          this.channelstates[channel] = CHANNEL_OUTPUT
+        } else if (mode == "APPEND") {
+          this.channels[channel] = fopen_a(file)
+          this.channelstates[channel] = CHANNEL_OUTPUT
+        } else {
+          error(ERR_ILL_ARG, "Invalid mode: " + mode)
+        }
+      }
+      CLOSE: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        var channel = stack[stackpos].cast(Int)
+        switch (this.channelstates[channel]) {
+          CHANNEL_INPUT:
+            this.channels[channel].cast(IStream).close()
+          CHANNEL_OUTPUT:
+            this.channels[channel].cast(OStream).close()
+          CHANNEL_CLOSED:
+            error(ERR_ILL_STATE, "Channel " + channel + " is already opened")
+        }
+        this.channels[channel] = null
+        this.channelstates[channel] = CHANNEL_CLOSED
+      }
+      PUT: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        ofs = this.execexpr(command, ofs, stackpos+1)
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_OUTPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in OUTPUT mode")
+        }
+        this.channels[channel].cast(OStream).write(stack[stackpos+1].cast(Int))
+      }
+      FPRINTI: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        ofs = this.execexpr(command, ofs, stackpos+1)
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_OUTPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in OUTPUT mode")
+        }
+        this.channels[channel].cast(OStream).writeint(stack[stackpos+1].cast(Int))
+      }
+      FPRINTF: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        ofs = this.execexpr(command, ofs, stackpos+1)
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_OUTPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in OUTPUT mode")
+        }
+        this.channels[channel].cast(OStream).writedouble(stack[stackpos+1].cast(Double))
+      }
+      FPRINTS: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        ofs = this.execexpr(command, ofs, stackpos+1)
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_OUTPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in OUTPUT mode")
+        }
+        this.channels[channel].cast(OStream).writeutf(stack[stackpos+1].cast(String))
+      }
+      GET: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        var ivar = cast ([Int]) this.varvalues[command[ofs] & 0xff]
+        ofs += 1
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_INPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in INPUT mode")
+        }
+        ivar[0] = this.channels[channel].cast(IStream).read()
+      }
+      FINPUTI: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        var ivar = cast ([Int]) this.varvalues[command[ofs] & 0xff]
+        ofs += 1
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_INPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in INPUT mode")
+        }
+        ivar[0] = this.channels[channel].cast(IStream).readint()
+      }
+      FINPUTF: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        var fvar = cast ([Double]) this.varvalues[command[ofs] & 0xff]
+        ofs += 1
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_INPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in INPUT mode")
+        }
+        fvar[0] = this.channels[channel].cast(IStream).readdouble()
+      }
+      FINPUTS: {
+        ofs = this.execexpr(command, ofs, stackpos)
+        var svar = cast ([String]) this.varvalues[command[ofs] & 0xff]
+        ofs += 1
+        var channel = stack[stackpos].cast(Int)
+        if (this.channelstates[channel] != CHANNEL_INPUT) {
+          error(ERR_ILL_STATE, "Channel " + channel + " is not in INPUT mode")
+        }
+        svar[0] = this.channels[channel].cast(IStream).readutf()
       }
       SETIVAR: {
         var idx = command[ofs] & 0xff
