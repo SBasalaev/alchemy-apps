@@ -1,0 +1,11 @@
+Source: i18n-tools
+Version: 0.1
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: GPL-3
+Section: devel
+Build-Depends: make
+
+Package: i18n-tools
+Summary: internationalization utilities
+Depends: ${libdeps}

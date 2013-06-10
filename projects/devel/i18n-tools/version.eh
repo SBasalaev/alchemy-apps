@@ -1,0 +1,1 @@
+const I18N_TOOLS_VERSION = " (i18n-tools 0.1)"
