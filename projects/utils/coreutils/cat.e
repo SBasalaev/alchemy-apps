@@ -8,14 +8,14 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "cat " + C_VERSION
+const VERSION = "cat" + COREUTILS_VERSION
 const HELP = "Prints given files or stdin to the stdout."
 
 def main(args: [String]): Int {
   // parse args
   var quit = false
   var exitcode = 0
-  var files = new_list()
+  var files = new List()
   for (var i=0, i<args.len && !quit, i+=1) {
     var arg = args[i]
     if (arg == "-h") {
@@ -38,7 +38,7 @@ def main(args: [String]): Int {
       stdout().writeall(stdin())
       stdout().flush()
     } else for (var i=0, i<files.len(), i+=1) {
-      var in = fopen_r(files[i].tostr())
+      var in = fopen_r(files[i].cast(String))
       stdout().writeall(in)
       stdout().flush()
       in.close()

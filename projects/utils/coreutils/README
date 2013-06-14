@@ -1,12 +1,12 @@
-Basic system utilities for Alchemy.
+Basic system utilities for Alchemy OS.
 
 cat <file>...
   Print files on the output. If no files specified then
   data is read from standard input.
 
 chmod <modifiers> <files>...
-  Modify attributes on given files. Modifiers are: -r, +r,
-  -w, +w, -x, +x.
+  Modify read, write, execute permissions on given files.
+  Modifiers are: -r, +r, -w, +w, -x, +x.
 
 cp <source> <destination>
 cp <files>... <directory>
@@ -24,7 +24,7 @@ env <key>=<value>... <command> <arguments>
 
 install <files>... <directory>
   Copy files to the specified directory and set their
-  attributes.
+  permissions.
 
 ls <directory>
   Print names of all files contained in given directory.

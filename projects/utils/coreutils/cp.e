@@ -8,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "cp " + C_VERSION
+const VERSION = "cp" + COREUTILS_VERSION
 const HELP = "Copies files and directories.\n" +
              "Usage:\n" +
              " cp <src> <dest>\n" +

@@ -8,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "rm " + C_VERSION
+const VERSION = "rm" + COREUTILS_VERSION
 const HELP = "Removes files and directories.\n" +
              "Options:\n" +
              "-r remove directories recursively\n" +

@@ -8,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "mkdir " + C_VERSION
+const VERSION = "mkdir" + COREUTILS_VERSION
 const HELP = "Makes directories.\n" +
              "Options:\n" +
              "-p don't fail if exists, create parents as needed" 

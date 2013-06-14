@@ -8,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "echo " + C_VERSION
+const VERSION = "echo" + COREUTILS_VERSION
 const HELP = "Prints strings to the stdout."
 
 def main(args: [String]): Int {

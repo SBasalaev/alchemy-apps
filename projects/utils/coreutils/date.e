@@ -8,7 +8,7 @@ use "string.eh"
 use "time.eh"
 use "version.eh"
 
-const VERSION = "date " + C_VERSION
+const VERSION = "date" + COREUTILS_VERSION
 const HELP = "Prints current date in default format."
 
 def main(args: [String]): Int {

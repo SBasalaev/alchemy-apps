@@ -7,9 +7,9 @@ use "io.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "chmod " + C_VERSION
+const VERSION = "chmod" + COREUTILS_VERSION
 const HELP = "Sets file attributes.\n" +
-             "Options:\n" +
+             "Attribute options (read, write, execute):\n" +
              " +r -r +w -w +x -x"
 
 const UNSET = -1

@@ -7,7 +7,7 @@ use "io.eh"
 use "list.eh"
 use "version.eh"
 
-const VERSION = "touch " + C_VERSION
+const VERSION = "touch" + COREUTILS_VERSION
 const HELP = "Update file timestamp."
 
 def main(args: [String]): Int {

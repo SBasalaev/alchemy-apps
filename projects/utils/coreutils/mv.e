@@ -8,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "mv " + C_VERSION
+const VERSION = "mv" + COREUTILS_VERSION
 const HELP = "Moves/renames files."
 
 def main(args: [String]): Int {

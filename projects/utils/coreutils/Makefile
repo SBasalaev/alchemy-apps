@@ -1,52 +1,48 @@
 ALL=cat chmod cp date echo env install ls mkdir mv rm touch
 
-all: ${ALL}
+all: bin/cat bin/chmod bin/cp bin/date bin/echo bin/env bin/install bin/ls bin/mkdir bin/mv bin/rm bin/touch
 
-cat: cat.e
- ex cat.e -o cat
+bin:
+ mkdir -p bin
 
-chmod: chmod.e
- ex chmod.e -o chmod
+bin/cat: bin cat.e
+ ex cat.e -o bin/cat
 
-cp: cp.e
- ex cp.e -o cp
+bin/chmod: bin chmod.e
+ ex chmod.e -o bin/chmod
 
-date: date.e
- ex date.e -o date
+bin/cp: bin cp.e
+ ex cp.e -o bin/cp
 
-echo: echo.e
- ex echo.e -o echo
+bin/date: bin date.e
+ ex date.e -o bin/date
 
-env: env.e
- ex env.e -o env
+bin/echo: bin echo.e
+ ex echo.e -o bin/echo
 
-install: install.e
- ex install.e -o install
+bin/env: bin env.e
+ ex env.e -o bin/env
 
-ls: ls.e
- ex ls.e -o ls
+bin/install: bin install.e
+ ex install.e -o bin/install
 
-mkdir: mkdir.e
- ex mkdir.e -o mkdir
+bin/ls: bin ls.e
+ ex ls.e -o bin/ls
 
-mv: mv.e
- ex mv.e -o mv
+bin/mkdir: bin mkdir.e
+ ex mkdir.e -o bin/mkdir
 
-rm: rm.e
- ex rm.e -o rm
+bin/mv: bin mv.e
+ ex mv.e -o bin/mv
 
-touch: touch.e
- ex touch.e -o touch
+bin/rm: bin rm.e
+ ex rm.e -o bin/rm
 
-clean-all: rm
- ./rm -f ${ALL}
+bin/touch: bin touch.e
+ ex touch.e -o bin/touch
 
-install-all: all
- ./install ${ALL} /bin
+clean: bin/rm
+ bin/rm -rf bin
 
-package: all
- ./mkdir -p bin
- ./install ${ALL} ./bin
- ./cat coreutils.package > PACKAGE
- arh c coreutils.pkg PACKAGE bin
- ./rm -r PACKAGE bin
+install: all
+ bin/install bin ${DESTDIR}

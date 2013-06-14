@@ -9,12 +9,21 @@ use "strbuf.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "install " + C_VERSION
+const VERSION = "install" + COREUTILS_VERSION
 const HELP = "Copy files in directory and set their permissions."
+
+def mkdirtree(dir: String) {
+  if (!exists(dir)) {
+    var parent = pathdir(dir)
+    if (parent != null && !exists(parent))
+      mkdirtree(parent)
+    mkdir(dir)
+  }
+}
 
 def finstalltree(src: String, dest: String) {
   if (is_dir(src)) {
-    if (!is_dir(dest)) mkdir(dest)
+    if (!is_dir(dest)) mkdirtree(dest)
     var subs = flist(src)
     for (var i=0, i < subs.len, i+=1) {
       finstalltree(src+"/"+subs[i], dest+"/"+subs[i])

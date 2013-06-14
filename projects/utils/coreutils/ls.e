@@ -8,7 +8,7 @@ use "list.eh"
 use "string.eh"
 use "version.eh"
 
-const VERSION = "ls " + C_VERSION
+const VERSION = "ls" + COREUTILS_VERSION
 const HELP = "List contents of given directory."
 
 def _ls(f: String): Int {

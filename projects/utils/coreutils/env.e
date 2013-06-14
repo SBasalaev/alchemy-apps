@@ -9,7 +9,7 @@ use "string.eh"
 use "sys.eh"
 use "version.eh"
 
-const VERSION = "env " + C_VERSION
+const VERSION = "env" + COREUTILS_VERSION
 const HELP = "Run program in changed environment.\n" +
              "Usage: env KEY=VALUE... program args..."
 
