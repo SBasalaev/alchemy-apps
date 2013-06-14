@@ -100,7 +100,7 @@ def pkgbuild_genspec(src: Source, pkg: Binary): Int {
       out.println("Homepage: " + src.homepage)
     }
     out.println("Summary: " + if (pkg.summary != null) pkg.summary else "")
-    if (pkg.depends != null) {
+    if (pkg.depends != null && pkg.depends.len() > 0) {
       out.print("Depends: ")
       var deplist = pkg.depends
       deplist.sortself(`String.cmp`)
