@@ -1,0 +1,20 @@
+Source: libexample
+Section: libs
+Version: 1
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: BSD-2
+Build-Depends: make
+
+Package: libexample1
+Summary: an example of a library
+Depends: ${libdeps}
+Files:
+ /lib/libexample.1.so
+
+Package: libexample-dev
+Summary: an example of a library - development headers
+Depends: libexample1
+Files:
+ /lib/libexample.so
+ /inc

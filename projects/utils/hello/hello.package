@@ -4,6 +4,7 @@ Version: 2
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: BSD-2
 Copyright: (c) 2011-2013 Sergey Basalaev
+Build-Depends: make
 
 Package: hello
 Depends: ${libdeps}

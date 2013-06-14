@@ -1,0 +1,19 @@
+This is an example of Ether library.
+
+Library consists of interface and implementation.
+The interface defined in 'example.eh' is what can
+be used by other programs. The file 'example.e' is
+the actual implementation of the library.
+
+This example builds two packages. The first 'libexample1'
+contains only the library itself (libexample.1.so).
+This package will be installed for programs that use
+libexample. The number 1 in the name of the library is
+the version of the library interface. If the interface
+changes, this number must be increased.
+
+The second package 'libexample-dev' contains files that
+are needed to build programs using the library. Namely,
+the header file that will be used by program sources and
+the link for the compiler to the library implementing
+current interface version.
