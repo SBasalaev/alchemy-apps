@@ -23,7 +23,7 @@ def mkdirtree(dir: String) {
 
 def finstalltree(src: String, dest: String) {
   if (is_dir(src)) {
-    if (!is_dir(dest)) mkdirtree(dest)
+    if (!is_dir(dest)) mkdir(dest)
     var subs = flist(src)
     for (var i=0, i < subs.len, i+=1) {
       finstalltree(src+"/"+subs[i], dest+"/"+subs[i])
@@ -69,6 +69,7 @@ def main(args: [String]): Int {
       exitcode = 1
     } else {
       var destdir = files[len-1].tostr()
+      mkdirtree(destdir)
       for (var i=0, i<len-1, i += 1) {
         var src = files[i].tostr()
         var dest = destdir+"/"+pathfile(src)
