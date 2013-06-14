@@ -13,6 +13,7 @@ Files:
  /lib/libexample.1.so
 
 Package: libexample-dev
+Section: libdevel
 Summary: an example of a library - development headers
 Depends: libexample1
 Files:
