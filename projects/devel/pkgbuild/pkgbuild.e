@@ -292,7 +292,7 @@ def pkgbuild_libdeps(pkg: Binary, index: Dict): Int {
           }
         }
       }
-    } else if (pkg.depends.indexof("${libdeps}" >= 0)) {
+    } else if (pkg.depends.indexof("${libdeps}") >= 0) {
       pkg.depends.remove(pkg.depends.indexof("${libdeps}"))
     }
   } catch (var e) {
