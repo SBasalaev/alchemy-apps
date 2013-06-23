@@ -7,11 +7,4 @@ clean:
  rm -f pkglint
 
 install:
- install pkglint /bin
-
-package: pkglint
- mkdir -p bin
- install pkglint bin
- cat pkglint.package > PACKAGE
- arh c pkglint.pkg PACKAGE bin
- rm -r PACKAGE bin
+ install pkglint ${DESTDIR}/bin

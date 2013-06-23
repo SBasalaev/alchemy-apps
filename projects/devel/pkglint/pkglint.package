@@ -1,9 +1,11 @@
-Package: pkglint
 Source: pkglint
-Version: 0.5.3
+Version: 0.6
 Section: devel
-Summary: check Alchemy OS packages for common errors
-Depends: libcore3, arh
 License: GPL-3
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Author: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2012-2013 Sergey Basalaev
+Build-Depends: make
+
+Package: pkglint
+Summary: check Alchemy OS packages for common errors
+Depends: ${libdeps}, arh

@@ -7,7 +7,7 @@ use "string.eh"
 
 const HELP = "Check binary packages for common errors\n" +
              "Usage: pkglint file.pkg"
-const VERSION = "pkglint 0.5.3"
+const VERSION = "pkglint 0.6"
 
 var errlevel: Int;
 var spec: Dict;
