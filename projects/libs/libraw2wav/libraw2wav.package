@@ -1,0 +1,20 @@
+Source: libraw2wav
+Version: 1.0-1
+Section: libs
+Copyright: (c) 2013, Kyle Alexander Buan
+Author: Kyle Alexander Buan <tar.shoduze@gmail.com> 
+License: GPL-3
+Build-Depends: make
+
+Package: libraw2wav0
+Summary: WAV file writer
+Depends: ${libdeps}
+Files: /lib/libraw2wav.0.so
+
+Package: libraw2wav-dev
+Summary: WAV file writer - development files
+Section: libdevel
+Depends: ${libdeps}, libraw2wav0
+Files:
+ /lib/libraw2wav.so
+ /inc/*
