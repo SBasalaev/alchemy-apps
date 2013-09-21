@@ -10,16 +10,14 @@ const HELP = "Build Alchemy OS package\n" +
 const VERSION = "pkgbuild 0.1"
 
 def parsedeps(deps: String): List {
-  if (deps == null) {
-    null
-  } else {
+  var list = new List()
+  if (deps != null) {
     var array = deps.split(',')
-    var list = new List()
     for (var i=array.len-1, i>=0, i-=1) {
       list.add(array[i].trim())
     }
-    list
   }
+  list
 }
 
 def String.indexofspace(from: Int = 0): Int {
@@ -50,7 +48,7 @@ def main(args: [String]): Int {
     } else if (pkgspec != "") {
       quit = true
       exitcode = 2
-      stderr().println("pkgbuild: extra parameter: " + arg)
+      stderr().println("pkgbuild: excess parameter: " + arg)
     } else {
       pkgspec = arg
     }
@@ -96,35 +94,32 @@ def main(args: [String]): Int {
       builddepends = parsedeps(spec["build-depends"].cast(String))
     }
     // checking build-deps and guessing build system
-    if (src.builddepends != null) {
-      for (var i=0, i < src.builddepends.len(), i+=1) {
-        var dep = src.builddepends[i].cast(String)
-        if (!exists("/cfg/pkg/db/lists/" + dep + ".files")) {
-          exitcode = 1
-          stderr().println("pkgbuild: missing build dependency: " + dep)
-        }
-        if (dep == "make") {
-          buildsys = "make"
-        }
+    for (var i=0, i < src.builddepends.len(), i+=1) {
+      var dep = src.builddepends[i].cast(String)
+      if (!exists("/cfg/pkg/db/lists/" + dep + ".files")) {
+        exitcode = 1
+        stderr().println("pkgbuild: missing build dependency: " + dep)
+      }
+      if (dep == "make") {
+        buildsys = "make"
       }
     }
     // reading binary sections
     while ({spec = r.nextSection(); spec != null}) {
-      binaries.add(
-        new Binary {
-          name = spec["package"].cast(String),
-          version = spec["version"].cast(String),
-          author = spec["author"].cast(String),
-          maintainer = spec["maintainer"].cast(String),
-          copyright = spec["copyright"].cast(String),
-          homepage = spec["homepage"].cast(String),
-          license = spec["license"].cast(String),
-          section = spec["section"].cast(String),
-          summary = spec["summary"].cast(String),
-          depends = parsedeps(spec["depends"].cast(String)),
-          files = spec["files"].cast(String)
-        }
-      )
+      var binary = new Binary {
+        name = spec["package"].cast(String),
+        version = spec["version"].cast(String),
+        author = spec["author"].cast(String),
+        maintainer = spec["maintainer"].cast(String),
+        copyright = spec["copyright"].cast(String),
+        homepage = spec["homepage"].cast(String),
+        license = spec["license"].cast(String),
+        section = spec["section"].cast(String),
+        summary = spec["summary"].cast(String),
+        depends = parsedeps(spec["depends"].cast(String)),
+        files = spec["files"].cast(String)
+      }
+      binaries.add(binary)
     }
     r.close()
     // check required fields

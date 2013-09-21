@@ -100,7 +100,7 @@ def pkgbuild_genspec(src: Source, pkg: Binary): Int {
       out.println("Homepage: " + src.homepage)
     }
     out.println("Summary: " + if (pkg.summary != null) pkg.summary else "")
-    if (pkg.depends != null && pkg.depends.len() > 0) {
+    if (pkg.depends.len() > 0) {
       out.print("Depends: ")
       var deplist = pkg.depends
       deplist.sortself(`String.cmp`)
@@ -131,13 +131,16 @@ def pkgbuild_installfiles(pkg: Binary): Int {
       if (path.len() > 0) {
         var sp = path.indexof(' ')
         if (sp < 0) {
+          // installing file from tmp
           fromdir = pathdir("PKGBUILD/tmp/" + path)
           todir = pathdir("PKGBUILD/" + pkg.name + '/' + path)
           filemask = pathfile(path)
         } else {
+          // installing file manually
           fromdir = pathdir("./" + path[:sp])
-          todir = pathdir("PKGBUILD/" + pkg.name + '/' + path[sp:].trim())
+          todir = abspath("PKGBUILD/" + pkg.name + '/' + path[sp:].trim())
           filemask = pathfile(path[:sp])
+          path = path[:sp]
         }
         exitcode = exec_wait("mkdir", ["-p", todir])
         var filelist = if (exists(fromdir)) flistfilter(fromdir, filemask) else null

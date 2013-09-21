@@ -4,7 +4,7 @@ SOURCES=cfgreader.e pkgbuild.e main.e
 all: ${TARGET}
 
 ${TARGET}: ${SOURCES}
- ex ${SOURCES} -o ${TARGET} -g
+ ex ${SOURCES} -o ${TARGET}
 
 clean:
  rm ${TARGET}
