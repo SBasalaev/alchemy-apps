@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=MidiTrax
+Exec=miditrax
+Icon=icon.png
+Categories=Sound;

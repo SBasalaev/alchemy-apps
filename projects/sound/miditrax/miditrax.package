@@ -1,0 +1,11 @@
+Source: miditrax
+Version: 1.1
+Section: sound
+Copyright: (c) 2013, Kyle Alexander Buan
+Author: Kyle Alexander Buan <tar.shoduze@gmail.com>
+License: GPL-3
+Build-Depends: make, libdialog-dev, libmidifile-dev, libmedia-dev
+
+Package: miditrax
+Summary: Create MIDI files in a familiar tracker-like environment
+Depends: ${libdeps}
