@@ -1,0 +1,29 @@
+Source: icons-oxygen
+Section: gui
+Version: 4.10
+Copyright: (c) 2007-2011 KDE Oxygen Team
+Author: KDE Oxygen Team <kde-artists@kde.org>
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+License: LGPL-3
+Homepage: http://oxygen-icons.org
+
+Package: icons-oxygen-16
+Summary: Oxygen icon theme, size 16x16
+Depends: ${libdeps}
+Files:
+ oxygen-16.theme res/icons/themes
+ 16 res/icons/oxygen
+
+Package: icons-oxygen-24
+Summary: Oxygen icon theme, size 24x24
+Depends: ${libdeps}
+Files:
+ oxygen-24.theme res/icons/themes
+ 24 res/icons/oxygen
+
+Package: icons-oxygen-32
+Summary: Oxygen icon theme, size 32x32
+Depends: ${libdeps}
+Files:
+ oxygen-32.theme res/icons/themes
+ 32 res/icons/oxygen
