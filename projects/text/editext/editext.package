@@ -1,0 +1,11 @@
+Source: editext
+Version: 1.0
+Section: text
+Author: jack_5@asia.com <jack_5@asia.com>
+Copyright: (c) 2013 jack_5@asia.com
+License: GPL-3
+Build-Depends: make
+
+Package: editext
+Summary: Advanced Text Editor for Alchemy OS
+Depends: ${libdeps}
