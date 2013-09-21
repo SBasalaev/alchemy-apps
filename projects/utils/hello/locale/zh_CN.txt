@@ -1,0 +1,2 @@
+# Simplified Chinese translation
+"Hello, world!" = "世界你好！"

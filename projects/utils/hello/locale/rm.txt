@@ -1,0 +1,2 @@
+# Phaeto-Romance translation
+"Hello, world!" = "Chau, muond!"

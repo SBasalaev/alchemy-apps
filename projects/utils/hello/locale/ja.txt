@@ -1,0 +1,2 @@
+# Japanese translation
+"Hello, world!" = "世界よ、こんにちは！"

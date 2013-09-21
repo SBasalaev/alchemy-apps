@@ -1,0 +1,2 @@
+# Thai translation
+"Hello, world!" = "สวัสดี, ชาวโลก!"

@@ -1,0 +1,2 @@
+# French translation
+"Hello, world!" = "Bonjour, le monde!"

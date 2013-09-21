@@ -1,0 +1,2 @@
+# Hungarian translation
+"Hello, world!" = "Szia Világ!"

@@ -1,0 +1,2 @@
+# Danish translation
+"Hello, world!" = "Hej verden!"

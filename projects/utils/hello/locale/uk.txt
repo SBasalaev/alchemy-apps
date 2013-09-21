@@ -1,0 +1,2 @@
+# Ukrainian translation
+"Hello, world!" = "Привіт світ!"

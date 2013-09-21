@@ -1,0 +1,2 @@
+# Vietnamese translation
+"Hello, world!" = "Chào thế giới !"

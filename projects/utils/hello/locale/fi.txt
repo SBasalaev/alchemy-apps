@@ -1,0 +1,2 @@
+# Finnish translation
+"Hello, world!" = "Terve maailma!"

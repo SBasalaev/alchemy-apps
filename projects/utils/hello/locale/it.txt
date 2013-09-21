@@ -1,0 +1,2 @@
+# Italian translation
+"Hello, world!" = "Salve, mondo!"

@@ -1,0 +1,2 @@
+# Korean translation
+"Hello, world!" = "안녕하세요, 여러분!"

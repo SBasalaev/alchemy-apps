@@ -1,0 +1,2 @@
+# Estonian translation
+"Hello, world!" = "Tere kõik!"

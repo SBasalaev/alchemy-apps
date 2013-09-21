@@ -1,0 +1,2 @@
+# Azerbaijani translation
+"Hello, world!" = "Salam, dünya!"

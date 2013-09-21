@@ -1,0 +1,2 @@
+# Lao translation
+"Hello, world!" = "ສະບາຍດີໂລກ"

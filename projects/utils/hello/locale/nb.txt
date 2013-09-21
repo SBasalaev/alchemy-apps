@@ -1,0 +1,2 @@
+# Norwegian Bokmaal translation
+"Hello, world!" = "Hei, verden!"

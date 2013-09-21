@@ -1,0 +1,2 @@
+# Arabic translation
+"Hello, world!" = "مرحبا ، العالم!"

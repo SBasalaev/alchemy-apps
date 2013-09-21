@@ -1,0 +1,2 @@
+# Irish translation
+"Hello, world!" = "Dia duit, a dhomhain!"

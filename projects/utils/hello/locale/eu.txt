@@ -1,0 +1,2 @@
+# Basque translation
+"Hello, world!" = "Kaixo, mundu!"

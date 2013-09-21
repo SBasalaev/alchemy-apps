@@ -1,0 +1,2 @@
+# Traditional Chinese translation
+"Hello, world!" = "哈囉，大家好！"

@@ -1,0 +1,2 @@
+# English translation
+"Hello, world!" = "Hello, world!"

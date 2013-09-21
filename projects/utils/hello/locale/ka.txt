@@ -1,0 +1,2 @@
+# Georgian translation
+"Hello, world!" = "სალამი მსოფლიოს!"

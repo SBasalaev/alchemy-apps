@@ -1,0 +1,2 @@
+# Turkish translation
+"Hello, world!" = "Merhaba, dünya!"

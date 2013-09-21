@@ -1,5 +1,9 @@
 use "io"
+use "i18n"
 
 def main(args: [String]) {
-  println("Hello, world!")
+  // set base name for translations
+  settextdomain("hello")
+  // print translated string
+  println(_("Hello, world!"))
 }

@@ -1,0 +1,2 @@
+# Spanish translation
+"Hello, world!" = "¡Hola, mundo!"

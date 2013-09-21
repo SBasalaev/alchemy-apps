@@ -1,0 +1,2 @@
+# Norwegian nynorsk translation
+"Hello, world!" = "Hei, verda!"

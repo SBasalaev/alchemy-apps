@@ -1,0 +1,2 @@
+# Esperanto translation
+"Hello, world!" = "Saluton, mondo!"

@@ -1,0 +1,2 @@
+# Croatian translation
+"Hello, world!" = "Pozdrav, svijete!"

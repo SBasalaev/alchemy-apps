@@ -1,0 +1,2 @@
+# Serbian translation
+"Hello, world!" = "Поздрав свима!"

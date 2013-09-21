@@ -1,0 +1,2 @@
+# Galician translation
+"Hello, world!" = "¡Ola, mundo!"

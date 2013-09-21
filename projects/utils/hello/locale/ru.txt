@@ -1,0 +1,2 @@
+# Russian translation
+"Hello, world!" = "Здравствуй, мир!"

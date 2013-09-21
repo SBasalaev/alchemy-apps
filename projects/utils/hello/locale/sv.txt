@@ -1,0 +1,2 @@
+# Swedish translation
+"Hello, world!" = "Hej, världen!"

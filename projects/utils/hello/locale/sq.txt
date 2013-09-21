@@ -1,0 +1,2 @@
+# Albanian translation
+"Hello, world!" = "Përshëndetje, botë!"

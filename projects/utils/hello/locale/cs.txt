@@ -1,0 +1,2 @@
+# Czech translation
+"Hello, world!" = "Nazdar, světe!"

@@ -1,0 +1,2 @@
+# Hebrew translation
+"Hello, world!" = "שלום עולם!"

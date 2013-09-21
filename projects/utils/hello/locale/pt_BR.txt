@@ -1,0 +1,2 @@
+# Brazilian Portuguese translation
+"Hello, world!" = "Olá, mundo!"
