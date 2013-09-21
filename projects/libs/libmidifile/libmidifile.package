@@ -1,0 +1,21 @@
+Source: libmidifile
+Version: 1.3
+Section: libs
+Copyright: (c) 2013, Kyle Alexander Buan
+Author: Kyle Alexander Buan <tar.shoduze@gmail.com>
+License: GPL-3
+Build-Depends: make
+
+Package: libmidifile0
+Summary: MIDI file writer
+Depends: ${libdeps}
+Files:
+ /lib/libmidifile.0.so
+
+Package: libmidifile-dev
+Section: libdevel
+Summary: MIDI file writer, header files
+Depends: libmidifile0, libcore-dev
+Files:
+ /lib/libmidifile.so
+ /inc/*
