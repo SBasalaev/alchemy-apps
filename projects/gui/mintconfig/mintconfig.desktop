@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Appearance
+Name[ru]=Внешний вид
+Exec=mintconfig
+Icon=app-configure
+Categories=Settings;

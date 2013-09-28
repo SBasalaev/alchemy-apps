@@ -1,0 +1,11 @@
+Source: mintconfig
+Version: 1.0
+Section: gui
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: GPL-3
+Build-Depends: make, libmint-dev
+
+Package: mintconfig
+Summary: appearance configuration for MINT desktop
+Depends: ${libdeps}
