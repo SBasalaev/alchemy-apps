@@ -1,0 +1,21 @@
+Source: mint
+Section: libs
+Version: 0.96
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: LGPL-3
+Build-Depends: make
+
+Package: libmint1
+Depends: ${libdeps}
+Summary: mobile interface toolkit - shared library
+Files:
+ /lib/libmint.1.so
+
+Package: libmint-dev
+Section: libdevel
+Depends: libmint1, libui-dev
+Summary: mobile interface toolkit - development headers
+Files:
+ /lib/libmint.so
+ /inc
