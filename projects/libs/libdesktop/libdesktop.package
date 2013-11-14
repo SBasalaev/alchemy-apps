@@ -1,0 +1,22 @@
+Source: libdesktop
+Section: libs
+Version: 1.0
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013, Sergey Basalaev
+License: LGPL-3
+Build-Depends: make
+
+Package: libdesktop1
+Depends: ${libdeps}
+Summary: shared desktop library
+Files:
+ /lib/libdesktop.1.so
+ /res
+
+Package: libdesktop-dev
+Section: libdevel
+Depends: ${libdeps}, libdesktop1
+Summary: desktop library - headers
+Files:
+ /lib/libdesktop.so
+ /inc

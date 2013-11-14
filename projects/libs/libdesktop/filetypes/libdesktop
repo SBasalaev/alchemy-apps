@@ -1,0 +1,277 @@
+# Special types
+/?/:bin:Unknown file
+/dir/:dir:Folder
+/empty/:text:Empty file
+/ebin/:exec:Ether executable
+/nbin/:exec:Native executable
+/link/:exec:Symbolic link
+/script/:script:Interpreter script
+/text/:text:Text file
+# Types from freedesktop.org
+3ga:video:3GPP video
+3gp:video:3GPP video
+3gpp:video:3GPP video
+7z:package:7-zip archive
+a:package:AR archive
+aac:audio:AAC audio
+abw:office:AbiWord document
+ac3:audio:Dolby Digital audio
+ace:package:ACE archive
+adb:text:Ada source code
+ads:text:Ada source code
+aif:audio:AIFF audio
+aifc:audio:AIFC audio
+aiff:audio:AIFF audio
+amr:audio:AMR audio
+amz:audio:AmazonMP3 download file
+ani:image:Windows animated cursor
+ape:audio:Monkey's audio
+apk:package:Android package
+arj:package:ARJ acrhive
+asc:text:Plain text
+asf:video:ASF video
+asm:text:Assembly source code
+asp:web:Microsoft Active Server page
+ass:text:SSA subtitles
+atom:web:Atom syndication feed
+au:audio:AU audio
+avi:video:AVI video
+awk:text:AWK script
+axa:audio:Annodex audio
+axv:video:Annodex video
+b64:text:Base64 encoded data
+bak:bin:Backup file
+bas:text:BASIC source code
+bat:text:MS-DOS batch file
+bmp:image:Windows BMP image
+bz2:package:Bzip archive
+c:text:C source code
+cbl:text:Cobol source code
+cc:text:C++ source code
+cda:audio:CDA audio
+cer:bin:X.509 certificate
+chm:office:CHM document
+class:bin:Java class
+cmake:text:CMake source code
+cpio:package:CPIO archive
+cpp:text:C++ source code
+cs:text:C# source code
+csh:script:C shell script
+css:text:CSS stylesheet
+csv:text:CSV document
+cue:text:CD image cuesheet
+cur:image:Windows cursor
+cxx:text:C++ source code
+dc:exec:Dreamcast ROM
+dcm:image:DICOM image
+deb:package:Debian package
+desktop:text:Desktop configuration file
+dib:image:DIB image
+diff:text:Differences between files
+divx:video:AVI video
+djv:image:DjVu image
+djvu:image:DjVu image
+dll:bin:Windows dynamic library
+dmg:bin:Apple disk image
+doc:office:Microsoft Word document
+docx:office:Microsoft Word 2007 document
+dts:audio:DTS audio
+dv:video:DV video
+dvi:office:TeX DVI document
+emf:image:EMF image
+eps:image:EPS image
+epub:bin:Electronic book
+erl:text:Erlang source code
+es:script:ECMAScript program
+exe:exec:DOS/Windows executable
+f:text:Fortran source code
+f4a:audio:MPEG-4 audio
+f4v:video:MPEG-4 video
+fb2:bin:FictionBook document
+flac:audio:FLAC audio
+flv:video:Flash video
+gb:exec:GameBoy ROM
+gba:exec:GameBoy Advance ROM
+gbc:exec:GameBoy Color ROM
+gen:exec:Genesis ROM
+gg:exec:Sega Game Gear ROM
+gif:image:GIF image
+gnumeric:office:Gnumeric spreadsheet
+gnuplot:office:Gnuplot document
+go:text:Go source code
+gplt:office:Gnuplot document
+gsm:audio:GSM 06.10 audio
+gz:package:Gzip archive
+h:text:C header
+h++:text:C++ header
+hpp:text:C++ header
+hs:text:Haskell source code
+htm:web:HTML document
+html:web:HTML document
+hxx:text:C++ header
+ics:text:ICS calendar
+icns:image:Mac OS X icon
+ico:image:Microsoft icon
+iso:bin:Raw CD image
+jad:text:Java application descriptor
+jar:package:Java archive
+java:text:Java source code
+jks:bin:Java keystore
+jng:image:JPEG Network image
+jnlp:text:JNLP file
+jpeg:image:JPEG image
+jpg:image:JPEG image
+js:script:JavaScript program
+latex:text:TeX document
+lha:package:LHA archive
+lhs:text:Literal Haskell source code
+lhz:package:LHZ archive
+lrz:package:Lrzip archive
+ltx:text:TeX document
+lua:script:Lua script
+lyx:office:LyX document
+lz:package:Lzip archive
+lzma:package:LZMA archive
+lzo:package:LZO archive
+m3u:audio:M3U playlist
+m4:script:M4 macro
+m4a:audio:MPEG-4 audio
+m4v:video:MPEG-4 video
+man:text:Manual page
+markdown:text:Markdown document
+md:text:Markdown document
+mdb:office:Microsoft Access database
+mht:bin:MHTML web archive
+mid:audio:MIDI audio
+midi:audio:MIDI audio
+mka:audio:Matroska audio
+mkv:video:Matroska video
+ml:text:OCaml source code
+mobi:office:Mobipocket e-book
+mov:video:QuickTime video
+mp2:audio:MP2 audio
+mp3:audio:MP3 audio
+mp4:video:MPEG-4 video
+mpe:video:MPEG video
+mpeg:video:MPEG video
+mpg:video:MPEG video
+mpga:audio:MP3 audio
+msi:exec:Windows Installer package
+msx:exec:MSX ROM
+mxf:video:MXF video
+n64:exec:Nintendo64 ROM
+nds:exec:Nintendo DS ROM
+nes:exec:Nintendo ROM
+o:bin:Object code
+objc:text:Objective C source code
+odb:office:OpenDocument database
+odc:office:OpenDocument chart
+odf:office:OpenDocument formula
+odg:image:OpenDocument drawing
+odi:image:OpenDocument image
+odp:office:OpenDocument presentation
+ods:office:OpenDocument spreadsheet
+odt:office:OpenDocument text
+oga:audio:Ogg audio
+ogg:audio:Ogg audio
+ogm:video:OGM video
+ogv:video:Ogg video
+ogx:video:Ogg multimedia file
+old:bin:Backup file
+opml:web:OPML syndication feed
+otf:bin:OpenType font
+pak:package:PAK archive
+pas:text:Pascal source code
+patch:text:Differences between files
+pcm:audio:PCM audio
+pcd:image:PhotoCD image
+pcx:image:PCX image
+pdf:office:PDF Document
+php:script:PHP script
+pl:script:Perl script
+png:image:PNG image
+pntg:image:MacPaint Bitmap image
+po:text:Gettext translation file
+ppt:office:Microsoft PowerPoint presentation
+pptx:office:Microsoft PowerPoint 2007 presentation
+ps:text:PostScript document
+psd:image:Photoshop image
+psw:office:Pocket Word document
+py:script:Python script
+pyc:bin:Python bytecode
+rar:package:RAR archive
+raw:image:Panasonic raw image
+rb:script:Ruby script
+rdf:bin:RDF document
+rle:image:Run Length Encoded bitmap image
+rpm:package:RPM package
+rtf:text:RTF document
+scala:text:Scala source code
+scm:text:Scheme source code
+sgm:bin:SGML document
+sgml:bin:SGML document
+sql:text:SQL code
+sh:script:Shell script
+shar:package:Shell archive
+sis:package:Symbian package
+sisx:package:Symbian package
+smc:exec:Super Nintendo ROM
+sms:exec:Sega Master System ROM
+so:bin:Shared library
+sr2:image:Sony SR2 raw image
+srf:image:Sony SRF raw image
+ssa:text:SSA subtitles
+sty:text:TeX document
+sub:text:Subtitles
+svg:image:SVG image
+swf:video:Shockwave Flash video
+tar:package:Tar archive
+tcl:script:Tcl script
+tex:text:TeX document
+texi:text:TeXInfo document
+tga:image:Targa image
+tgz:package:Tar archive (gzip compressed)
+theme:package:Theme file
+tif:image:TIFF image
+tiff:image:TIFF image
+tk:Tcl script
+torrent:bin:BitTorrent seed file
+ttf:bin:TrueType font
+ttx:text:TrueType XML font
+txt:text:Plain text
+url:web:Internet shortcut
+uue:package:UU-encoded file 
+vala:text:Vala source code
+vapi:text:Vala source code
+vcard:text:Electronic business card
+vcf:text:Electronic business card
+webm:video:WebM video
+wmv:video:Windows Media video
+xbm:image:X bitmap
+xcf:image:GIMP image
+xhtml:web:XHTML page
+xls:office:Microsoft Excel spreadsheet
+xlsx:office:Microsoft Excel 2007 spreadsheet
+xmf:audio:XMF audio
+xml:web:XML document
+xpm:image:X pixmap
+xsl:text:XSLT stylesheet
+xslt:text:XSLT stylesheet
+xz:package:XZ archive
+yaml:text:YAML document
+vcs:text:VCS calendar
+vsd:office:Microsoft Visio document
+wav:audio:WAV audio
+wbmp:image:WBMP image
+wma:audio:Windows Media audio
+wmf:image:WMF image
+wml:web:WML document
+z:package:UNIX compressed file
+zip:package:Zip archive
+# Alchemy specific types
+arh:package:ARH archive
+e:text:Ether source code
+eh:text:Ether header
+mb:script:MBASIC script
+nth:package:Nokia theme package
+pkg:package:Alchemy OS package
