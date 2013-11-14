@@ -1,0 +1,11 @@
+Source: mint-baseapps
+Version: 0.1
+Section: gui
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: GPL-3
+Build-Depends: make, libmint-dev, libdesktop-dev
+
+Package: mint-baseapps
+Depends: ${libdeps}
+Summary: basic utilities for MINT desktop
