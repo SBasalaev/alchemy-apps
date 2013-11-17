@@ -1,8 +1,0 @@
-Package: terminal
-Source: natives
-Version: 2.1
-Section: gui
-Copyright: (c) 2011-2013 Sergey Basalaev
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-License: GPL-3
-Summary: Built-in terminal for Alchemy OS

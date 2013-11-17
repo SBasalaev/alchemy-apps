@@ -1,0 +1,27 @@
+Source: natives
+Version: 2.1
+Section: admin
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+License: GPL-3
+Copyright: (c) 2011-2013 Sergey Basalaev
+
+Package: terminal
+Version: 2.1.1
+Summary: Built-in terminal for Alchemy OS
+Files: bin/terminal /bin
+
+Package: mount
+Summary: utilities for mounting and managing different file systems
+Files:
+ bin/mount /bin
+ bin/umount /bin
+ bin/lsroots /bin
+
+Package: nec
+Section: devel
+Summary: Ether compiler for Alchemy OS
+Files: bin/nec /bin
+
+Package: sh
+Summary: shell for Alchemy OS
+Files: bin/sh /bin
