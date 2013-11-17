@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Simple Text Editor
+Exec=edit
+Icon=file-text
+Extensions=/text/;
+Categories=Utility;TextEditor;

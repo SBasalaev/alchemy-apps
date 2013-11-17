@@ -1,15 +1,12 @@
 edit: edit.e
- ex edit.e -o edit -lui
+ ex edit.e -o edit -lui -lmint -g
+
+run: edit
+ ./edit
 
 clean:
  rm -f edit
 
 install: edit
- install edit /bin
-
-package: edit
- mkdir bin
- install edit bin
- cp edit.package PACKAGE
- arh c edit.pkg PACKAGE bin
- rm -r PACKAGE bin
+ install edit ${DESTDIR}/bin
+ install edit.desktop ${DESTDIR}/res/apps

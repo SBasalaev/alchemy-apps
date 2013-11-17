@@ -1,77 +1,94 @@
-/* Simple editor
- * (C) 2012, Sergey Basalaev
+/* Simple text editor
+ * (C) 2012-2013, Sergey Basalaev
  * Licensed under GPL v3
  */
 
-use "io.eh"
-use "string.eh"
-use "sys.eh"
-use "ui.eh"
-use "stdscreens.eh"
+use "io"
+use "string"
+use "stdscreens"
+use "ui"
 
-const HELP = "Usage: edit file"
-const VERSION = "edit 0.9.2"
+use "mint/dialog"
+use "mint/actionlist"
+use "mint/eventloop"
 
-def readfile(f: String): String {
-  if (exists(f)) {
-    var buf = new BArray(fsize(f))
-    var in = fopen_r(f)
-    in.readarray(buf, 0, buf.len)
-    in.close()
-    ba2utf(buf)
-  } else {
-    ""
+const HELP = "Usage: edit [file]"
+const VERSION = "edit 1.0"
+
+var edit: EditBox;
+var file = "";
+
+def save(ask: Bool) {
+  var fname = file
+  if (fname == "" || ask) {
+    fname = showSaveFileDialog("Save as", file)
+  }
+  if (fname != null && fname != "") try {
+    var out = fopen_w(fname)
+    var buf = edit.text.utfbytes()
+    out.writearray(buf, 0, buf.len)
+    out.close()
+    edit.title = pathfile(file) + " - Edit"
+    file = fname
+  } catch (var e) {
+    showError("I/O Error", "Failed to save file "+file + ". Cause: " + e)
   }
 }
 
-def writefile(f: String, text: String) {
-  var buf = text.utfbytes()
-  var out = fopen_w(f)
-  out.writearray(buf, 0, buf.len)
-  out.close()
-}
-
-const ALERT_TIMEOUT = 1500
-
-def show_alert(msg: String) {
-  var alert = new_msgbox(msg, null)
-  alert.set_title("Edit")
-  alert.add_menu(new_menu("Close", 1))
-  var back = ui_get_screen()
-  ui_set_screen(alert)
-  for (var i=0, i< ALERT_TIMEOUT / 100, i += 1) {
-    var e = ui_read_event()
-    if (e != null && e.source == alert && e.kind == EV_MENU) {
-      i = ALERT_TIMEOUT / 100 // quit
+def main(args: [String]): Int {
+  // parse arguments
+  var quit = false
+  var exitcode = 0
+  if (args.len > 0) {
+    if (args[0] == "-h") {
+      println(HELP)
+      quit = true
+    } else if (args[0] == "-v") {
+      println(VERSION)
+      quit = true
     } else {
-      sleep(100) // wait a little
+      file = abspath(args[0])
     }
   }
-  ui_set_screen(back)
-}
 
-def main(args: [String]) {
-  if (args.len == 0 || args[0] == "-h") {
-    println(HELP)
-  } else if (args[0] == "-v") {
-    println(VERSION)
-  } else {
-    var f = args[0]
-    var edit = new_editbox(EDIT_ANY)
-    edit.set_title(f + "- Edit")
-    edit.set_text(readfile(f))
-    var msave = new_menu("Save", 1)
-    var mquit = new_menu("Quit", 2)
-    edit.add_menu(msave)
-    edit.add_menu(mquit)
-    ui_set_screen(edit)
-    var e = ui_wait_event()
-    while (e.value != mquit) {
-      if (e.value == msave) {
-        writefile(f, edit.get_text())
-        show_alert("File "+f+" is saved.")
+  // loading file
+  if (!quit) {
+    edit = new EditBox(EDIT_ANY)
+    if (file == "" || !exists(file)) {
+      edit.title = "[NEW] - Edit"
+    } else {
+      edit.title = pathfile(file) + " - Edit"
+      var size = fsize(file)
+      if (size > edit.maxsize) {
+        showError("I/O Error", "The file " + file + " is too big for edit.")
+        exitcode = 1
+        quit = true
       }
-      e = ui_wait_event()
+      if (!quit) {
+        try {
+          var input = fopen_r(file)
+          var buf = input.readfully()
+          input.close()
+          edit.text = ba2utf(buf)
+        } catch (var e) {
+          showError("I/O Error", "Failed to load file "+file + ". Cause: " + e)
+          exitcode = 1
+          quit = true
+        }
+      }
     }
   }
+
+  // processing
+  if (!quit) {
+    var list = new ActionList("Menu")
+    list.add("Save", "document-save", save.curry(false))
+    list.add("Save as", "document-save-as", save.curry(true))
+
+    var loop = new EventLoop(edit)
+    loop.onMenu(new Menu("Menu", 1), list.start.curry(true))
+    list.add("Quit", "app-exit", loop.quit)
+    loop.start()
+  }
+  exitcode
 }

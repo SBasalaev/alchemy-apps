@@ -1,9 +1,11 @@
-Package: edit
 Source: edit
-Version: 0.9.2build2
+Version: 1.0
 Section: text
-Summary: simple text editor
-Depends: libcore3, libui1
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2012 Sergey Basalaev
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2012-2013 Sergey Basalaev
 License: GPL-3
+Build-Depends: make, libmint-dev
+
+Package: edit
+Summary: simple text editor
+Depends: ${libdeps}
