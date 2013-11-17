@@ -199,9 +199,10 @@ def showSaveFileDialog(title: String, dir: String = null, filters: [String] = nu
       }
     } else {
       var choice = list.get_string(list.index)
-      dir = abspath(dir + '/' + choice)
-      if (choice != ".." && choice[choice.len()-1] != '/') {
-        if (showYesNo("Overwrite file", "File " + choice + " already exists. Overwrite it?"))
+      if (choice == ".." || choice[choice.len()-1] == '/') {
+        dir = abspath(dir + '/' + choice)
+      } else if (showYesNo("Overwrite file", "File " + choice + " already exists. Overwrite it?")) {
+        dir = abspath(dir + '/' + choice)
         quit = true
       }
     }
