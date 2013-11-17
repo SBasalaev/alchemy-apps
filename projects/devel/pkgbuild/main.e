@@ -6,8 +6,8 @@ use "list.eh"
 use "specs.eh"
 
 const HELP = "Build Alchemy OS package\n" +
-             "Usage: pkgbuild [options] specfile"
-const VERSION = "pkgbuild 0.1"
+             "Usage: pkgbuild [options] [specfile]"
+const VERSION = "pkgbuild 0.4.1"
 
 def parsedeps(deps: String): List {
   var list = new List()

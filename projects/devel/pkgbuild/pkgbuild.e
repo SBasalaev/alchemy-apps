@@ -121,7 +121,7 @@ def pkgbuild_genspec(src: Source, pkg: Binary): Int {
 
 def pkgbuild_installfiles(pkg: Binary): Int {
   var exitcode = 0
-  try {
+  if (pkg.files != null) try {
     var files = pkg.files.split('\n')
     for (var i=0, exitcode == 0 && i<files.len, i+=1) {
       var path = files[i]

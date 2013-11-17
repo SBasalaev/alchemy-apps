@@ -1,6 +1,6 @@
 Source: pkgbuild
 Section: devel
-Version: 0.4
+Version: 0.4.1
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2013 Sergey Basalaev
 License: GPL-3
