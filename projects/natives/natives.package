@@ -8,7 +8,9 @@ Copyright: (c) 2011-2013 Sergey Basalaev
 Package: terminal
 Version: 2.1.1
 Summary: Built-in terminal for Alchemy OS
-Files: bin/terminal /bin
+Files:
+ bin/terminal /bin
+ res /
 
 Package: mount
 Summary: utilities for mounting and managing different file systems
