@@ -1,0 +1,20 @@
+Source: liblexer
+Section: libs
+Version: 1.0
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: LGPL-3
+Build-Depends: make
+
+Package: liblexer1
+Summary: simple lexical tokenizer
+Depends: ${libdeps}
+Files: /lib/liblexer.1.so
+
+Package: liblexer-dev
+Section: libdevel
+Summary: simple lexical tokenizer - headers for development
+Depends: liblexer1, ${libdeps}
+Files:
+ /lib/liblexer.so
+ /inc
