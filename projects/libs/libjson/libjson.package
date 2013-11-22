@@ -1,0 +1,20 @@
+Source: libjson
+Section: libs
+Version: 1.0
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013, Sergey Basalaev
+License: LGPL-3
+Build-Depends: make, liblexer-dev
+
+Package: libjson1
+Depends: ${libdeps}
+Summary: JSON parser and generator
+Files: /lib/libjson.1.so
+
+Package: libjson-dev
+Section: libdevel
+Depends: libjson1, ${libdeps}
+Summary: JSON parser and generator - headers for development
+Files:
+ /lib/libjson.so
+ /inc
