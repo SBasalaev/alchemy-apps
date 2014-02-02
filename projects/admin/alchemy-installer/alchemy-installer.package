@@ -1,0 +1,11 @@
+Source: alchemy-installer
+Section: admin
+Version: 1
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) Sergey Basalaev, 2014
+License: GPL-3
+Build-Depends: make
+
+Package: alchemy-installer
+Depends: ${libdeps}
+Summary: installs/updates Alchemy OS
