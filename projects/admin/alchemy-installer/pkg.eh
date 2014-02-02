@@ -10,3 +10,4 @@ def pkg_remove(pm: PkgManager, names: [String]);
 def pkg_install_seq(pm: PkgManager, names: [String]): [String];
 def pkg_arh_unpack(pm: PkgManager, f: String);
 def pkg_list_installed(pm: PkgManager): [String];
+def pkg_query_installed(pm: PkgManager, name: String): PkgSpec;

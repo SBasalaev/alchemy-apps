@@ -72,9 +72,11 @@ def installUpdates(progress: ProgressScreen, manager: PkgManager) {
     ok = false
   }
   if (ok) {
-    var seq = pkg_install_seq(manager, ["alchemy-gui"])
-    progress.show()
-    installSeq(progress, manager, seq)
+    var seq = pkg_install_seq(manager, pkg_list_installed(manager))
+    if (seq.len > 0) {
+      progress.show()
+      installSeq(progress, manager, seq)
+    }
   }
 }
 
@@ -102,31 +104,42 @@ def main(args: [String]): Int {
   var status = STATUS_OK
   try {
     // initialization
-   var message = new MessageScreen("Installer")
-   message.setMessage("Preparing to install")
-   message.show()
-   var progress = new ProgressScreen("Installer")
-   var update = exists("/cfg/pkg/db/sources/installed")
-   if (!update) {
-     fcreate("/cfg/pkg/db/sources/installed")
-   }
-   writeString("/cfg/pkg/sources", "res:/pkg 2.1")
-   var manager = pkg_init()
-   // choosing install task
-   var task = showOption("Install variant",
-     ["Base system", "Standard UI"],
-     ["This variant will only install system utilities and terminal session. 60 KiB to install.",
-      "This variant will install graphical user interface. 90 KiB to install."])
-    // installing base system
+    var message = new MessageScreen("Installer")
+    message.setMessage("Preparing to install")
+    message.show()
+    var progress = new ProgressScreen("Installer")
+    var upgrade = exists("/cfg/pkg/db/sources/installed")
+    if (!upgrade) {
+      fcreate("/cfg/pkg/db/sources/installed")
+    }
+    writeString("/cfg/pkg/sources", "res:/pkg 2.1")
+    var manager = pkg_init()
+    // choosing install task
+    var task: Int
+    if (upgrade) {
+      // task is selected based on presence of alchemy-gui package
+      if (pkg_query_installed(manager, "alchemy-gui") != null) task = TASK_UI
+      else task = TASK_BASE
+    } else {
+      task = showOption("Install variant",
+        ["Base system", "Standard UI"],
+        ["This variant will only install system utilities and terminal session. 60 KiB to install.",
+         "This variant will install graphical user interface. 90 KiB to install."])
+    }
+    // installing base system and local updates
     try {
-      message.setMessage("Installing base system")
+      message.setMessage("Reading local repository")
       message.show()
       progress.setMessage("Installing base system")
       installBaseSystem(progress, manager)
+      message.show()
+      progress.setMessage("Installing updates")
+      installUpdates(progress, manager)
     } catch (var e) {
       status = STATUS_FAIL
       showMessage("Error", "The base system could not be installed properly.\n\n" + e)
     }
+    // TODO: remove outdated packages on upgrade
     // configuring base system
     if (status == STATUS_OK) try {
       message.setMessage("Configuring base system")
@@ -136,9 +149,9 @@ def main(args: [String]): Int {
       status = STATUS_FAIL
       showMessage("Error", "The base system could not be configured properly.\n\n" + e)
     }
-    // installing desktop
-    if (status == STATUS_OK && task == TASK_UI) try {
-      message.setMessage("Installing user interface")
+    // install chosen task
+    if (!upgrade && status == STATUS_OK && task == TASK_UI) try {
+      message.setMessage("Reading local repository")
       message.show()
       progress.setMessage("Installing user interface")
       installUi(progress, manager)
@@ -146,12 +159,11 @@ def main(args: [String]): Int {
       status == STATUS_BASEONLY
       showMessage("Error", "Could not install user interface.\n\n" + e)
     }
-    // TODO: remove outdated packages on upgrade
-    // installing updates
+    // downloading and installing updates
     if (status == STATUS_OK && showYesNo("Updates",
-      "Do you want to download and install the latest updates?" +
-      "Requires internet connection!")) try {
-      message.setMessage("Installing updates")
+        "Do you want to download and install the latest updates?" +
+        "Requires internet connection!")) try {
+      message.setMessage("Downloading package lists")
       message.show()
       progress.setMessage("Installing updates")
       installUpdates(progress, manager)
@@ -169,19 +181,19 @@ def main(args: [String]): Int {
       showMessage("Error", "Failed to configure system.\n\n" + e)
       status = STATUS_FAIL
     }
-     // show goodbye message
-     var msg = switch (status) {
-       STATUS_OK:
-         "Alchemy OS " + VERSION + " has been successfully installed. " +
-         "We hope you enjoy it!"
-       STATUS_BASEONLY:
-         "User interface could not be installed, base terminal session was " +
-         "configured instead. You can try to install user interface later."
-       else:
-         "For some reason installation failed. Sorry :("
-     }
-     showMessage("Installer", msg)
-     status
+    // show goodbye message
+    var msg = switch (status) {
+      STATUS_OK:
+        "Alchemy OS " + VERSION + " has been successfully installed. " +
+        "We hope you enjoy it!"
+      STATUS_BASEONLY:
+        "User interface could not be installed, base terminal session was " +
+        "configured instead. You can try to install user interface later."
+      else:
+        "For some reason installation failed. Sorry :("
+    }
+    showMessage("Installer", msg)
+    status
   } catch (var e) {
     showMessage("Fatal Error", "There was a terrible error. Installation cannot proceed.\n\n" + e)
     STATUS_FAIL
