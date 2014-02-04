@@ -9,10 +9,4 @@ clean:
  rm -f elink
 
 install: all
- install elink /bin
-
-package: all
- mkdir -p bin
- install elink bin
- arh c elink.pkg PACKAGE bin
- rm -r bin
+ install elink ${DESTDIR}/bin

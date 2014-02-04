@@ -6,11 +6,7 @@ def Entry.new(kind: Int, value: Any) {
 }
 
 def Entry.eq(other: Entry): Bool {
-  if (other == null) {
-    false
-  } else {
-    this.kind == other.kind && this.value == other.value
-  }
+  return this.kind == other.kind && this.value == other.value
 }
 
 def NullEntry.new() {

@@ -1,9 +1,0 @@
-Package: elink
-Source: elink
-Version: 2.1.1
-Section: devel
-Summary: linker for Alchemy OS
-Depends: libcore3
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2013 Sergey Basalaev
-License: GPL-3

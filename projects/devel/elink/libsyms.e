@@ -1,16 +1,13 @@
 use "libsyms.eh"
 use "textio.eh"
 use "dataio.eh"
-use "string.eh"
-use "error.eh"
 use "sys.eh"
 
-def loadFromNative(in: IStream): LibInfo {
-  var r = utfreader(in);
+def loadFromNative(inp: IStream): LibInfo {
+  var r = utfreader(inp)
   var soname: String = null
   var symbolfile: String = null
-  var line = r.readline()
-  while (line != null) {
+  while (var line = r.readLine(), line != null) {
     var cl = line.indexof('=')
     if (cl > 0) {
       var key = line[:cl].lcase().trim()
@@ -18,74 +15,73 @@ def loadFromNative(in: IStream): LibInfo {
       if (key == "soname") soname = value
       else if (key == "symbols") symbolfile = value
     }
-    line = r.readline();
   }
-  r.close();
+  r.close()
   var info = new LibInfo {
     soname = soname
-  };
+  }
   var vsym = new List()
   if (symbolfile != null) {
-    var symstream = readurl("res:" + symbolfile);
-    var buf = new [Byte](symstream.available());
-    symstream.readarray(buf, 0, buf.len);
-    symstream.close();
-    var syms = ba2utf(buf).split('\n');
-    vsym.addfrom(syms, 0, syms.len);
+    var symstream = readUrl("res:" + symbolfile)
+    r = utfreader(symstream)
+    while (var line = r.readLine(), line != null) {
+      vsym.add(line)
+    }
+    r.close()
   }
-  info.symbols = vsym;
-  info;
+  info.symbols = vsym
+  return info
 }
 
-def loadFromEther(in: IStream): LibInfo {
-  if (in.readushort() > SUPPORTED)
-    error(ERR_LINKER, "Unsupported format version");
-  var info = new LibInfo{};
-  var symbols = new List();
-  var lflags = in.readubyte();
+def loadFromEther(inp: IStream): LibInfo {
+  if (inp.readUShort() > SUPPORTED)
+    throw(ERR_LINKER, "Unsupported format version")
+  var info = new LibInfo { }
+  var symbols = new List()
+  var lflags = inp.readUByte()
   if ((lflags & LFLAG_SONAME) != 0) { //has soname
-    info.soname = in.readutf();
+    info.soname = inp.readUTF()
   }
   //skipping dependencies
-  var depsize = in.readushort();
-  for (var i=0, i<depsize, i+=1) {
-    in.skip(in.readushort());
+  var depsize = inp.readUShort()
+  for (var i in 0 .. depsize-1) {
+    inp.skip(inp.readUShort())
   }
   //reading pool
-  var poolsize = in.readushort();
-  for (var i=0, i<poolsize, i+=1) {
-    var ch = in.readubyte();
+  var poolsize = inp.readUShort()
+  for (var i in 0 .. poolsize-1) {
+    var ch = inp.readUByte()
     switch (ch) {
       '0': { }
-      'i', 'f': in.skip(4);
-      'l', 'd': in.skip(8);
-      'S': in.skip(in.readushort());
+      'i', 'f': inp.skip(4)
+      'l', 'd': inp.skip(8)
+      'S': inp.skip(inp.readUShort())
       'E': {
-        in.skip(2);
-        in.skip(in.readushort());
+        inp.skip(2)
+        inp.skip(inp.readUShort())
       }
       'P': {
-        var name = in.readutf();
-        var flags = in.readubyte();
-        in.skip(2);
-        in.skip(in.readushort());
+        var name = inp.readUTF()
+        var flags = inp.readUByte()
+        inp.skip(2)
+        inp.skip(inp.readUShort())
         if ((flags & FFLAG_SHARED) != 0) {
-          symbols.add(name);
+          symbols.add(name)
         }
         if ((flags & FFLAG_LNUM) != 0) {
-          in.skip(in.readushort()*2);
+          inp.skip(inp.readUShort()*2)
         }
         if ((flags & FFLAG_ERRTBL) != 0) {
-          in.skip(in.readushort()*2);
+          inp.skip(inp.readUShort()*2)
         }
       }
       else:
-        error(ERR_LINKER, "Unknown object type: "+ch);
+        throw(ERR_LINKER, "Unknown object type: "+ch)
     }
   }
-  in.close();
-  info.symbols = symbols;
-  info;
+  inp.close()
+  info.symbols = symbols
+  return info
 }
 
 def loadLibInfo(libname: String): LibInfo {
@@ -96,27 +92,27 @@ def loadLibInfo(libname: String): LibInfo {
     if (exists(testfile)) libfile = testfile
   }
   if (libfile == null)
-    error(ERR_LINKER, "Library not found: " + libname)
-  var in = fopen_r(libfile);
-  var magic = in.read() << 8 | in.read();
-  var info = switch (magic) {
+    throw(ERR_LINKER, "Library not found: " + libname)
+  var inp = fread(libfile)
+  var magic = inp.read() << 8 | inp.read()
+  var info: LibInfo = null
+  switch (magic) {
     ('#'<<8|'='): {
-      var link = utfreader(in).readline().trim();
-      in.close();
-      loadLibInfo(link);
+      var link = utfreader(inp).readLine().trim()
+      inp.close()
+      info = loadLibInfo(link)
     }
     0xC0DE: {
-      loadFromEther(in);
-    };
+      info = loadFromEther(inp)
+    }
     ('#'<<8|'@'): {
-      loadFromNative(in);
+      info = loadFromNative(inp)
     }
     else: {
-      in.close();
-      error(ERR_LINKER, "Unknown library format: " + magic)
-      null;
+      inp.close()
+      throw(ERR_LINKER, "Unknown library format: " + magic)
     }
   }
-  if (info.soname == null) info.soname = libname;
-  info;
+  if (info.soname == null) info.soname = libname
+  return info
 }
