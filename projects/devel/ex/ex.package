@@ -1,9 +1,11 @@
 Source: ex
-Package: ex
 Section: devel
-Version: 1.4.1
-Depends: nec, elink, libcore3
-Summary: build tool for Alchemy OS
-Copyright: (c) 2012-2013 Sergey Basalaev
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Version: 2.0
+Copyright: (c) 2012-2014 Sergey Basalaev
+Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3
+Build-Depends: make
+
+Package: ex
+Depends: ${libdeps}, nec, elink
+Summary: build tool for Alchemy OS
