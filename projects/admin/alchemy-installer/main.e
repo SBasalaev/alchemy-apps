@@ -54,7 +54,9 @@ def configureBaseSystem() {
     "http://alchemy-os.org/pkg 2.1/main\n" +
     "http://alchemy-os.org/pkg 2.1/nonfree", true)
   writeString("/bin/ec", "#=nec")
+  setExec("/bin/ec", true)
   writeString("/bin/el", "#=elink")
+  setExec("/bin/el", true)
 }
 
 def installUi(progress: ProgressScreen, manager: PkgManager) {
