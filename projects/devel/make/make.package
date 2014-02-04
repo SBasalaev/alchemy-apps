@@ -1,9 +1,11 @@
 Source: make
-Package: make
-Version: 1.4
+Version: 1.5
 Section: devel
-Depends: libcore3
-Summary: utility to ease program building
 License: GPL-3
-Copyright: (c) 2012-2013 Sergey Basalaev
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2012-2014 Sergey Basalaev
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Build-Depends: make
+
+Package: make
+Depends: ${libdeps}
+Summary: utility to ease program building

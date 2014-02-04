@@ -7,11 +7,4 @@ clean:
  rm -f make
 
 install: make
- install make /bin
-
-package: make
- mkdir bin
- install make bin
- cp make.package PACKAGE
- arh c make.pkg PACKAGE bin
- rm -r PACKAGE bin
+ install make ${DESTDIR}/bin

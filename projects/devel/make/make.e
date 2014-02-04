@@ -1,16 +1,15 @@
 /* Make utility for Alchemy OS
- * Copyright (c) 2012-2013, Sergey Basalaev
+ * Copyright (c) 2012-2014, Sergey Basalaev
  * Licensed under GPL v3
  */
 
-use "dict.eh"
-use "list.eh"
-use "strbuf.eh"
-use "string.eh"
-use "sys.eh"
-use "textio.eh"
+use "dict"
+use "list"
+use "strbuf"
+use "sys"
+use "textio"
 
-const VERSION = "make 1.4"
+const VERSION = "make 1.5"
 const HELP = "Usage: make [options] [targets]\n" +
              "Options:\n" +
              "-h this help\n" +
@@ -58,7 +57,7 @@ def substvars(line: String): String {
       }
     }
   }
-  sb.tostr()
+  return sb.tostr()
 }
 
 /* Build named target. */
@@ -67,47 +66,46 @@ def build(target: String, silent: Bool): Bool {
   if (rule == null) {
     // if no rule just check if file exists
     if (exists(target)) {
-      true
+      return true
     } else {
       stderr().println("** No rule to build target "+target)
-      false
+      return false
     }
-  } else {
-    var ok = true
-    // build dependencies
-    for (var i=0, ok && i<rule.deps.len, i+=1) {
-      ok = build(rule.deps[i], silent)
-    }
-    if (ok) {
-      // test if we need to build target
-      var needs = !exists(target)
-      if (!needs) {
-        var time = fmodified(target)
-        for (var i=0, !needs && i<rule.deps.len, i+=1) {
-          needs = time < fmodified(rule.deps[i])
-        }
-      }
-      // build target
-      if (needs) {
-        for (var i=0, ok && i<rule.exec.len, i+=1) {
-          if (!silent) println(rule.exec[i])
-          ok = 0 == exec_wait("sh", ["-c", rule.exec[i]])
-        }
-      }
-      if (!ok) {
-        stderr().println("** Failed to build target "+target)
-      }
-    }
-    ok
   }
+  var ok = true
+  // build dependencies
+  for (var i=0, ok && i<rule.deps.len, i+=1) {
+    ok = build(rule.deps[i], silent)
+  }
+  if (ok) {
+    // test if we need to build target
+    var needs = !exists(target)
+    if (!needs) {
+      var time = fmodified(target)
+      for (var i=0, !needs && i<rule.deps.len, i+=1) {
+        needs = time < fmodified(rule.deps[i])
+      }
+    }
+    // build target
+    if (needs) {
+      for (var i=0, ok && i<rule.exec.len, i+=1) {
+        if (!silent) println(rule.exec[i])
+        ok = 0 == execWait("sh", ["-c", rule.exec[i]])
+      }
+    }
+    if (!ok) {
+      stderr().println("** Failed to build target "+target)
+    }
+  }
+  return ok
 }
 
 /* Parses makefile. */
 def readmf(fname: String): Bool {
-  var r = utfreader(fopen_r(fname))
+  var r = utfreader(fread(fname))
   var ok = true
   var lineno = 1
-  var line = r.readline()
+  var line = r.readLine()
   var rule: Rule
   var commands = new List()
   while (ok && line != null) {
@@ -125,7 +123,7 @@ def readmf(fname: String): Bool {
       // end target
       if (rule != null) {
         rule.exec = new [String](commands.len())
-        commands.copyinto(0, rule.exec, 0, rule.exec.len)
+        commands.copyInto(0, rule.exec, 0, rule.exec.len)
         rules[rule.target] = rule
         commands = new List()
         if (def_rule == null) def_rule = rule
@@ -139,7 +137,7 @@ def readmf(fname: String): Bool {
       // start new target
       if (rule != null) {
         rule.exec = new [String](commands.len())
-        commands.copyinto(0, rule.exec, 0, rule.exec.len)
+        commands.copyInto(0, rule.exec, 0, rule.exec.len)
         rules[rule.target] = rule
         commands = new List()
         if (def_rule == null) def_rule = rule
@@ -164,50 +162,46 @@ def readmf(fname: String): Bool {
       stderr().println(fname+":"+lineno+": Syntax error")
       ok = false
     }
-    line = r.readline()
+    line = r.readLine()
     lineno += 1
   }
   if (rule != null) {
     rule.exec = new [String](commands.len())
-    commands.copyinto(0, rule.exec, 0, rule.exec.len)
+    commands.copyInto(0, rule.exec, 0, rule.exec.len)
     rules[rule.target] = rule
     if (def_rule == null) def_rule = rule
   }
   r.close()
-  ok
+  return ok
 }
 
 def main(args: [String]): Int {
   // init
   rules = new Dict()
   vars = new Dict()
-  var result = 0
-  var exit = false
   // parse args
   var targets = new List()
   var todir = ""
   var silent = false
   var readdir = false
-  for (var i=0, i < args.len, i+=1) {
+  for (var arg in args) {
     if (readdir) {
       readdir = false
-      todir = args[i]
+      todir = arg
     } else {
-      var arg = args[i]
       if (arg == "-h") {
         println(HELP)
-        exit = true
+        return 0
       } else if (arg == "-v") {
         println(VERSION)
-        exit = true
+        return 0
       } else if (arg == "-s") {
         silent = true
       } else if (arg == "-C") {
         readdir = true
       } else if (arg.ch(0) == '-') {
         stderr().println("make: Unknown option: "+arg)
-        result = 2
-        exit = true
+        return 2
       } else if (arg.indexof('=') > 0) {
         var eq = arg.indexof('=')
         vars[arg[:eq]] = arg[eq+1:]
@@ -217,40 +211,30 @@ def main(args: [String]): Int {
     }
   }
   // apply args
-  if (todir.len() > 0) set_cwd(todir)
+  if (todir.len() > 0) setCwd(todir)
   if (readdir) {
     stderr().println("** -C must precede dir name")
-    result = 2
-    exit = true
+    return 2
   }
   // check makefile
   var fname = "Makefile"
-  if (!exit) {
+  if (!exists(fname)) {
+    fname = "makefile"
     if (!exists(fname)) {
-      fname = "makefile"
-      if (!exists(fname)) {
-        stderr().println("** Makefile not found")
-        exit = true
-        result = 2
-      }
+      stderr().println("** Makefile not found")
+      return 2
     }
   }
   // parse makefile
-  if (!exit) {
-    if (!readmf(fname)) {
-      exit = true
-      result = 2
-    }
+  if (!readmf(fname)) {
+    return 2
   }
   // build
-  if (!exit) {
-    var ok = true
-    if (targets.len() == 0) {
-      ok = build(def_rule.target, silent)
-    } else for (var i=0, ok && i < targets.len(), i+=1) {
-      ok = build(targets[i].tostr(), silent)
-    }
-    result = if (ok) 0 else 1
+  var ok = true
+  if (targets.len() == 0) {
+    ok = build(def_rule.target, silent)
+  } else for (var i=0, ok && i < targets.len(), i+=1) {
+    ok = build(targets[i].tostr(), silent)
   }
-  result
+  return if (ok) 0 else 1
 }
