@@ -1,1 +1,1 @@
-const COREUTILS_VERSION = " 0.5.5 (Alchemy coreutils)"
+const COREUTILS_VERSION = " 1.0 (Alchemy coreutils)"

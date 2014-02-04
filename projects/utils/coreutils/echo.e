@@ -1,47 +1,44 @@
 /* Alchemy coreutils
- * (C) 2011-2013, Sergey Basalaev
+ * (C) 2011-2014, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "io.eh"
 use "list.eh"
-use "string.eh"
 use "version.eh"
 
 const VERSION = "echo" + COREUTILS_VERSION
-const HELP = "Prints strings to the stdout."
+const HELP =
+  "Prints strings to the stdout.\n" +
+  "Options:\n" +
+  " -n  do not add newline"
 
 def main(args: [String]): Int {
   // parse args
-  var len = args.len
-  var quit = false
-  var exitcode = 0
-  var strings = new_list()
-  for (var i=0, i < args.len, i+=1) {
-    var arg = args[i]
+  var strings = new List()
+  var addNl = true
+  for (var arg in args) {
     if (arg == "-h") {
       println(HELP)
-      quit = true
+      return SUCCESS
     } else if (arg == "-v") {
       println(VERSION)
-      quit = true
-    } else if (arg.ch(0) == '-') {
+      return SUCCESS
+    } else if (arg == "-n") {
+      addNl = false
+    } else if (arg[0] == '-') {
       stderr().println("Unknown option: "+arg)
-      quit = true
-      exitcode = 1
+      return FAIL
     } else {
       strings.add(arg)
     }
   }
   // print strings
-  if (!quit) {
-    len = strings.len()
-    for (var i=0, i < len, i += 1) {
-      if (i != 0) write(' ')
-      print(strings[i])
-    }
-    write('\n')
-    flush()
+  for (var i in 0 .. strings.len()-1) {
+    if (i != 0) write(' ')
+    print(strings[i])
   }
-  exitcode
+  if (addNl) write('\n')
+  flush()
+  return SUCCESS
 }

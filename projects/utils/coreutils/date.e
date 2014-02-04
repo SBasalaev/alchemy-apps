@@ -1,10 +1,10 @@
 /* Alchemy coreutils
- * (C) 2011-2013, Sergey Basalaev
+ * (C) 2011-2014, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "io.eh"
-use "string.eh"
+use "sys.eh"
 use "time.eh"
 use "version.eh"
 
@@ -13,23 +13,20 @@ const HELP = "Prints current date in default format."
 
 def main(args: [String]): Int {
   // parse args
-  var quit = false
-  var exitcode = 0
-  for (var i=0, i < args.len, i+=1) {
-    var arg = args[i]
+  var format: String = null
+  for (var arg in args) {
     if (arg == "-h") {
       println(HELP)
-      quit = true
+      return SUCCESS
     } else if (arg == "-v") {
       println(VERSION)
-      quit = true
-    } else if (arg.ch(0) == '-') {
+      return SUCCESS
+    } else {
       stderr().println("Unknown option: "+arg)
-      quit = true
-      exitcode = 1
+      return FAIL
     }
   }
   // work!
-  if (!quit) println(datestr(systime()))
-  exitcode
+  println(datestr(systime()))
+  return SUCCESS
 }

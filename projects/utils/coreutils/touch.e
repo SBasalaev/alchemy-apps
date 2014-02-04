@@ -1,5 +1,5 @@
 /* Alchemy coreutils
- * (C) 2011-2013, Sergey Basalaev
+ * (C) 2011-2014, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -12,38 +12,31 @@ const HELP = "Update file timestamp."
 
 def main(args: [String]): Int {
   // parse args
-  var quit = false
-  var exitcode = 0
   var files = new List()
-  for (var i=0, i < args.len, i += 1) {
-    var arg = args[i]
+  for (var arg in args) {
     if (arg == "-h") {
       println(HELP)
-      quit = true
+      return SUCCESS
     } else if (arg == "-v") {
       println(VERSION)
-      quit = true
+      return SUCCESS
     } else if (arg[0] == '-') {
       stderr().println("Unknown option: "+arg)
-      exitcode = 1
-      quit = true
+      return FAIL
     } else {
       files.add(arg)
     }
   }
   // touch files
-  if (!quit) {
-    var len = files.len()
-    if (len == 0) {
-      stderr().println("touch: no arguments")
-      exitcode == 1
-    } else {
-      for (var i=0, i<len, i += 1) {
-        var out = fopen_a(files[i].cast(String))
-        out.flush()
-        out.close()
-      }
-    }
+  var len = files.len()
+  if (len == 0) {
+    stderr().println("touch: no arguments")
+    return FAIL
   }
-  exitcode
+  for (var i in 0 .. len-1) {
+    var out = fappend(files[i].cast(String))
+    out.flush()
+    out.close()
+  }
+  return SUCCESS
 }

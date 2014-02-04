@@ -45,4 +45,4 @@ clean: bin/rm
  bin/rm -rf bin
 
 install: all
- bin/install bin ${DESTDIR}
+ bin/install bin ${DESTDIR}/

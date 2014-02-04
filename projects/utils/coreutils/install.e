@@ -1,5 +1,5 @@
 /* Alchemy coreutils
- * (C) 2011-2013, Sergey Basalaev
+ * (C) 2011-2014, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -10,72 +10,58 @@ use "string.eh"
 use "version.eh"
 
 const VERSION = "install" + COREUTILS_VERSION
-const HELP = "Copy files in directory and set their permissions."
+const HELP =
+  "Copy files with their permissions.\n" +
+  "Destination directory is created if does not exist."
 
-def mkdirtree(dir: String) {
-  if (!exists(dir)) {
-    var parent = pathdir(dir)
-    if (parent != null && !exists(parent))
-      mkdirtree(parent)
-    mkdir(dir)
-  }
-}
-
-def finstalltree(src: String, dest: String) {
-  if (is_dir(src)) {
-    if (!is_dir(dest)) mkdir(dest)
-    var subs = flist(src)
-    for (var i=0, i < subs.len, i+=1) {
-      finstalltree(src+"/"+subs[i], dest+"/"+subs[i])
+def installTree(src: String, dest: String) {
+  if (isDir(src)) {
+    if (!isDir(dest)) mkdir(dest)
+    var files = flist(src)
+    for (var file in files) {
+      installTree(src + "/" + file, dest + "/" + file)
     }
   } else {
     fcopy(src, dest)
   }
-  set_read(dest, can_read(src))
-  set_exec(dest, can_exec(src))
-  set_write(dest, can_write(src))
+  setExec(dest, canExec(src))
+  setWrite(dest, canWrite(src))
+  setRead(dest, canRead(src))
 }
 
 def main(args: [String]): Int {
-  var len = args.len
   // parse args
-  var quit = false
-  var exitcode = 0
-  var files = new_list()
-  for (var i=0, i < len, i += 1) {
-    var arg = args[i]
+  var files = new List()
+  for (var arg in args) {
     if (arg == "-h") {
       println(HELP)
-      quit = true
+      return SUCCESS
     } else if (arg == "-v") {
       println(VERSION)
-      quit = true
-    } else if (arg.ch(0) == '-') {
+      return SUCCESS
+    } else if (arg[0] == '-') {
       stderr().println("Unknown option: "+arg)
-      exitcode = 1
-      quit = true
+      return FAIL
     } else {
       files.add(arg)
     }
   }
   // installing files
-  if (!quit) {
-    len = files.len()
-    if (len == 0) {
-      stderr().println("install: missing argument")
-      exitcode = 1
-    } else if (len == 1) {
-      stderr().println("install: missing destination")
-      exitcode = 1
-    } else {
-      var destdir = files[len-1].tostr()
-      mkdirtree(destdir)
-      for (var i=0, i<len-1, i += 1) {
-        var src = files[i].tostr()
-        var dest = destdir+"/"+pathfile(src)
-        finstalltree(src, dest)
-      }
-    }
+  var len = files.len()
+  if (len == 0) {
+    stderr().println("install: missing argument")
+    return FAIL
   }
-  exitcode
+  if (len == 1) {
+    stderr().println("install: missing destination")
+    return FAIL
+  }
+  var destdir = files[len-1].cast(String)
+  mkdirTree(destdir)
+  for (var i in 0 .. len-2) {
+    var src = files[i].cast(String)
+    var dest = destdir + "/" + pathfile(src)
+    installTree(src, dest)
+  }
+  return SUCCESS
 }

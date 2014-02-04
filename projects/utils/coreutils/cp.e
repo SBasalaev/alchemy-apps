@@ -5,7 +5,6 @@
 
 use "io.eh"
 use "list.eh"
-use "string.eh"
 use "version.eh"
 
 const VERSION = "cp" + COREUTILS_VERSION
@@ -16,12 +15,12 @@ const HELP = "Copies files and directories.\n" +
              "Options:\n" +
              " -r copy directories recursively"
 
-def fcopytree(src: String, dest: String) {
-  if (is_dir(src)) {
-    if (!is_dir(dest)) mkdir(dest)
-    var subs = flist(src)
-    for (var i=0, i < subs.len, i+=1) {
-      fcopytree(src+"/"+subs[i], dest+"/"+subs[i])
+def fcopyTree(src: String, dest: String) {
+  if (isDir(src)) {
+    if (!isDir(dest)) mkdir(dest)
+    var files = flist(src)
+    for (var file in files) {
+      fcopyTree(src + "/" + file, dest + "/" + file)
     }
   } else {
     fcopy(src, dest)
@@ -29,56 +28,50 @@ def fcopytree(src: String, dest: String) {
 }
 
 def main(args: [String]): Int {
-  var len = args.len
   // parse args
-  var quit = false
-  var exitcode = 0
   var recursive = false
-  var files = new_list()
-  for (var i=0, i < len, i += 1) {
-    var arg = args[i]
+  var files = new List()
+  for (var arg in args) {
     if (arg == "-h") {
       println(HELP)
-      quit = true
+      return SUCCESS
     } else if (arg == "-v") {
       println(VERSION)
-      quit = true
+      return SUCCESS
     } else if (arg == "-r") {
       recursive = true
     } else if (arg.ch(0) == '-') {
       stderr().println("Unknown option: "+arg)
-      exitcode = 1
-      quit = true
+      return FAIL
     } else {
       files.add(arg)
     }
   }
   // do copying
-  if (!quit) {
-    len = files.len()
-    if (len == 0) {
-      stderr().println("cp: missing argument")
-      exitcode = 1
-    } else if (len == 1) {
-      stderr().println("cp: missing destination")
-      exitcode = 1
-    } else {
-      var dest = files[len-1].tostr()
-      if (is_dir(dest)) {
-        for (var i=0, i<len-1, i+=1) {
-          var srcfile = files[i].tostr()
-          { if (recursive) fcopytree else fcopy }
-          (srcfile, dest+"/"+pathfile(srcfile))
-        }
-      } else if (len == 2) {
-        var src = files[0].tostr()
-        { if (recursive) fcopytree else fcopy }
-        (src, dest)
-      } else {
-        stderr().println("cp: many arguments but target is not directory")
-        exitcode = 1
-      }
-    }
+  var len = files.len()
+  if (len == 0) {
+    stderr().println("cp: missing argument")
+    return FAIL
   }
-  exitcode
+  if (len == 1) {
+    stderr().println("cp: missing destination")
+    return FAIL
+  }
+  var dest = files[len-1].tostr()
+  if (isDir(dest)) {
+    for (var i=0, i<len-1, i+=1) {
+      var srcfile = files[i].cast(String);
+      ( if (recursive) fcopyTree else fcopy )
+      (srcfile, dest + "/" + pathfile(srcfile))
+    }
+    return SUCCESS
+  } else if (len == 2) {
+    var src = files[0].cast(String);
+    ( if (recursive) fcopyTree else fcopy )
+    (src, dest)
+    return SUCCESS
+  } else {
+    stderr().println("cp: many arguments but target is not directory")
+    return FAIL
+  }
 }

@@ -1,64 +1,75 @@
 /* Alchemy coreutils
- * (C) 2011-2013, Sergey Basalaev
+ * (C) 2011-2014, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "io.eh"
 use "list.eh"
-use "string.eh"
+use "dict.eh"
 use "version.eh"
 
 const VERSION = "ls" + COREUTILS_VERSION
-const HELP = "List contents of given directory."
 
-def _ls(f: String): Int {
-  if (is_dir(f)) {
-    var list = flist(f)
-    for (var i=0, i < list.len, i = i+1) {
-      println(list[i])
-    }
-    1
-  } else if (exists(f)) {
-    println(pathfile(f))
-    1
-  } else {
-    stderr().println("ls: file not found: "+f)
-    0
-  }
-}
+const HELP =
+  "List contents of given directory.\n" +
+  "Options:\n" +
+  " -d list directories as items, not their contents"
 
 def main(args: [String]): Int {
   // parse args
-  var len = args.len
-  var exitcode = 0
-  var quit = false
-  var files = new_list()
-  for (var i=0, i < len, i += 1) {
-    var arg  = args[i]
+  var names = new List()
+  var expandDirs = true
+  for (var arg in args) {
     if (arg == "-h") {
       println(HELP)
-      quit = true
+      return SUCCESS
     } else if (arg == "-v") {
       println(VERSION)
-      quit = true
+      return SUCCESS
+    } else if (arg == "-d") {
+      expandDirs = false
     } else if (arg.ch(0) == '-') {
       stderr().println("Unknown option: "+arg)
-      exitcode = 1
-      quit = true
+      return FAIL
     } else {
-      files.add(arg)
+      names.add(arg)
     }
   }
-  // list files
-  if (!quit) {
-    if (files.len() == 0) {
-      _ls(get_cwd())
+  if (names.len() == 0) {
+    names.add(".")
+  }
+  // sort names
+  var files = new List()
+  var dirlists = new Dict()
+  var exitcode = SUCCESS
+  for (var i in 0 .. names.len()-1) {
+    var f = names[i].cast(String)
+    if (expandDirs && isDir(f)) {
+      var dirList = new List(flist(f))
+      dirList.sortself(`String.cmp`)
+      dirlists[f] = dirList
+    } else if (exists(f)) {
+      files.add(f)
     } else {
-      for (var i=0, i<args.len && exitcode == 0, i += 1) {
-        exitcode = _ls(files[i].tostr())
-      }
+      stderr().println("ls: file not found: "+f)
+      exitcode = FAIL
     }
   }
-  exitcode
+  // print files
+  files.sortself(`String.cmp`)
+  for (var i in 0 .. files.len()-1) {
+    println(files[i])
+  }
+  // print dirs
+  var dirnames = new List(dirlists.keys())
+  dirnames.sortself(`String.cmp`)
+  var printNames = dirnames.len() > 1 || files.len() > 0
+  for (var dirI in 0 .. dirnames.len()-1) {
+    if (printNames) println("\n" + dirnames[dirI] + ":")
+    var filelist = dirlists[dirnames[dirI]].cast(List)
+    for (var i in 0 .. filelist.len()-1) {
+      println(filelist[i])
+    }
+  }
+  return exitcode
 }
-
