@@ -25,10 +25,9 @@ type Rule {
 
 var def_rule: Rule
 var rules: Dict
-var vars: Dict
 
 /* Do variable substitution in line. */
-def substvars(line: String): String {
+def substvars(rule: Rule, line: String): String {
   var sb = new StrBuf()
   while (line.len() > 0) {
     var S = line.indexof('$')
@@ -39,21 +38,44 @@ def substvars(line: String): String {
       sb.append(line[:S])
       line = line[S+1:]
       var ch = line[0]
-      if (ch == '$') {
-        sb.addch('$')
-        line = line[1:]
-      } else if (ch == '{') {
-        var rbrace = line.indexof('}')
-        if (rbrace < 0) rbrace = line.len()
-        var value = vars[line[1:rbrace]]
-        if (value == null) value = ""
-        sb.append(value)
-        line = line[rbrace+1:]
-      } else {
-        var value = vars[ch.tostr()]
-        if (value == null) value = ""
-        sb.append(value)
-        line = line[1:]
+      switch (ch) {
+        '$': {
+          sb.addch('$')
+          line = line[1:]
+        }
+        '{': {
+          var rbrace = line.indexof('}')
+          if (rbrace < 0) rbrace = line.len()
+          var value = getenv(line[1:rbrace])
+          if (value == null) value = ""
+          sb.append(value)
+          line = line[rbrace+1:]
+        }
+        '@': {
+          sb.append(rule.target)
+          line = line[1:]
+        }
+        '<': {
+          if (rule.deps.len > 0) {
+            sb.append(rule.deps[0])
+          }
+          line = line[1:]
+        }
+        '^': {
+          var first = true
+          for (var dep in rule.deps) {
+            if (first) first = false
+            else sb.addch(' ')
+            sb.append(dep)
+          }
+          line = line[1:]
+        }
+        else: {
+          var value = getenv(ch.tostr())
+          if (value == null) value = ""
+          sb.append(value)
+          line = line[1:]
+        }
       }
     }
   }
@@ -117,7 +139,7 @@ def readmf(fname: String): Bool {
         stderr().println(fname+":"+lineno+": Commands before first target. Stop.")
         ok = false
       } else {
-        commands.add(substvars(line.trim()))
+        commands.add(substvars(rule, line.trim()))
       }
     } else if (line.indexof('=') > 0) {
       // end target
@@ -127,12 +149,10 @@ def readmf(fname: String): Bool {
         rules[rule.target] = rule
         commands = new List()
         if (def_rule == null) def_rule = rule
-        vars.remove("@")
-        vars.remove("<")
       }
       // add variable
       var eq = line.indexof('=')
-      vars[line[:eq].trim()] = substvars(line[eq+1:].trim())
+      setenv(line[:eq].trim(), substvars(rule, line[eq+1:].trim()))
     } else if (line.indexof(':') > 0) {
       // start new target
       if (rule != null) {
@@ -141,14 +161,10 @@ def readmf(fname: String): Bool {
         rules[rule.target] = rule
         commands = new List()
         if (def_rule == null) def_rule = rule
-        vars.remove("<")
-        vars.remove("@")
       }
       var cl = line.indexof(':')
-      var target = substvars(line[:cl])
-      var deps = substvars(line[cl+1:])
-      vars["<"] = deps
-      vars["@"] = target
+      var target = substvars(null, line[:cl])
+      var deps = substvars(null, line[cl+1:])
       rule = new Rule { target = target, deps = deps.split(' ') }
     } else if (line.find("include ") == 0) {
       var incl_name = line[8:].trim()
@@ -178,7 +194,6 @@ def readmf(fname: String): Bool {
 def main(args: [String]): Int {
   // init
   rules = new Dict()
-  vars = new Dict()
   // parse args
   var targets = new List()
   var todir = ""
@@ -204,7 +219,7 @@ def main(args: [String]): Int {
         return 2
       } else if (arg.indexof('=') > 0) {
         var eq = arg.indexof('=')
-        vars[arg[:eq]] = arg[eq+1:]
+        setenv(arg[:eq], arg[eq+1:])
       } else {
         targets.add(arg)
       }
