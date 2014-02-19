@@ -1,39 +1,25 @@
-/* High-level interface to pkg. */
+use "pkgutil" 
 
-type PkgManager;
-type PkgSpec < Any;
+type PkgManager
 
-/* Reads database and creates package manager. */
-def pkg_init(): PkgManager;
+def initPkgManager(): PkgManager
 
-/* Refreshes source lists. */
-def pkg_refresh(pm: PkgManager);
+/* Info queries */
+def PkgManager.getInstalledPackage(name: String): Package
+def PkgManager.getLatestPackage(name: String): Package
+def PkgManager.getPackage(dep: Dependency): Package
 
-/* Installs most recent versions of packages with dependencies. */
-def pkg_install(pm: PkgManager, names: [String]): Bool;
+/* Hooks for interfaces */
+def PkgManager.onFail(handle: (String,Error))
 
-/* Removes packages if nothing depends on them. */
-def pkg_remove(pm: PkgManager, names: [String]);
+def PkgManager.onInstallRequest(handle: ([Package]): Bool)
+def PkgManager.onRemoveRequest(handle: ([Package]): Bool)
 
-/* Returns spec for given version of package. If version is null
- * then most recent version of package is returned.
- */
-def pkg_query(pm: PkgManager, name: String, version: String): PkgSpec;
+def PkgManager.onInstall(handle: (String,String,Int,Int))
+def PkgManager.onRemove(handle: (String,String,Int,Int))
+def PkgManager.onDownload(handle: (String,String,Int,Int))
 
-/* Returns spec for installed version of package. */
-def pkg_query_installed(pm: PkgManager, name: String): PkgSpec;
-
-/* Returns names of all installed packages. */
-def pkg_list_installed(pm: PkgManager): [String];
-
-/* Returns names of all available packages. */
-def pkg_list_all(pm: PkgManager): [String];
-
-/* Reads specified key from the spec. */
-def PkgSpec.get(key: String): String;
-
-/* Extracts spec from package archive. */
-def pkg_arh_extract_spec(file: String): PkgSpec;
-
-/* Installs package archive with dependencies. */
-def pkg_arh_install(pm: PkgManager, file: String): Bool;
+def PkgManager.loadPkgLists()
+def PkgManager.refresh(): Bool
+def PkgManager.install(names: [String]): Bool
+def PkgManager.remove(names: [String]): Bool

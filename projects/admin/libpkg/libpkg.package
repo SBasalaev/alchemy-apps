@@ -1,0 +1,20 @@
+Source: libpkg
+Version: 1.0
+Section: admin
+License: LGPL-3
+Copyright: (c) 2012-2014 Sergey Basalaev
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Build-Depends: make
+
+Package: libpkg2
+Summary: package management library
+Depends: ${libdeps}
+Files: /lib/libpkg.2.so
+
+Package: libpkg-dev
+Section: libdevel
+Summary: package management library - development headers
+Depends: ${libdeps}, libpkg1
+Files:
+ /lib/libpkg.so
+ /inc

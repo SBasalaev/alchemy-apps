@@ -1,31 +1,22 @@
-TARGET=libpkg.1.so
-SONAME=${TARGET}
+NAME=pkg
+VERSION=2
+SOURCES=cfgreader.e pkg_common.e pkg_install.e pkg_refresh.e pkg_remove.e pkgfile.e pkgutil.e
+HEADERS=cfgreader.eh pkg.eh pkgfile.eh pkgutil.eh
 
-all: ${TARGET} libpkg.so
+LIB=lib${NAME}.${VERSION}.so
+LINK=lib${NAME}.so
 
-${TARGET}: pkg_spec.e pkg_list.e pkg_shared.e pkg_installremove.e pkg.e
- ex pkg_spec.e pkg_list.e pkg_shared.e pkg_installremove.e pkg.e -o ${TARGET} -s${SONAME}
+all: ${LIB} ${LINK}
 
-libpkg.so:
- echo '#=${TARGET}' > libpkg.so
- chmod +x libpkg.so
+${LIB}: ${SOURCES}
+ ex ${SOURCES} -o ${LIB} -s${LIB} -g
 
-install: all
- install ${TARGET} libpkg.so /lib
- install pkg.eh /inc
+${LINK}:
+ echo '#=${LIB}' > ${LINK}
 
 clean:
- rm -f ${TARGET} libpkg.so
+ rm -f ${LIB} ${LINK}
 
-package: all
- mkdir lib
- install ${TARGET} lib
- cat libpkg1.package > PACKAGE
- arh c libpkg1.pkg PACKAGE lib
- rm -r lib
- mkdir lib inc
- install libpkg.so lib
- install pkg.eh inc
- cat libpkg-dev.package > PACKAGE
- arh c libpkg-dev.pkg PACKAGE lib inc
- rm -r PACKAGE lib inc
+install:
+ install ${LIB} ${LINK} ${DESTDIR}/lib
+ install ${HEADERS} ${DESTDIR}/inc/pkg

@@ -1,9 +1,0 @@
-Package: libpkg-dev
-Source: libpkg
-Version: 0.3.6
-Section: libdevel
-Summary: package management library - development headers
-Depends: libpkg1
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2012-2013 Sergey Basalaev
-License: LGPL-3
