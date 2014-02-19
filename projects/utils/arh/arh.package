@@ -1,9 +1,11 @@
 Source: arh
-Package: arh
-Version: 1.1.2
+Version: 1.2
 Section: utils
-Summary: archiving utility
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2011-2013 Sergey Basalaev
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2011-2014 Sergey Basalaev
 License: GPL-3
-Depends: libcore3
+Build-Depends: make
+
+Package: arh
+Summary: archiving utility
+Depends: ${libdeps}

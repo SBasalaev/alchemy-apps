@@ -8,6 +8,7 @@ arh h                     - show help message and exit
 arh v                     - show arh version and exit
 
 ChangeLog:
+[2014-02-19]  Port to libcore 4.0
 [2013-02-16]  Port to libcore 3.1
 [2012-11-26]  Hard setting rights for archived files
 [2012-10-28]  Port to libcore 3.0
