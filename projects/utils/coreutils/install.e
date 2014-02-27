@@ -59,8 +59,8 @@ def main(args: [String]): Int {
   var destdir = files[len-1].cast(String)
   mkdirTree(destdir)
   for (var i in 0 .. len-2) {
-    var src = files[i].cast(String)
-    var dest = destdir + "/" + pathfile(src)
+    var src = abspath(files[i].cast(String))
+    var dest = abspath(destdir + "/" + pathfile(src))
     installTree(src, dest)
   }
   return SUCCESS
