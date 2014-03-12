@@ -1,6 +1,6 @@
 Package: mpl
 Source: mpl
-Version: 2.0.5
+Version: 2.0.6
 Section: sound
 Depends: libcore3, libui1,libmedia1
 Summary: Music player

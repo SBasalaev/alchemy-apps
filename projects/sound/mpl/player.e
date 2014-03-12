@@ -358,7 +358,7 @@ def Load_song()
 {
 try{p.close()}catch{}
 get_type(fn)
-try{p=new_player(fopen_r(fn),typ)}catch{}
+try{p=create_player(fn,typ)}catch{}
 }
 
 def get_duration()
