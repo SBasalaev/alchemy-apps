@@ -358,7 +358,16 @@ def Load_song()
 {
 try{p.close()}catch{}
 get_type(fn)
-try{p=create_player(fn,typ)}catch{}
+try{
+  // fix by Sergey Basalaev
+  // for compatibility with older versions
+  var cfunc = create_player
+  if (cfunc != null) {
+    p=cfunc(fn,typ)
+  } else {
+    p=new_player(fopen_r(fn),typ)
+  }
+}catch{}
 }
 
 def get_duration()
