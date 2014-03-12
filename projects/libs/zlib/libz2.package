@@ -1,9 +1,0 @@
-Package: libz2
-Source: zlib
-Version: 0.99.1
-Section: libs
-Summary: compression library
-Depends: libcore3
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2012-2013 Sergey Basalaev
-License: GPL-2 with runtime exception

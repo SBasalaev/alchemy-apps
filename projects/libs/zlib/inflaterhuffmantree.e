@@ -34,7 +34,7 @@ def InflaterHuffmanTree.buildTree(codeLengths: [Byte]) {
     }
   }
   if (code != 65536 && max > 1)
-    error(FAIL, "incomplete dynamic bit lengths tree");
+    throw(FAIL, "incomplete dynamic bit lengths tree");
 
   /* Now create and fill the extra tables from longest to shortest
    * bit len.  This way the sub trees will be aligned.
@@ -57,10 +57,10 @@ def InflaterHuffmanTree.buildTree(codeLengths: [Byte]) {
       code = nextCode[bits];
       var revcode = bitReverse(code);
       if (bits <= 9) {
-        do {
-          this.tree[revcode] = (i << 4) | bits;
-          revcode += 1 << bits;
-        } while (revcode < 512);
+         do {
+           this.tree[revcode] = (i << 4) | bits;
+           revcode += 1 << bits;
+         } while (revcode < 512);
       } else {
         var subTree = this.tree[revcode & 511];
         var treeLen = 1 << (subTree & 15);
@@ -75,16 +75,14 @@ def InflaterHuffmanTree.buildTree(codeLengths: [Byte]) {
   }
 }
 
-def new_InflaterHuffmanTree(codeLengths: [Byte]): InflaterHuffmanTree {
-  var iht = new InflaterHuffmanTree { }
-  iht.buildTree(codeLengths)
-  iht
+def InflaterHuffmanTree.new(codeLengths: [Byte]) {
+  this.buildTree(codeLengths)
 }
 
 var defLT: InflaterHuffmanTree;
 var defDT: InflaterHuffmanTree;
 
-def init_static_trees() = {
+def init_static_trees() {
   var codeLengths = new [Byte](288);
   var i = 0;
   while (i < 144) {
@@ -103,7 +101,7 @@ def init_static_trees() = {
     codeLengths[i] = 8;
     i += 1;
   }
-  defLT = new_InflaterHuffmanTree(codeLengths);
+  defLT = new InflaterHuffmanTree(codeLengths);
 
   codeLengths = new [Byte](32);
   i = 0;
@@ -111,26 +109,26 @@ def init_static_trees() = {
     codeLengths[i] = 5;
     i += 1;
   }
-  defDT = new_InflaterHuffmanTree(codeLengths);
+  defDT = new InflaterHuffmanTree(codeLengths);
 }
 
 def defLitLenTree(): InflaterHuffmanTree {
   var tree = defLT;
   if (tree != null) {
-    tree
+    return tree
   } else {
     init_static_trees()
-    defLT
+    return defLT
   }
 }
 
 def defDistTree(): InflaterHuffmanTree {
   var tree = defDT;
   if (tree != null) {
-    tree
+    return tree
   } else {
     init_static_trees()
-    defDT
+    return defDT
   }
 }
 
@@ -140,36 +138,31 @@ def InflaterHuffmanTree.getSymbol(input: StreamManipulator): Int {
     var symbol = this.tree[lookahead];
     if (symbol >= 0) {
       input.dropBits(symbol & 15);
-      symbol >> 4;
-    } else {
-      var subtree = -(symbol >> 4);
-      var bitlen = symbol & 15;
-      lookahead = input.peekBits(bitlen);
-      if (lookahead >= 0) {
-        symbol = this.tree[subtree | (lookahead >> 9)];
-        input.dropBits(symbol & 15);
-        symbol >> 4;
-      } else {
-        var bits = input.getAvailableBits();
-        lookahead = input.peekBits(bits);
-        symbol = this.tree[subtree | (lookahead >> 9)];
-        if ((symbol & 15) <= bits) {
-          input.dropBits(symbol & 15);
-          symbol >> 4;
-        } else {
-          -1;
-        }
-      }
+      return symbol >> 4;
     }
-  } else {
+    var subtree = -(symbol >> 4);
+    var bitlen = symbol & 15;
+    lookahead = input.peekBits(bitlen);
+    if (lookahead >= 0) {
+      symbol = this.tree[subtree | (lookahead >> 9)];
+      input.dropBits(symbol & 15);
+      return symbol >> 4;
+    }
     var bits = input.getAvailableBits();
     lookahead = input.peekBits(bits);
-    var symbol = this.tree[lookahead];
-    if (symbol >= 0 && (symbol & 15) <= bits) {
+    symbol = this.tree[subtree | (lookahead >> 9)];
+    if ((symbol & 15) <= bits) {
       input.dropBits(symbol & 15);
-      symbol >> 4;
-    } else {
-      -1;
+      return symbol >> 4;
     }
+    return -1;
   }
+  var bits = input.getAvailableBits();
+  lookahead = input.peekBits(bits);
+  var symbol = this.tree[lookahead];
+  if (symbol >= 0 && (symbol & 15) <= bits) {
+    input.dropBits(symbol & 15);
+    return symbol >> 4;
+  }
+  return -1;
 }

@@ -23,7 +23,7 @@ def Adler32.update(bval: Int) {
   this.checksum = (s2 << 16) + s1;
 }
 
-def Adler32.updatearray(buf: [Byte], off: Int, len: Int) {
+def Adler32.updateArray(buf: [Byte], off: Int, len: Int) {
   //(By Per Bothner)
   var s1 = this.checksum & 0xffff;
   var s2 = this.checksum >>> 16;
@@ -35,10 +35,10 @@ def Adler32.updatearray(buf: [Byte], off: Int, len: Int) {
     var n = 3800;
     if (n > len) n = len;
     len -= n;
-    while ({n-=1; n >= 0}) {
-      s1 = s1 + (buf[off] & 0xFF);
+    while (n -= 1, n >= 0) {
+      s1 += (buf[off] & 0xFF);
       off += 1;
-      s2 = s2 + s1;
+      s2 += s1;
     }
     s1 %= BASE;
     s2 %= BASE;
@@ -47,6 +47,6 @@ def Adler32.updatearray(buf: [Byte], off: Int, len: Int) {
   this.checksum = (s2 << 16) | s1;
 }
 
-def Adler32.get_value(): Int {
-  this.checksum
+def Adler32.getValue(): Int {
+  return this.checksum;
 }

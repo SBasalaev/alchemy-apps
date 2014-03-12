@@ -7,9 +7,9 @@ type DeflaterStream {
   buf: [Byte]
 }
 
-def DeflaterStream.new(out: OStream, dfl: Deflater, size: Int = 4096): DeflaterStream;
+def DeflaterStream.new(out: OStream, dfl: Deflater, size: Int = 4096);
 def DeflaterStream.write(b: Int);
-def DeflaterStream.writearray(buf: [Byte], off: Int, len: Int);
+def DeflaterStream.writeArray(buf: [Byte], off: Int, len: Int);
 def DeflaterStream.flush();
 def DeflaterStream.finish();
 def DeflaterStream.close();

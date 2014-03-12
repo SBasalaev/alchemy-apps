@@ -4,7 +4,7 @@ type DeflaterHuffman;
 
 def bitReverse(value: Int): Short;
 
-def new_DeflaterHuffman(pending: PendingBuffer): DeflaterHuffman;
+def DeflaterHuffman.new(pending: PendingBuffer): DeflaterHuffman;
 
 def DeflaterHuffman.reset();
 def DeflaterHuffman.sendAllTrees(blTreeCodes: Int);

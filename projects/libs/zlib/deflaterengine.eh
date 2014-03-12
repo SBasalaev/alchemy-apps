@@ -2,7 +2,7 @@ use "pendingbuffer.eh"
 
 type DeflaterEngine;
 
-def new_DeflaterEngine(pending: PendingBuffer): DeflaterEngine;
+def DeflaterEngine.new(pending: PendingBuffer);
 def DeflaterEngine.reset();
 def DeflaterEngine.resetAdler();
 def DeflaterEngine.getAdler(): Int;

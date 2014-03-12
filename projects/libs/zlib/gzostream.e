@@ -4,7 +4,7 @@ use "gzostream.eh"
 use "gzistream.eh"
 
 use "time.eh"
-use "error.eh"
+use "sys.eh"
 
 type GzOStream < DeflaterStream {
   crc: CRC32
@@ -38,16 +38,16 @@ def GzOStream.new(out: OStream) {
     255
   };
 
-  out.writearray(gzipHeader, 0, gzipHeader.len);
+  out.writeArray(gzipHeader, 0, gzipHeader.len);
 }
 
-def GzOStream.writearray(buf: [Byte], off: Int, len: Int) {
-  super.writearray(buf, off, len);
-  this.crc.updatearray(buf, off, len);
+def GzOStream.writeArray(buf: [Byte], off: Int, len: Int) {
+  super.writeArray(buf, off, len);
+  this.crc.updateArray(buf, off, len);
 }
 
 def GzOStream.write(b: Int) {
-  this.writearray(new [Byte] {b}, 0, 1)
+  this.writeArray(new [Byte] {b}, 0, 1)
 }
 
 def GzOStream.flush() {
@@ -62,7 +62,7 @@ def GzOStream.close() {
 def GzOStream.finish() {
   super.finish();
 
-  var totalin = cast (Int) this.dfl.bytesread;
+  var totalin = this.dfl.bytesRead.cast(Int);
   var crcval = this.crc.value;
 
   var gzipFooter = new [Byte] {
@@ -77,5 +77,5 @@ def GzOStream.finish() {
     totalin >> 24
   };
 
-  this.out.writearray(gzipFooter, 0, gzipFooter.len);
+  this.out.writeArray(gzipFooter, 0, gzipFooter.len);
 }

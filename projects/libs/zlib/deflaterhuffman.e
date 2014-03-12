@@ -40,7 +40,7 @@ def BL_ORDER(at: Int): Int = switch (at) {
 const bit4Reverse = "\000\010\004\014\002\012\006\016\001\011\005\015\003\013\007\017";
 
 def bitReverse(value: Int): Short {
-  (bit4Reverse[value & 0xf] << 12
+  return (bit4Reverse[value & 0xf] << 12
     | bit4Reverse[(value >> 4) & 0xf] << 8
     | bit4Reverse[(value >> 8) & 0xf] << 4
     | bit4Reverse[value >> 12]);
@@ -48,14 +48,14 @@ def bitReverse(value: Int): Short {
 
 def l_code(len: Int): Int {
   if (len == 255) {
-    285;
+    return 285;
   } else {
     var code = 257;
     while (len >= 8) {
       code += 4;
       len >>= 1;
     }
-    code + len;
+    return code + len;
   }
 }
 
@@ -65,7 +65,7 @@ def d_code(distance: Int): Int {
     code += 2;
     distance >>= 1;
   }
-  code + distance;
+  return code + distance;
 }
 
 var staticLCodes: [Short];
@@ -134,15 +134,13 @@ type Tree {
   maxLength: Int
 }
 
-def new_Tree(owner: DeflaterHuffman, elems: Int, minCodes: Int, maxLength: Int): Tree {
-  new Tree {
-    owner = owner,
-    minNumCodes = minCodes,
-    numCodes = 0,
-    maxLength = maxLength,
-    freqs = new [Short](elems),
-    bl_counts = new [Int](maxLength)
-  }
+def Tree.new(owner: DeflaterHuffman, elems: Int, minCodes: Int, maxLength: Int) {
+  this.owner = owner;
+  this.minNumCodes = minCodes;
+  this.numCodes = 0;
+  this.maxLength = maxLength;
+  this.freqs = new [Short](elems);
+  this.bl_counts = new [Int](maxLength);
 }
 
 def Tree.reset() {
@@ -213,7 +211,9 @@ def Tree.buildLength(childs: [Int]) {
     var incrBitLen = this.maxLength - 1;
     do {
       /* Find the first bit length which could increase: */
-      while ({incrBitLen -= 1; this.bl_counts[incrBitLen] == 0}) { }
+      do {
+        incrBitLen -= 1;
+      } while (this.bl_counts[incrBitLen] == 0);
 
       /* Move this node one down and remove a corresponding
        * amount of overflow nodes.
@@ -277,8 +277,9 @@ def Tree.buildTree() {
       var pos = heapLen;
       heapLen += 1;
       var ppos: Int;
-      while (pos > 0 &&
-              this.freqs[heap[{ppos = (pos - 1) / 2; ppos}]] > freq) {
+      while (pos > 0) {
+        ppos = (pos - 1) / 2;
+        if (this.freqs[heap[ppos]] <= freq) break;
         heap[pos] = heap[ppos];
         pos = ppos;
       }
@@ -293,8 +294,12 @@ def Tree.buildTree() {
    * this case, both literals get a 1 bit code.
    */
   while (heapLen < 2) {
-    var node = if (maxCode < 2) {maxCode += 1; maxCode} else 0;
-    heap[heapLen] = node;
+    if (maxCode < 2) {
+      maxCode += 1;
+      heap[heapLen] = maxCode;
+    } else {
+      heap[heapLen] = 0;
+    }
     heapLen += 1;
   }
 
@@ -336,9 +341,11 @@ def Tree.buildTree() {
      * it shouldn't go too deep.
      */
     var lastVal = values[last];
-    while (({path = ppos; path}) > 0
-            && values[heap[{ppos = (path - 1)/2; ppos}]] > lastVal)
+    while (path = ppos, path > 0) {
+      ppos = (path - 1) / 2;
+      if (values[heap[ppos]] <= lastVal) break;
       heap[path] = heap[ppos];
+    }
     heap[path] = last;
 
 
@@ -367,14 +374,16 @@ def Tree.buildTree() {
     }
 
     /* Now propagate the new element down along path */
-    while (({path = ppos; path}) > 0
-            && values[heap[{ppos = (path - 1)/2; ppos}]] > lastVal)
+    while (path = ppos, path > 0) {
+      ppos = (path - 1) / 2;
+      if (values[heap[ppos]] > lastVal) break;
       heap[path] = heap[ppos];
-      heap[path] = last;
+    }
+    heap[path] = last;
   } while (heapLen > 1);
 
   if (heap[0] != childs.len / 2 - 1)
-    error(FAIL, "Weird!");
+    throw(FAIL, "Weird!");
 
   this.buildLength(childs);
 }
@@ -383,7 +392,7 @@ def Tree.getEncodedLength(): Int {
   var len = 0;
   for (var i = 0, i < this.freqs.len, i += 1)
     len += this.freqs[i] * this.length[i];
-  len;
+  return len;
 }
 
 def Tree.calcBLFreq(blTree: Tree) {
@@ -410,12 +419,10 @@ def Tree.calcBLFreq(blTree: Tree) {
     curlen = nextlen;
     i += 1;
 
-    var break = false;
-    while (!break && i < this.numCodes && curlen == this.length[i]) {
+    while (i < this.numCodes && curlen == this.length[i]) {
       i += 1;
       count += 1;
-      if (count >= max_count)
-        break = true;
+      if (count >= max_count) break;
     }
 
     if (count < min_count)
@@ -453,16 +460,14 @@ def Tree.writeTree(blTree: Tree) {
     curlen = nextlen;
     i += 1;
 
-    var break = false;
-    while (!break && i < this.numCodes && curlen == this.length[i]) {
+    while (i < this.numCodes && curlen == this.length[i]) {
       i += 1;
       count += 1;
-      if (count >= max_count)
-        break = true;
+      if (count >= max_count) break;
     }
 
     if (count < min_count) {
-      while ({count -= 1; count+1} > 0)
+      while (count -= 1, count+1 > 0)
         blTree.writeSymbol(curlen);
     } else if (curlen != 0) {
       blTree.writeSymbol(REP_3_6);
@@ -477,20 +482,16 @@ def Tree.writeTree(blTree: Tree) {
   }
 }
 
-def new_DeflaterHuffman(pending: PendingBuffer): DeflaterHuffman {
+def DeflaterHuffman.new(pending: PendingBuffer): DeflaterHuffman {
   if (staticLCodes == null) init_static()
-  var dh = new DeflaterHuffman {
-    pending = pending,
-    d_buf = new [Short](BUFSIZE),
-    l_buf = new [Byte](BUFSIZE),
-    last_lit = 0,
-    extra_bits = 0
-  }
-  dh.literalTree = new_Tree(dh, LITERAL_NUM, 257, 15);
-  dh.distTree    = new_Tree(dh, DIST_NUM, 1, 15);
-  dh.blTree      = new_Tree(dh, BITLEN_NUM, 4, 7);
-
-  dh
+  this.pending = pending;
+  this.d_buf = new [Short](BUFSIZE);
+  this.l_buf = new [Byte](BUFSIZE);
+  this.last_lit = 0;
+  this.extra_bits = 0;
+  this.literalTree = new Tree(this, LITERAL_NUM, 257, 15);
+  this.distTree = new Tree(this, DIST_NUM, 1, 15);
+  this.blTree = new Tree(this, BITLEN_NUM, 4, 7);
 }
 
 def DeflaterHuffman.reset() {
@@ -517,8 +518,8 @@ def DeflaterHuffman.sendAllTrees(blTreeCodes: Int) {
 def DeflaterHuffman.compressBlock() {
   for (var i = 0, i < this.last_lit, i += 1) {
     var litlen = this.l_buf[i] & 0xff;
-    var dist = this.d_buf[i];
-    if ({dist -=1; dist+1} != 0) {
+    var dist = this.d_buf[i] - 1;
+    if (dist+1 != 0) {
       var lc = l_code(litlen);
       this.literalTree.writeSymbol(lc);
 
@@ -536,7 +537,6 @@ def DeflaterHuffman.compressBlock() {
       this.literalTree.writeSymbol(litlen);
     }
   }
-  
   this.literalTree.writeSymbol(EOF_SYMBOL);
 }
 
@@ -602,7 +602,7 @@ def DeflaterHuffman.flushBlock(stored: [Byte], stored_offset: Int, stored_len: I
 }
 
 def DeflaterHuffman.isFull(): Bool {
-  this.last_lit == BUFSIZE;
+  return this.last_lit == BUFSIZE;
 }
 
 def DeflaterHuffman.tallyLit(lit: Int): Bool {
@@ -610,7 +610,7 @@ def DeflaterHuffman.tallyLit(lit: Int): Bool {
   this.l_buf[this.last_lit] = lit;
   this.last_lit += 1;
   this.literalTree.freqs[lit] += 1;
-  this.last_lit == BUFSIZE;
+  return this.last_lit == BUFSIZE;
 }
 
 def DeflaterHuffman.tallyDist(dist: Int, len: Int): Bool {
@@ -627,5 +627,5 @@ def DeflaterHuffman.tallyDist(dist: Int, len: Int): Bool {
   this.distTree.freqs[dc] += 1;
   if (dc >= 4)
     this.extra_bits += dc / 2 - 1;
-  this.last_lit == BUFSIZE;
+  return this.last_lit == BUFSIZE;
 }

@@ -10,25 +10,11 @@ ${LINK}:
  echo '#=${TARGET}' > ${LINK}
 
 ${TARGET}: ${SOURCES}
- ex ${SOURCES} -o ${TARGET} -s${SONAME} -Wall
+ ex ${SOURCES} -o ${TARGET} -s${SONAME} -Wall -g
 
 clean:
  rm -f ${TARGET} ${LINK}
 
 install: all
- install ${TARGET} ${LINK} /lib
- mkdir -p /inc/zlib
- install ${HEADERS} /inc/zlib
- 
-package: all
- mkdir -p lib
- install ${TARGET} lib
- cat libz2.package > PACKAGE
- arh c libz2.pkg PACKAGE lib
- rm -r lib
- mkdir -p lib inc/zlib
- install ${LINK} lib
- install ${HEADERS} inc/zlib
- cat zlib-dev.package > PACKAGE
- arh c zlib-dev.pkg PACKAGE lib inc
- rm -r PACKAGE lib inc
+ install ${TARGET} ${LINK} ${DESTDIR}/lib
+ install ${HEADERS} ${DESTDIR}/inc/zlib

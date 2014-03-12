@@ -2,7 +2,7 @@ use "streammanipulator.eh"
 
 type OutputWindow;
 
-def new_OutputWindow(): OutputWindow;
+def OutputWindow.new(): OutputWindow;
 def OutputWindow.write(abyte: Int);
 def OutputWindow.repeat(len: Int, dist: Int);
 def OutputWindow.copyStored(input: StreamManipulator, len: Int): Int;

@@ -1,6 +1,6 @@
 type PendingBuffer;
 
-def new_PendingBuffer(bufsize: Int): PendingBuffer;
+def PendingBuffer.new(bufsize: Int);
 def PendingBuffer.reset();
 def PendingBuffer.writeByte(b: Int);
 def PendingBuffer.writeShort(s: Int);

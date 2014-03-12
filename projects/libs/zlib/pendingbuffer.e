@@ -5,20 +5,14 @@ use "pendingbuffer.eh"
 
 type PendingBuffer {
   buf: [Byte],
-  start: Int,
-  end: Int,
-  bits: Int,
-  bitCount: Int
+  start: Int = 0,
+  end: Int = 0,
+  bits: Int = 0,
+  bitCount: Int = 0
 }
 
-def new_PendingBuffer(bufsize: Int): PendingBuffer {
-  new PendingBuffer {
-    buf = new [Byte](bufsize),
-    start = 0,
-    end = 0,
-    bits = 0,
-    bitCount = 0
-  }
+def PendingBuffer.new(bufsize: Int) {
+  this.buf = new [Byte](bufsize);
 }
 
 def PendingBuffer.reset() {
@@ -56,7 +50,7 @@ def PendingBuffer.writeBlock(block: [Byte], offset: Int, len: Int) {
 }
 
 def PendingBuffer.getBitCount(): Int {
-  this.bitCount;
+  return this.bitCount;
 }
 
 def PendingBuffer.alignToByte() {
@@ -93,7 +87,7 @@ def PendingBuffer.writeShortMSB(s: Int) {
 }
 
 def PendingBuffer.isFlushed(): Bool {
-  this.end == 0;
+  return this.end == 0;
 }
 
 def PendingBuffer.flush(output: [Byte], offset: Int, length: Int): Int {
@@ -112,7 +106,7 @@ def PendingBuffer.flush(output: [Byte], offset: Int, length: Int): Int {
     acopy(this.buf, this.start, output, offset, length);
     this.start += length;
   }
-  length;
+  return length;
 }
 
 def PendingBuffer.toByteArray(): [Byte] {
@@ -120,5 +114,5 @@ def PendingBuffer.toByteArray(): [Byte] {
   acopy(this.buf, this.start, ret, 0, ret.len);
   this.start = 0;
   this.end = 0;
-  ret;
+  return ret;
 }

@@ -1,6 +1,6 @@
 type StreamManipulator;
 
-def new_StreamManipulator(): StreamManipulator;
+def StreamManipulator.new();
 def StreamManipulator.peekBits(n: Int): Int;
 def StreamManipulator.dropBits(n: Int);
 def StreamManipulator.getBits(n: Int): Int;

@@ -4,8 +4,6 @@ use "deflaterconstants.eh"
 use "deflaterengine.eh"
 use "pendingbuffer.eh"
 
-use "error.eh"
-
 const IS_SETDICT              = 0x01;
 const IS_FLUSHING             = 0x04;
 const IS_FINISHING            = 0x08;
@@ -30,11 +28,11 @@ type Deflater {
 }
 
 def Deflater.new(lvl: Int = DEFAULT_COMPRESSION, nowrap: Bool = false) {
-  this.pending = new_PendingBuffer(PENDING_BUF_SIZE);
+  this.pending = new PendingBuffer(PENDING_BUF_SIZE);
   this.noHeader = nowrap;
-  this.engine = new_DeflaterEngine(this.pending);
-  this.set_strategy(DEFAULT_STRATEGY);
-  this.set_level(lvl);
+  this.engine = new DeflaterEngine(this.pending);
+  this.setStrategy(DEFAULT_STRATEGY);
+  this.setLevel(lvl);
   this.reset();
 }
 
@@ -51,16 +49,16 @@ def Deflater.end() {
   this.state = CLOSED_STATE;
 }
 
-def Deflater.get_adler(): Int {
-  this.engine.getAdler();
+def Deflater.getAdler(): Int {
+  return this.engine.getAdler();
 }
 
-def Deflater.get_bytesread(): Long {
-  this.engine.getTotalIn();
+def Deflater.getBytesRead(): Long {
+  return this.engine.getTotalIn();
 }
 
-def Deflater.get_byteswritten(): Long {
-  this.totalOut;
+def Deflater.getBytesWritten(): Long {
+  return this.totalOut;
 }
 
 def Deflater.flush() {
@@ -72,24 +70,24 @@ def Deflater.finish() {
 }
 
 def Deflater.finished(): Bool {
-  this.state == FINISHED_STATE && this.pending.isFlushed();
+  return this.state == FINISHED_STATE && this.pending.isFlushed();
 }
 
-def Deflater.needs_input(): Bool {
-  this.engine.needsInput();
+def Deflater.needsInput(): Bool {
+  return this.engine.needsInput();
 }
 
-def Deflater.set_input(input: [Byte], off: Int, len: Int) {
+def Deflater.setInput(input: [Byte], off: Int, len: Int) {
   if ((this.state & IS_FINISHING) != 0)
-    error(ERR_ILL_ARG, "finish()/end() already called");
+    throw(ERR_ILL_ARG, "finish()/end() already called");
   this.engine.setInput(input, off, len);
 }
 
-def Deflater.set_level(lvl: Int) {
+def Deflater.setLevel(lvl: Int) {
   if (lvl == DEFAULT_COMPRESSION)
     lvl = 6
   else if (lvl < NO_COMPRESSION || lvl > BEST_COMPRESSION)
-    error(ERR_ILL_ARG, null);
+    throw(ERR_ILL_ARG, null);
 
   if (this.level != lvl) {
     this.level = lvl;
@@ -97,16 +95,16 @@ def Deflater.set_level(lvl: Int) {
   }
 }
 
-def Deflater.set_strategy(stgy: Int) {
+def Deflater.setStrategy(stgy: Int) {
   if (stgy != DEFAULT_STRATEGY && stgy != FILTERED
         && stgy != HUFFMAN_ONLY)
-    error(ERR_ILL_ARG, null);
+    throw(ERR_ILL_ARG, null);
   this.engine.setStrategy(stgy);
 }
 
-def Deflater.set_dictionary(dict: [Byte], offset: Int, length: Int) {
+def Deflater.setDictionary(dict: [Byte], offset: Int, length: Int) {
   if (this.state != INIT_STATE)
-    error(ERR_ILL_STATE, null);
+    throw(ERR_ILL_STATE, null);
 
   this.state = SETDICT_STATE;
   this.engine.setDictionary(dict, offset, length);
@@ -116,7 +114,7 @@ def Deflater.deflate(output: [Byte], offset: Int, length: Int): Int {
   var origLength = length;
 
   if (this.state == CLOSED_STATE)
-    error(ERR_ILL_STATE, "Deflater closed");
+    throw(ERR_ILL_STATE, "Deflater closed");
 
   if (this.state < BUSY_STATE) {
     /* output header */
@@ -141,20 +139,19 @@ def Deflater.deflate(output: [Byte], offset: Int, length: Int): Int {
     this.state = BUSY_STATE | (this.state & (IS_FLUSHING | IS_FINISHING));
   }
 
-  var break = false;
-  while (!break) {
+  while (true) {
     var count = this.pending.flush(output, offset, length);
     offset += count;
     this.totalOut += count;
     length -= count;
     if (length == 0 || this.state == FINISHED_STATE) {
-      break = true;
+      break;
     } else {
       if (!this.engine.deflate((this.state & IS_FLUSHING) != 0,
               (this.state & IS_FINISHING) != 0)) {
         if (this.state == BUSY_STATE) {
           /* We need more input now */
-          break = true;
+          break;
         } else if (this.state == FLUSHING_STATE) {
           if (this.level != NO_COMPRESSION) {
             /* We have to supply some lookahead.  8 bit lookahead
@@ -185,5 +182,5 @@ def Deflater.deflate(output: [Byte], offset: Int, length: Int): Int {
     }
   }
 
-  origLength - length;
+  return origLength - length;
 }

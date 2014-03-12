@@ -11,30 +11,23 @@ type StreamManipulator {
   bits_in_buffer: Int
 }
 
-def new_StreamManipulator(): StreamManipulator {
-  new StreamManipulator {
-    window_start = 0,
-    window_end = 0,
-    buffer = 0,
-    bits_in_buffer = 0
-  }
+def StreamManipulator.new() {
 }
 
 def StreamManipulator.peekBits(n: Int): Int {
   if (this.bits_in_buffer < n) {
     if (this.window_start == this.window_end) {
-      -1;
-    } else {
-      var buf = this.window[this.window_start] & 0xff;
-      this.window_start += 1;
-      buf |= (this.window[this.window_start] & 0xff) << 8;
-      this.window_start += 1;
-      this.buffer |= buf << this.bits_in_buffer;
-      this.bits_in_buffer += 16;
-      this.buffer & ((1 << n) - 1);
+      return -1;
     }
+    var buf = this.window[this.window_start] & 0xff;
+    this.window_start += 1;
+    buf |= (this.window[this.window_start] & 0xff) << 8;
+    this.window_start += 1;
+    this.buffer |= buf << this.bits_in_buffer;
+    this.bits_in_buffer += 16;
+    return this.buffer & ((1 << n) - 1);
   } else {
-    this.buffer & ((1 << n) - 1);
+    return this.buffer & ((1 << n) - 1);
   }
 }
 
@@ -46,15 +39,15 @@ def StreamManipulator.dropBits(n: Int) {
 def StreamManipulator.getBits(n: Int): Int {
   var bits = this.peekBits(n);
   if (bits >= 0) this.dropBits(n);
-  bits;
+  return bits;
 }
 
 def StreamManipulator.getAvailableBits(): Int {
-  this.bits_in_buffer;
+  return this.bits_in_buffer;
 }
 
 def StreamManipulator.getAvailableBytes(): Int {
-  this.window_end - this.window_start + (this.bits_in_buffer >> 3);
+  return this.window_end - this.window_start + (this.bits_in_buffer >> 3);
 }
 
 def StreamManipulator.skipToByteBoundary() {
@@ -63,15 +56,15 @@ def StreamManipulator.skipToByteBoundary() {
 }
 
 def StreamManipulator.needsInput(): Bool {
-  this.window_start == this.window_end;
+  return this.window_start == this.window_end;
 }
 
 def StreamManipulator.copyBytes(output: [Byte], offset: Int, length: Int): Int {
   if (length < 0)
-    error(ERR_ILL_ARG, "length negative");
+    throw(ERR_ILL_ARG, "length negative");
   if ((this.bits_in_buffer & 7) != 0)
     /* bits_in_buffer may only be 0 or 8 */
-    error(ERR_ILL_STATE, "Bit buffer is not aligned!");
+    throw(ERR_ILL_STATE, "Bit buffer is not aligned!");
 
   var count = 0;
   while (this.bits_in_buffer > 0 && length > 0) {
@@ -83,22 +76,21 @@ def StreamManipulator.copyBytes(output: [Byte], offset: Int, length: Int): Int {
     count += 1;
   }
   if (length == 0) {
-    count;
-  } else {
-    var avail = this.window_end - this.window_start;
-    if (length > avail)
-      length = avail;
-    acopy(this.window, this.window_start, output, offset, length);
-    this.window_start += length;
-
-    if (((this.window_start - this.window_end) & 1) != 0) {
-      /* We always want an even number of bytes in input, see peekBits */
-      this.buffer = (this.window[this.window_start] & 0xff);
-      this.window_start += 1;
-      this.bits_in_buffer = 8;
-    }
-    count + length;
+    return count;
   }
+  var avail = this.window_end - this.window_start;
+  if (length > avail)
+    length = avail;
+  acopy(this.window, this.window_start, output, offset, length);
+  this.window_start += length;
+
+  if (((this.window_start - this.window_end) & 1) != 0) {
+    /* We always want an even number of bytes in input, see peekBits */
+    this.buffer = (this.window[this.window_start] & 0xff);
+    this.window_start += 1;
+    this.bits_in_buffer = 8;
+  }
+  return count + length;
 }
 
 def StreamManipulator.reset() {
@@ -110,7 +102,7 @@ def StreamManipulator.reset() {
 
 def StreamManipulator.setInput(buf: [Byte], off: Int, len: Int) {
   if (this.window_start < this.window_end)
-    error(ERR_ILL_STATE, "Old input was not completely processed");
+    throw(ERR_ILL_STATE, "Old input was not completely processed");
 
   var end = off + len;
 
@@ -118,7 +110,7 @@ def StreamManipulator.setInput(buf: [Byte], off: Int, len: Int) {
    * tricky: it also handles integer wrap around.
    */
   if (0 > off || off > end || end > buf.len)
-    error(ERR_RANGE, null);
+    throw(ERR_RANGE, null);
 
   if ((len & 1) != 0) {
     /* We always want an even number of bytes in input, see peekBits */

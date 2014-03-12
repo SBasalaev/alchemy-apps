@@ -6,9 +6,6 @@ use "deflaterconstants.eh"
 use "deflaterhuffman.eh"
 use "maxmin.eh"
 
-use "error.eh"
-use "sys.eh"
-
 const TOO_FAR = 4096;
 
 type DeflaterEngine {
@@ -37,35 +34,17 @@ type DeflaterEngine {
   adler: Adler32
 }
 
-def new_DeflaterEngine(pending: PendingBuffer): DeflaterEngine {
-  new DeflaterEngine {
-    pending = pending,
-    huffman = new_DeflaterHuffman(pending),
-    adler = new Adler32(),
+def DeflaterEngine.new(pending: PendingBuffer) {
+  this.pending = pending;
+  this.huffman = new DeflaterHuffman(pending);
+  this.adler = new Adler32();
 
-    window = new [Byte](2*WSIZE),
-    head   = new [Short](HASH_SIZE),
-    prev   = new [Short](WSIZE),
+  this.window = new [Byte](2*WSIZE);
+  this.head = new [Short](HASH_SIZE);
+  this.prev = new [Short](WSIZE);
 
-    blockStart = 1,
-    strstart = 1,
-
-    /* Initializing numeric fields which otherwise will contain null. */
-    ins_h = 0,
-    matchStart = 0,
-    matchLen = 0,
-    prevAvailable = false,
-    lookahead = 0,
-    strategy = 0,
-    max_chain = 0,
-    max_lazy = 0,
-    niceLength = 0,
-    goodLength = 0,
-    comprFunc = 0,
-    totalIn = 0L,
-    inputOff = 0,
-    inputEnd = 0
-  }
+  this.blockStart = 1;
+  this.strstart = 1;
 }
 
 def DeflaterEngine.reset() {
@@ -88,11 +67,11 @@ def DeflaterEngine.resetAdler() {
 }
 
 def DeflaterEngine.getAdler(): Int {
-  this.adler.value
+  return this.adler.value;
 }
 
 def DeflaterEngine.getTotalIn(): Long {
-  this.totalIn;
+  return this.totalIn;
 }
 
 def DeflaterEngine.setStrategy(strat: Int) {
@@ -151,7 +130,7 @@ def DeflaterEngine.insertString(): Int {
   this.prev[this.strstart & WMASK] = match;
   this.head[hash] = this.strstart;
   this.ins_h = hash;
-  match & 0xffff;
+  return match & 0xffff;
 }
 
 def DeflaterEngine.slideWindow() {
@@ -168,8 +147,7 @@ def DeflaterEngine.slideWindow() {
     this.head[i] = if (m >= WSIZE) m - WSIZE else 0;
   }
 
-  /* Slide the prev table.
-   */
+  /* Slide the prev table. */
   for (var i = 0, i < WSIZE, i += 1) {
     var m = this.prev[i] & 0xffff;
     this.prev[i] = if (m >= WSIZE) m - WSIZE else 0;
@@ -194,7 +172,7 @@ def DeflaterEngine.fillWindow() {
 
     acopy(this.inputBuf, this.inputOff, this.window,
             this.strstart + this.lookahead, more);
-    this.adler.updatearray(this.inputBuf, this.inputOff, more);
+    this.adler.updateArray(this.inputBuf, this.inputOff, more);
     this.inputOff += more;
     this.totalIn  += more;
     this.lookahead += more;
@@ -229,7 +207,6 @@ def DeflaterEngine.findLongestMatch(curMatch: Int): Bool {
   if (niceLength > this.lookahead)
     niceLength = this.lookahead;
 
-  var break = false;
   do {
     if (this.window[curMatch + best_len] == scan_end
      && this.window[curMatch + best_len - 1] == scan_end1
@@ -242,22 +219,31 @@ def DeflaterEngine.findLongestMatch(curMatch: Int): Bool {
       /* We check for insufficient lookahead only every 8th comparison;
        * the 256th check will be made at strstart+258.
        */
-      while ({scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && {scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && {scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && {scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && {scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && {scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && {scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && {scan += 1; match += 1; this.window[scan] == this.window[match]}
-          && scan < strend) { }
+      do {
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+        scan += 1; match += 1;
+        if (this.window[scan] != this.window[match]) break;
+      } while (scan < strend);
 
       if (scan > best_end) {
         this.matchStart = curMatch;
         best_end = scan;
         best_len = scan - this.strstart;
         if (best_len >= niceLength) {
-          break = true;
+          break;
         } else {
           scan_end1 = this.window[best_end-1];
           scan_end  = this.window[best_end];
@@ -265,15 +251,17 @@ def DeflaterEngine.findLongestMatch(curMatch: Int): Bool {
       }
       scan = this.strstart;
     }
-  } while (({curMatch = (prev[curMatch & WMASK] & 0xffff); curMatch}) > limit
-             && {chainLength -= 1; chainLength != 0});
+    curMatch = (prev[curMatch & WMASK] & 0xffff);
+    if (curMatch > limit) break;
+    chainLength -= 1;
+  } while (chainLength != 0);
 
   this.matchLen = min(best_len, this.lookahead);
-  this.matchLen >= MIN_MATCH;
+  return this.matchLen >= MIN_MATCH;
 }
 
 def DeflaterEngine.setDictionary(buffer: [Byte], offset: Int, length: Int) {
-  this.adler.updatearray(buffer, offset, length);
+  this.adler.updateArray(buffer, offset, length);
   if (length >= MIN_MATCH) {
     if (length > MAX_DIST) {
       offset += length - MAX_DIST;
@@ -284,7 +272,7 @@ def DeflaterEngine.setDictionary(buffer: [Byte], offset: Int, length: Int) {
 
     this.updateHash();
     length -= 1;
-    while ({length -= 1; length > 0}) {
+    while (length -= 1, length > 0) {
       this.insertString();
       this.strstart += 1;
     }
@@ -294,10 +282,8 @@ def DeflaterEngine.setDictionary(buffer: [Byte], offset: Int, length: Int) {
 }
 
 def DeflaterEngine.deflateStored(flush: Bool, finish: Bool): Bool {
-  var result = true
-  
   if (!flush && this.lookahead == 0) {
-    result = false;
+    return false;
   } else {
     this.strstart += this.lookahead;
     this.lookahead = 0;
@@ -317,29 +303,24 @@ def DeflaterEngine.deflateStored(flush: Bool, finish: Bool): Bool {
 
       this.huffman.flushStoredBlock(this.window, this.blockStart, storedLen, lastBlock);
       this.blockStart += storedLen;
-      result = !lastBlock;
+      return !lastBlock;
     }
   }
-  result;
+  return true;
 }
 
 def DeflaterEngine.deflateFast(flush: Bool, finish: Bool): Bool {
-  var quit = false;
-  var result = true;
-
   if (this.lookahead < MIN_LOOKAHEAD && !flush) {
-    quit = true;
-    result = false;
+    return false;
   }
 
-  while (!quit && (this.lookahead >= MIN_LOOKAHEAD || flush)) {
+  while (this.lookahead >= MIN_LOOKAHEAD || flush) {
     if (this.lookahead == 0) {
       /* We are flushing everything */
       this.huffman.flushBlock(this.window, this.blockStart,
               this.strstart - this.blockStart, finish);
       this.blockStart = this.strstart;
-      quit = true;
-      result = false;
+      return false;
     } else {
 
       if (this.strstart > 2 * WSIZE - MIN_LOOKAHEAD) {
@@ -352,8 +333,9 @@ def DeflaterEngine.deflateFast(flush: Bool, finish: Bool): Bool {
 
       var hashHead: Int;
       var full = true;
-      if (this.lookahead >= MIN_MATCH
-          && ({hashHead = this.insertString(); hashHead}) != 0
+      if (this.lookahead >= MIN_MATCH) {
+       hashHead = this.insertString();
+       if (hashHead != 0
           && this.strategy != HUFFMAN_ONLY
           && this.strstart - hashHead <= MAX_DIST
           && this.findLongestMatch(hashHead)) {
@@ -362,7 +344,7 @@ def DeflaterEngine.deflateFast(flush: Bool, finish: Bool): Bool {
 
         this.lookahead -= this.matchLen;
         if (this.matchLen <= this.max_lazy && this.lookahead >= MIN_MATCH) {
-           while ({this.matchLen -= 1; this.matchLen > 0}) {
+           while (this.matchLen -= 1, this.matchLen > 0) {
              this.strstart += 1;
              this.insertString();
            }
@@ -373,6 +355,7 @@ def DeflaterEngine.deflateFast(flush: Bool, finish: Bool): Bool {
             this.updateHash();
         }
         this.matchLen = MIN_MATCH - 1;
+       }
       } else {
         /* No match found */
         this.huffman.tallyLit(this.window[this.strstart] & 0xff);
@@ -385,12 +368,11 @@ def DeflaterEngine.deflateFast(flush: Bool, finish: Bool): Bool {
         this.huffman.flushBlock(this.window, this.blockStart,
             this.strstart - this.blockStart, lastBlock);
         this.blockStart = this.strstart;
-        quit = true;
-        result = !lastBlock;
+        return !lastBlock;
       }
     }
   }
-  result;
+  return true;
 }
 
 def DeflaterEngine.deflateSlow(flush: Bool, finish: Bool): Bool {
@@ -452,7 +434,8 @@ def DeflaterEngine.deflateSlow(flush: Bool, finish: Bool): Bool {
           this.lookahead -= 1;
           if (this.lookahead >= MIN_MATCH)
             this.insertString();
-        } while ({prevLen -= 1; prevLen > 0});
+          prevLen -= 1;
+        } while (prevLen > 0);
         this.strstart += 1;
         this.lookahead -= 1;
         this.prevAvailable = false;
@@ -477,7 +460,7 @@ def DeflaterEngine.deflateSlow(flush: Bool, finish: Bool): Bool {
       }
     }
   }
-  result;
+  return result;
 }
 
 def DeflaterEngine.deflate(flush: Bool, finish: Bool): Bool {
@@ -489,17 +472,17 @@ def DeflaterEngine.deflate(flush: Bool, finish: Bool): Bool {
       DEFLATE_STORED: progress = this.deflateStored(canFlush, finish);
       DEFLATE_FAST: progress = this.deflateFast(canFlush, finish);
       DEFLATE_SLOW: progress = this.deflateSlow(canFlush, finish);
-      else: error(FAIL, null);
+      else: throw(FAIL, null);
     }
   } while (this.pending.isFlushed()  /* repeat while we have no pending output */
            && progress);             /* and progress was made */
 
-  progress;
+  return progress;
 }
 
 def DeflaterEngine.setInput(buf: [Byte], off: Int, len: Int) {
   if (this.inputOff < this.inputEnd)
-    error(ERR_ILL_STATE, "Old input was not completely processed");
+    throw(ERR_ILL_STATE, "Old input was not completely processed");
 
   var end = off + len;
 
@@ -507,7 +490,7 @@ def DeflaterEngine.setInput(buf: [Byte], off: Int, len: Int) {
    * check is very tricky: it also handles integer wrap around.
    */
   if (0 > off || off > end || end > buf.len)
-    error(ERR_RANGE, null);
+    throw(ERR_RANGE, null);
 
   this.inputBuf = buf;
   this.inputOff = off;
@@ -515,5 +498,5 @@ def DeflaterEngine.setInput(buf: [Byte], off: Int, len: Int) {
 }
 
 def DeflaterEngine.needsInput(): Bool {
-  this.inputEnd == this.inputOff;
+  return this.inputEnd == this.inputOff;
 }

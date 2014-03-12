@@ -14,13 +14,13 @@ type OutputWindow {
   window_filled: Int
 }
 
-def new_OutputWindow(): OutputWindow {
-  new OutputWindow(new [Byte](WINDOW_SIZE), 0, 0)
+def OutputWindow.new() {
+  this.window = new [Byte](WINDOW_SIZE)
 }
 
 def OutputWindow.write(abyte: Int) {
   if (this.window_filled == WINDOW_SIZE)
-    error(ERR_ILL_STATE, "Window full");
+    throw(ERR_ILL_STATE, "Window full");
   this.window_filled += 1;
   this.window[this.window_end] = abyte;
   this.window_end += 1;
@@ -41,7 +41,7 @@ def OutputWindow.slowRepeat(rep_start: Int, len: Int, dist: Int) {
 def OutputWindow.repeat(len: Int, dist: Int) {
   this.window_filled += len;
   if (this.window_filled > WINDOW_SIZE)
-    error(ERR_ILL_STATE, "Window full");
+    throw(ERR_ILL_STATE, "Window full");
 
   var rep_start = (this.window_end - dist) & WINDOW_MASK;
   var border = WINDOW_SIZE - len;
@@ -79,12 +79,12 @@ def OutputWindow.copyStored(input: StreamManipulator, len: Int): Int {
 
   this.window_end = (this.window_end + copied) & WINDOW_MASK;
   this.window_filled += copied;
-  copied;
+  return copied;
 }
 
 def OutputWindow.copyDict(dict: [Byte], offset: Int, len: Int) {
   if (this.window_filled > 0)
-    error(ERR_ILL_STATE, null);
+    throw(ERR_ILL_STATE, null);
 
   if (len > WINDOW_SIZE) {
     offset += len - WINDOW_SIZE;
@@ -95,11 +95,11 @@ def OutputWindow.copyDict(dict: [Byte], offset: Int, len: Int) {
 }
 
 def OutputWindow.getFreeSpace(): Int {
-  WINDOW_SIZE - this.window_filled;
+  return WINDOW_SIZE - this.window_filled;
 }
 
 def OutputWindow.getAvailable(): Int {
-  this.window_filled;
+  return this.window_filled;
 }
 
 def OutputWindow.copyOutput(output: [Byte], offset: Int, len: Int): Int {
@@ -120,8 +120,8 @@ def OutputWindow.copyOutput(output: [Byte], offset: Int, len: Int): Int {
   acopy(this.window, copy_end - len, output, offset, len);
   this.window_filled -= copied;
   if (this.window_filled < 0)
-    error(ERR_ILL_STATE, null);
-  copied;
+    throw(ERR_ILL_STATE, null);
+  return copied;
 }
 
 def OutputWindow.reset() {

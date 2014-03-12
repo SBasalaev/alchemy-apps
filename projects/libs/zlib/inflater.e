@@ -7,9 +7,6 @@ use "inflaterhuffmantree.eh"
 use "outputwindow.eh"
 use "streammanipulator.eh"
 
-use "error.eh"
-use "string.eh"
-
 /* Copy lengths for literal codes 257..285 */
 def CPLENS(at: Int): Int = switch (at) {
   0: 3;
@@ -41,7 +38,7 @@ def CPLENS(at: Int): Int = switch (at) {
   26: 195;
   27: 227;
   28: 258;
-  else: { error(ERR_RANGE, null); 0}
+  else: -1;
 }
 
 /* Extra bits for literal codes 257..285 */
@@ -75,7 +72,7 @@ def CPLEXT(at: Int): Int = switch (at) {
  26: 5;
  27: 5;
  28: 0;
- else: { error(ERR_RANGE, null); 0}
+ else: -1;
 }
 
 /* Copy offsets for distance codes 0..29 */
@@ -110,7 +107,7 @@ def CPDIST(at: Int): Int = switch (at) {
   27: 12289;
   28: 16385;
   29: 24577;
-  else: { error(ERR_RANGE, null); 0}
+  else: -1;
 }
 
 /* Extra bits for distance codes */
@@ -145,7 +142,7 @@ def CPDEXT(at: Int): Int = switch (at) {
   27: 12;
   28: 13;
   29: 13;
-  else: { error(ERR_RANGE, null); 0}
+  else: -1;
 }
 
 /* The states in which the inflater can be. */
@@ -185,8 +182,8 @@ type Inflater {
 def Inflater.new(nowrap: Bool = false) {
   this.mode = if (nowrap) DECODE_BLOCKS else DECODE_HEADER;
   this.nowrap = nowrap;
-  this.input = new_StreamManipulator();
-  this.outputWindow = new_OutputWindow();
+  this.input = new StreamManipulator();
+  this.outputWindow = new OutputWindow();
   this.adler = new Adler32();
 }
 
@@ -200,55 +197,57 @@ def Inflater.end() {
 }
 
 def Inflater.finished(): Bool {
-  this.mode == FINISHED && this.outputWindow.getAvailable() == 0;
+  return this.mode == FINISHED && this.outputWindow.getAvailable() == 0;
 }
 
-def Inflater.get_adler(): Int {
-  if(this.needs_dictionary()) this.readAdler else this.adler.value;
+def Inflater.getAdler(): Int {
+  if (this.needsDictionary()) {
+    return this.readAdler
+  } else {
+    return this.adler.value;
+  }
 }
 
-def Inflater.get_remaining(): Int {
-  this.input.getAvailableBytes();
+def Inflater.getRemaining(): Int {
+  return this.input.getAvailableBytes();
 }
 
-def Inflater.get_bytesread(): Long {
-  this.totalIn - this.remaining;
+def Inflater.getBytesRead(): Long {
+  return this.totalIn - this.remaining;
 }
 
-def Inflater.get_byteswritten(): Long {
-  this.totalOut;
+def Inflater.getBytesWritten(): Long {
+  return this.totalOut;
 }
 
 def Inflater.decode(): Bool;
 def Inflater.inflate(buf: [Byte], off: Int, len: Int): Int {
   /* Check for correct buff, off, len triple */
   if (0 > off || off > off + len || off + len > buf.len)
-    error(ERR_RANGE, null);
+    throw(ERR_RANGE, null);
   var count = 0;
-  var break = false;
-  while (!break) {
+  while (true) {
     if (this.outputWindow.getAvailable() == 0) {
       if (!this.decode())
-        break = true;
+        break;
     } else if (len > 0) {
       var more = this.outputWindow.copyOutput(buf, off, len);
-      this.adler.updatearray(buf, off, more);
+      this.adler.updateArray(buf, off, more);
       off += more;
       count += more;
       this.totalOut += more;
       len -= more;
-    } else
-      break = true;
+    } else break;
   }
-  count;
+  return count;
 }
 
-def Inflater.needs_dictionary(): Bool {
-  this.mode == DECODE_DICT && this.neededBits == 0;
+def Inflater.needsDictionary(): Bool {
+  return this.mode == DECODE_DICT && this.neededBits == 0;
 }
 
-def Inflater.needs_input(): Bool {
-  this.input.needsInput();
+def Inflater.needsInput(): Bool {
+  return this.input.needsInput();
 }
 
 def Inflater.reset() {
@@ -264,334 +263,267 @@ def Inflater.reset() {
   this.adler.reset();
 }
 
-def Inflater.set_dictionary(buffer: [Byte], off: Int, len: Int) {
-  if (!this.needs_dictionary())
-    error(ERR_ILL_STATE, null);
+def Inflater.setDictionary(buffer: [Byte], off: Int, len: Int) {
+  if (!this.needsDictionary())
+    throw(ERR_ILL_STATE, null);
 
-  this.adler.updatearray(buffer, off, len);
+  this.adler.updateArray(buffer, off, len);
   if (this.adler.value != this.readAdler)
-    error(ERR_ILL_ARG, "Wrong adler checksum");
+    throw(ERR_ILL_ARG, "Wrong adler checksum");
   this.adler.reset();
   this.outputWindow.copyDict(buffer, off, len);
   this.mode = DECODE_BLOCKS;
 }
 
-def Inflater.set_input(buf: [Byte], off: Int, len: Int) {
+def Inflater.setInput(buf: [Byte], off: Int, len: Int) {
   this.input.setInput (buf, off, len);
   this.totalIn += len;
 }
 
 def Inflater.decodeHeader(): Bool {
   var header = this.input.peekBits(16);
-  if (header < 0) {
-    false;
+  if (header < 0) return false;
+  this.input.dropBits(16);
+
+  /* The header is written in "wrong" byte order */
+  header = ((header << 8) | (header >> 8)) & 0xffff;
+  if (header % 31 != 0)
+    throw(FAIL, "Header checksum illegal");
+
+  if ((header & 0x0f00) != (DEFLATED << 8))
+    throw(FAIL, "Compression Method unknown");
+
+  /* Maximum size of the backwards window in bits.
+   * We currently ignore this, but we could use it to make the
+   * inflater window more space efficient. On the other hand the
+   * full window (15 bits) is needed most times, anyway.
+   int max_wbits = ((header & 0x7000) >> 12) + 8;
+   */
+
+  if ((header & 0x0020) == 0) { // Dictionary flag?
+    this.mode = DECODE_BLOCKS;
   } else {
-    this.input.dropBits(16);
-
-    /* The header is written in "wrong" byte order */
-    header = ((header << 8) | (header >> 8)) & 0xffff;
-    if (header % 31 != 0)
-      error(FAIL, "Header checksum illegal");
-
-    if ((header & 0x0f00) != (DEFLATED << 8))
-      error(FAIL, "Compression Method unknown");
-
-    /* Maximum size of the backwards window in bits.
-     * We currently ignore this, but we could use it to make the
-     * inflater window more space efficient. On the other hand the
-     * full window (15 bits) is needed most times, anyway.
-     int max_wbits = ((header & 0x7000) >> 12) + 8;
-     */
-
-    if ((header & 0x0020) == 0) // Dictionary flag?
-    {
-      this.mode = DECODE_BLOCKS;
-    } else {
-      this.mode = DECODE_DICT;
-      this.neededBits = 32;
-    }
-    true;
+    this.mode = DECODE_DICT;
+    this.neededBits = 32;
   }
+  return true;
 }
 
 def Inflater.decodeDict(): Bool {
-  var break = false;
-  while (!break && this.neededBits > 0) {
+  while (this.neededBits > 0) {
     var dictByte = this.input.peekBits(8);
-    if (dictByte < 0) {
-      break = true;
-    } else {
-      this.input.dropBits(8);
-      this.readAdler = (this.readAdler << 8) | dictByte;
-      this.neededBits -= 8;
-    }
+    if (dictByte < 0) break;
+    this.input.dropBits(8);
+    this.readAdler = (this.readAdler << 8) | dictByte;
+    this.neededBits -= 8;
   }
-  false;
+  return false;
 }
 
 def Inflater.decodeHuffman(): Bool {
   var free = this.outputWindow.getFreeSpace();
-  var break = false;
-  var result = true;
-  while (!break && free >= 258) {
+  while (free >= 258) {
     var symbol: Int;
     switch (this.mode) {
       DECODE_HUFFMAN: {
-        while (!break && (({symbol = this.litlenTree.getSymbol(this.input); symbol}) & ~0xff) == 0) {
+        while (symbol = this.litlenTree.getSymbol(this.input), (symbol & ~0xff) == 0) {
           this.outputWindow.write(symbol);
           free -= 1;
-          if (free < 258) {
-            break = true;
-            result = true;
-          }
+          if (free < 258) return true;
         }
-        if (!break && symbol < 257) {
-          if (symbol < 0) {
-            break = true;
-            result = false;
-          } else {
-            /* symbol == 256: end of block */
-            this.distTree = null;
-            this.litlenTree = null;
-            this.mode = DECODE_BLOCKS;
-            break = true;
-            result = true;
-          }
+        if (symbol < 257) {
+          if (symbol < 0) return false;
+
+          /* symbol == 256: end of block */
+          this.distTree = null;
+          this.litlenTree = null;
+          this.mode = DECODE_BLOCKS;
+          return true;
         }
 
-        if (!break) {
-          try {
-            this.repLength = CPLENS(symbol - 257);
-            this.neededBits = CPLEXT(symbol - 257);
-          } catch {
-            error(FAIL, "Illegal rep length code");
-          }
-          if (this.neededBits > 0) {
-            this.mode = DECODE_HUFFMAN_LENBITS;
-            var i = this.input.peekBits(this.neededBits);
-            if (i < 0) {
-              break = true;
-              result = false;
-            } else {
-              this.input.dropBits(this.neededBits);
-              this.repLength += i;
-            }
-          }
-          if (!break) this.mode = DECODE_HUFFMAN_DIST;
+        try {
+          this.repLength = CPLENS(symbol - 257);
+          this.neededBits = CPLEXT(symbol - 257);
+        } catch {
+          throw(FAIL, "Illegal rep length code");
         }
+        if (this.neededBits > 0) {
+          this.mode = DECODE_HUFFMAN_LENBITS;
+          var i = this.input.peekBits(this.neededBits);
+          if (i < 0) return false;
+          this.input.dropBits(this.neededBits);
+          this.repLength += i;
+        }
+        this.mode = DECODE_HUFFMAN_DIST;
       }
       DECODE_HUFFMAN_LENBITS: {
         if (this.neededBits > 0) {
           this.mode = DECODE_HUFFMAN_LENBITS;
           var i = this.input.peekBits(this.neededBits);
-          if (i < 0) {
-            break = true;
-            result = false;
-          } else {
-            this.input.dropBits(this.neededBits);
-            this.repLength += i;
-          }
+          if (i < 0) return false;
+          this.input.dropBits(this.neededBits);
+          this.repLength += i;
         }
-        if (!break) this.mode = DECODE_HUFFMAN_DIST;
+        this.mode = DECODE_HUFFMAN_DIST;
       }
       DECODE_HUFFMAN_DIST: {
         symbol = this.distTree.getSymbol(this.input);
-        if (symbol < 0) {
-          break = true;
-          result = false;
-        } else {
-          try {
-            this.repDist = CPDIST(symbol);
-            this.neededBits = CPDEXT(symbol);
-          } catch {
-            error(FAIL, "Illegal rep dist code");
-          }
+        if (symbol < 0) return false;
+        try {
+          this.repDist = CPDIST(symbol);
+          this.neededBits = CPDEXT(symbol);
+        } catch {
+          throw(FAIL, "Illegal rep dist code");
         }
-        if (!break && this.neededBits > 0) {
+        if (this.neededBits > 0) {
           this.mode = DECODE_HUFFMAN_DISTBITS;
           var i = this.input.peekBits(this.neededBits);
-          if (i < 0) {
-            break = true;
-            result = false;
-          } else {
-            this.input.dropBits(this.neededBits);
-            this.repDist += i;
-          }
+          if (i < 0) return false;
+          this.input.dropBits(this.neededBits);
+          this.repDist += i;
         }
-        if (!break) {
-          this.outputWindow.repeat(this.repLength, this.repDist);
-          free -= this.repLength;
-          this.mode = DECODE_HUFFMAN;
-        }
+        this.outputWindow.repeat(this.repLength, this.repDist);
+        free -= this.repLength;
+        this.mode = DECODE_HUFFMAN;
       }
       DECODE_HUFFMAN_DISTBITS: {
         if (this.neededBits > 0) {
           this.mode = DECODE_HUFFMAN_DISTBITS;
           var i = this.input.peekBits(this.neededBits);
-          if (i < 0) {
-            break = true;
-            result = false;
-          } else {
-            this.input.dropBits(this.neededBits);
-            this.repDist += i;
-          }
+          if (i < 0) return false;
+          this.input.dropBits(this.neededBits);
+          this.repDist += i;
         }
-        if (!break) {
-          this.outputWindow.repeat(this.repLength, this.repDist);
-          free -= this.repLength;
-          this.mode = DECODE_HUFFMAN;
-        }
+        this.outputWindow.repeat(this.repLength, this.repDist);
+        free -= this.repLength;
+        this.mode = DECODE_HUFFMAN;
       }
       else:
-        error(ERR_ILL_STATE, null);
+        throw(ERR_ILL_STATE, null);
     }
   }
-  result;
+  return true;
 }
 
 def Inflater.decodeChksum(): Bool {
-  var break = false;
-  var result = false;
-  while (!break && this.neededBits > 0) {
+  while (this.neededBits > 0) {
     var chkByte = this.input.peekBits(8);
-    if (chkByte < 0) {
-      break = true;
-      result = false;
-    } else {
-      this.input.dropBits(8);
-      this.readAdler = (this.readAdler << 8) | chkByte;
-      this.neededBits -= 8;
-    }
+    if (chkByte < 0) return false;
+    this.input.dropBits(8);
+    this.readAdler = (this.readAdler << 8) | chkByte;
+    this.neededBits -= 8;
   }
-  if (!break) {
-    if (this.adler.value != this.readAdler)
-      error(FAIL, "Adler chksum doesn't match: "
-            + (this.adler.value).tohex()
-            + " vs. " + (this.readAdler).tohex());
-    this.mode = FINISHED;
-  }
-  result;
+  if (this.adler.value != this.readAdler)
+    throw(FAIL, "Adler chksum doesn't match: "
+          + (this.adler.value).tohex()
+          + " vs. " + (this.readAdler).tohex());
+  this.mode = FINISHED;
+  return false;
 }
 
 def Inflater.decode(): Bool {
   switch (this.mode) {
     DECODE_HEADER:
-      this.decodeHeader();
+      return this.decodeHeader();
     DECODE_DICT:
-      this.decodeDict();
+      return this.decodeDict();
     DECODE_CHKSUM:
-      this.decodeChksum();
+      return this.decodeChksum();
     DECODE_BLOCKS: {
       if (this.isLastBlock) {
         if (this.nowrap) {
           this.mode = FINISHED;
-          false;
+          return false;
         } else {
           this.input.skipToByteBoundary();
           this.neededBits = 32;
           this.mode = DECODE_CHKSUM;
-          true;
+          return true;
         }
-      } else {
-        var `type` = this.input.peekBits(3);
-        if (`type` < 0) {
-          false;
-        } else {
-          this.input.dropBits(3);
+      }
+      var `type` = this.input.peekBits(3);
+      if (`type` < 0) return false;
+      this.input.dropBits(3);
 
-          if ((`type` & 1) != 0)
-            this.isLastBlock = true;
-          switch (`type` >> 1) {
-            STORED_BLOCK: {
-              this.input.skipToByteBoundary();
-              this.mode = DECODE_STORED_LEN1;
-            }
-            STATIC_TREES: {
-              this.litlenTree = defLitLenTree();
-              this.distTree = defDistTree();
-              this.mode = DECODE_HUFFMAN;
-            }
-            DYN_TREES: {
-              this.dynHeader = new_InflaterDynHeader();
-              this.mode = DECODE_DYN_HEADER;
-            }
-            else:
-              error(FAIL, "Unknown block type " + `type`);
-          }
-          true;
+      if ((`type` & 1) != 0)
+        this.isLastBlock = true;
+      switch (`type` >> 1) {
+        STORED_BLOCK: {
+          this.input.skipToByteBoundary();
+          this.mode = DECODE_STORED_LEN1;
         }
+        STATIC_TREES: {
+          this.litlenTree = defLitLenTree();
+          this.distTree = defDistTree();
+          this.mode = DECODE_HUFFMAN;
+        }
+        DYN_TREES: {
+          this.dynHeader = new InflaterDynHeader();
+          this.mode = DECODE_DYN_HEADER;
+        }
+        else:
+          throw(FAIL, "Unknown block type " + `type`);
       }
+      return true;
     }
-    DECODE_STORED_LEN1:
-      if (({this.uncomprLen = this.input.peekBits(16); this.uncomprLen}) < 0) {
-        false;
-      } else {
-        this.input.dropBits(16);
-        this.mode = DECODE_STORED_LEN2;
-        var nlen = this.input.peekBits(16);
-        if (nlen < 0) {
-          false;
-        } else {
-          this.input.dropBits(16);
-          if (nlen != (this.uncomprLen ^ 0xffff))
-            error(FAIL, "broken uncompressed block");
-          this.mode = DECODE_STORED;
-          var more = this.outputWindow.copyStored(this.input, this.uncomprLen);
-          this.uncomprLen -= more;
-          if (this.uncomprLen == 0) {
-            this.mode = DECODE_BLOCKS;
-            true;
-          } else {
-            !this.input.needsInput();
-          }
-        }
+    DECODE_STORED_LEN1: {
+      this.uncomprLen = this.input.peekBits(16);
+      if (this.uncomprLen < 0) return false;
+      this.input.dropBits(16);
+      this.mode = DECODE_STORED_LEN2;
+      var nlen = this.input.peekBits(16);
+      if (nlen < 0) return false;
+      this.input.dropBits(16);
+      if (nlen != (this.uncomprLen ^ 0xffff))
+        throw(FAIL, "broken uncompressed block");
+      this.mode = DECODE_STORED;
+      var more = this.outputWindow.copyStored(this.input, this.uncomprLen);
+      this.uncomprLen -= more;
+      if (this.uncomprLen == 0) {
+        this.mode = DECODE_BLOCKS;
+        return true;
       }
+      return !this.input.needsInput();
+    }
     DECODE_STORED_LEN2: {
       var nlen = this.input.peekBits(16);
-      if (nlen < 0) {
-        false;
-      } else {
-        this.input.dropBits(16);
-        if (nlen != (this.uncomprLen ^ 0xffff))
-          error(FAIL, "broken uncompressed block");
-        this.mode = DECODE_STORED;
-        var more = this.outputWindow.copyStored(this.input, this.uncomprLen);
-        this.uncomprLen -= more;
-        if (this.uncomprLen == 0) {
-          this.mode = DECODE_BLOCKS;
-          true;
-        } else {
-          !this.input.needsInput();
-        }
+      if (nlen < 0) return false;
+      this.input.dropBits(16);
+      if (nlen != (this.uncomprLen ^ 0xffff))
+        throw(FAIL, "broken uncompressed block");
+      this.mode = DECODE_STORED;
+      var more = this.outputWindow.copyStored(this.input, this.uncomprLen);
+      this.uncomprLen -= more;
+      if (this.uncomprLen == 0) {
+        this.mode = DECODE_BLOCKS;
+        return true;
       }
+      return !this.input.needsInput();
     }
     DECODE_STORED: {
       var more = this.outputWindow.copyStored(this.input, this.uncomprLen);
       this.uncomprLen -= more;
       if (this.uncomprLen == 0) {
         this.mode = DECODE_BLOCKS;
-        true;
-      } else {
-        !this.input.needsInput();
+        return true;
       }
+      return !this.input.needsInput();
     }
-    DECODE_DYN_HEADER:
-      if (!this.dynHeader.decode(this.input)) {
-        false;
-      } else {
-        this.litlenTree = this.dynHeader.buildLitLenTree();
-        this.distTree = this.dynHeader.buildDistTree();
-        this.mode = DECODE_HUFFMAN;
-        this.decodeHuffman();
-      }
+    DECODE_DYN_HEADER: {
+      if (!this.dynHeader.decode(this.input)) return false;
+      this.litlenTree = this.dynHeader.buildLitLenTree();
+      this.distTree = this.dynHeader.buildDistTree();
+      this.mode = DECODE_HUFFMAN;
+      return this.decodeHuffman();
+    }
     DECODE_HUFFMAN,
     DECODE_HUFFMAN_LENBITS,
     DECODE_HUFFMAN_DIST,
     DECODE_HUFFMAN_DISTBITS:
-      this.decodeHuffman();
+      return this.decodeHuffman();
     FINISHED:
-      false;
+      return false;
     else:
-      {error(ERR_ILL_STATE, null); false}
+      throw(ERR_ILL_STATE, null);
   }
 }

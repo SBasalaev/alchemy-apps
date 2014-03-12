@@ -1,14 +1,9 @@
 This is an Ether port of jazzlib (Java implementation of zlib library).
 
-Copyright:
-    (C) 2012  Sergey Basalaev
-Author:
-    Sergey Basalaev <sbasalaev@gmail.com>
+Port copyright: (C) 2012-2014, Sergey Basalaev <sbasalaev@gmail.com>
 
-Original copyright:
-    (C) 1999-2005  Free Software Foundation, Inc.
-Original authors:
-    John Leuner, Per Bothner, Jochen Hoenicke, Tom Tromey
+Original copyright: (C) 1999-2005  Free Software Foundation, Inc.
+Original authors: John Leuner, Per Bothner, Jochen Hoenicke, Tom Tromey
 
 == LICENSE ==
 

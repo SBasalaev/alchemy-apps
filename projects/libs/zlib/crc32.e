@@ -25,8 +25,8 @@ def CRC32.new(): CRC32 {
   if (crc_table == null) make_crc_table();
 }
 
-def CRC32.get_value(): Int {
-  this.crc;
+def CRC32.getValue(): Int {
+  return this.crc;
 }
 
 def CRC32.reset() {
@@ -39,7 +39,7 @@ def CRC32.update(bval: Int) {
   this.crc = ~c;
 }
 
-def CRC32.updatearray(buf: [Byte], off: Int, len: Int) {
+def CRC32.updateArray(buf: [Byte], off: Int, len: Int) {
   var c = ~this.crc;
   var table = crc_table;
   while (len > 0) {
