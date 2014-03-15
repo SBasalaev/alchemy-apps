@@ -1,0 +1,6 @@
+LFLAGS=-lui
+TYPE=program
+TARGET=hc-boot
+CFLAGS=
+HEADERS=hcg.eh
+SOURCES=main.e hcg.e

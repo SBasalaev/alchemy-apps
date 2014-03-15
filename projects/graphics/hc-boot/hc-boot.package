@@ -1,0 +1,11 @@
+Source: hc-boot
+Section: graphics
+Version: 0.0.1
+Author: Victor Akinyemi <madara8334@gmail.com>
+License: GPL-3
+Copyright: (c) 2014 Victor Akinyemi
+Build-Depends: make
+
+Package: hc-boot
+Depends: ${libdeps}
+Summary: A (wee bit) more advanced boot animation, after installing the package, please run hcbinstall from the terminal.
