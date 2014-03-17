@@ -1,6 +1,6 @@
 const SUPPORTED = 0x0202
 
-const VERSION = "Ether linker version 2.2.0"
+const VERSION = "Ether linker version 2.2.1"
 
 const HELP =
  "Usage: el [options] <input>...\nOptions:\n" +

@@ -14,6 +14,7 @@ use "dict.eh"
 def List.findentry(obj: Entry): Int {
   for (var i = 0, i < this.len(), i += 1) {
     var lobj = this[i].cast(Entry)
+    // operator == is overriden
     if (obj == lobj) return i
   }
   return -1
@@ -46,7 +47,7 @@ def main(args: [String]): Int {
             linklibs.add(arg[2:])
           }
         'L':
-          setenv("LIBPATH", getenv("LIBPATH")+':'+arg[2:])
+          setenv("LIBPATH", arg[2:]+':'+getenv("LIBPATH"))
         's':
           soname = arg[2:]
         else: {
@@ -276,7 +277,7 @@ def main(args: [String]): Int {
     return SUCCESS
   } catch (var e) {
     if (e.code() == ERR_LINKER)
-      stderr().println("Error: "+e)
+      stderr().println("Error: "+e.msg())
     else
       stderr().println(e)
     return e.code()
