@@ -1,0 +1,22 @@
+Source: libmp3tags
+Version: 1
+Section: libs
+Author: jack_5@asia.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2014 jack_5@asia.com
+License: GPL-3
+Build-Depends: make
+
+Package: libmp3tags-1
+Depends: ${libdeps}
+Summary: library to read mp3 tags (title, author, album, track number, etc.)
+Files:
+ /lib/libmp3tags.1.so
+
+Package: libmp3tags-dev
+Section: libdevel
+Depends: ${libdeps}, libmp3tags-1
+Summary: library to read mp3 tags - development headers
+Files:
+ /lib/libmp3tags.so
+ /inc/mp3tags.eh
