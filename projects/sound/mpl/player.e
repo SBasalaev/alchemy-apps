@@ -1,4 +1,5 @@
-/*ex player.e -o mpl -lui -lmedia*/
+/*ex main.e -o mpl -lui -lmedia -lmp3tags*/
+use "mp3tags"
 use "canvas"
 use "dataio"
 use "graphics"
@@ -12,6 +13,7 @@ use "sys"
 use "string"
 use "ui"
 use "ui_edit"
+use "error"
 
 var mounted:Bool
 
@@ -38,7 +40,6 @@ var lislen:Int
 var lisn:Int
 var mnpstn:Int
 var position:Int
-var stringlen:Int
 var spleffect:Int
 var rk:Int
 var w:Int
@@ -56,12 +57,12 @@ var wd:String
 var TDur:String
 var typ:String
 var fn:String
-var substrng:String
 var ls1:[String]
 var cType:[String]
 var tFlist:[String]
 var Menulist:[String]
 var MenuKey:[String]
+var metadata:Metadata
 var e:UIEvent
 
 //get audio file type
@@ -341,8 +342,7 @@ graphic.fill_rect(0,0,canv.get_width(),canv.get_height())
 graphic.set_color(0x000000)
 graphic.fill_rect(0,0,w*10,h*3/4)
 graphic.fill_rect(0,((h*9)+(h/4)),w*10,h)
-graphic.fill_roundrect(w,h*2,w*8,h,w,w)
-graphic.set_font(SIZE_MED|STYLE_PLAIN)
+graphic.set_font(SIZE_SMALL|STYLE_PLAIN)
 graphic.set_color(0xffffff)
 graphic.draw_string(" Music Player",0,0)
 graphic.draw_string(" Press 8 to view shortcuts",0,((h*9)+(h/4)))
@@ -351,13 +351,25 @@ graphic.draw_image(img4,w*4,h*7)
 graphic.draw_image(img3,w*6,h*7)
 graphic.set_color(0xff0000)
 graphic.draw_line(w*7/2,0,w*13/2,0)
-graphic.draw_roundrect(w,h*2,w*8,h,w,w)
 }
 
 def Load_song()
 {
 try{p.close()}catch{}
 get_type(fn)
+ try{metadata=getMetadata(fn)
+graphic.set_color(0x606060)
+graphic.fill_rect(0,h*3,w*10,h*4)
+graphic.set_color(0xffffff)
+graphic.set_font(SIZE_SMALL|STYLE_PLAIN)
+var tfh=font_height(SIZE_SMALL|STYLE_PLAIN)
+var hx3=h*3
+graphic.draw_string(""+metadata.TITLE,0,(hx3))
+graphic.draw_string(""+metadata.AUTHOR,0,(hx3+tfh))
+graphic.draw_string(""+metadata.ALBUM,0,(hx3+2*tfh))
+graphic.draw_string(""+metadata.YEAR,0,(hx3+3*tfh))
+graphic.draw_string(""+metadata.GENRE,0,(hx3+4*tfh))
+}catch(var er){graphic.draw_string(er.tostr(),0,h*3);println(er.tostr())}
 try{
   // fix by Sergey Basalaev
   // for compatibility with older versions
@@ -392,25 +404,18 @@ else{TDur=""+player_duration}
 
 def Set_title()
 {
-stringlen=fn.len()
-if(stringlen<(w-w/4)){substrng=fn}
-else{substrng=fn.substr(0,(w-w/4))}
 pp=false;
 lis.set_index(x)
 graphic.set_color(0x606060)
-graphic.fill_rect(0,h*2,w*10,h*3)
-graphic.set_color(0x000000)
-graphic.fill_roundrect(w,h*2,w*8,h,w,w)
-graphic.fill_rect(((w*6)+(w/2)),0,w*10,h*3/4)
+graphic.fill_rect(0,h*2,w*10,h)
 try{p.start()}catch{if(cklp){x=x+1}}
 get_duration()
 graphic.set_color(0xffffff)
-graphic.draw_string(substrng.lcase(),w+2,((h*2)+2))
+graphic.draw_string(fn,0,h*2)
+graphic.set_color(0)
+graphic.fill_rect(w*6,0,w*4,h*3/4)
 graphic.set_color(0xff0000)
-graphic.draw_roundrect(w,h*2,w*8,h,w,w)
 graphic.draw_string(""+(x+1)+"/"+lislen,((w*6)+(w/2)),0)
-graphic.set_color(0x606060)
-graphic.fill_rect(w*9+1,h*2,w,h)
 canv.refresh()
 }
 
@@ -498,13 +503,8 @@ spleffect=1
 Init_GUI()
 x=lis.get_index()
 fn=lis.get_string(x)
-stringlen=fn.len()
-if(stringlen<(w-w/4)){substrng=fn}
-else{substrng=fn.substr(0,(w-w/4))}
 graphic.set_color(0xffffff)
-graphic.draw_string(substrng.lcase(),w+2,((h*2)+2))
-graphic.set_color(0x606060)
-graphic.fill_rect(w*9+1,h*2,w,h)
+graphic.draw_string(fn,0,h*2)
 canv.refresh()
 Load_song()
 ui_set_screen(canv)
@@ -512,7 +512,6 @@ try{p.start()}catch{}
 pp=false
 get_duration()
 graphic.set_color(0xff0000)
-graphic.draw_roundrect(w,h*2,w*8,h,w,w)
 graphic.draw_string(""+(x+1)+"/"+lislen,((w*6)+(w/2)),0)
 canv.refresh()
 do
@@ -527,10 +526,10 @@ if(du>59)
 }
 else{title=""+du}
 graphic.set_color(0x606060)
-graphic.fill_rect(w,h*3/4,w*9,h-3)
+graphic.fill_rect(0,h,w*10,h)
 graphic.set_color(0x000000)
 graphic.set_font(SIZE_MED|STYLE_BOLD)
-graphic.draw_string("[ "+title+" ] [ "+TDur+" ]",w+w/2,(h*3/4+h/6))
+graphic.draw_string("[ "+title+" ] [ "+TDur+" ]",0,h)
 canv.refresh()
 graphic.set_font(SIZE_MED|STYLE_PLAIN)
 var gt=p.get_time()
