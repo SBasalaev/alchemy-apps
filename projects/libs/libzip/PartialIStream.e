@@ -104,18 +104,18 @@ def PartialIStream.readFully(buf: [Byte], off: Int = 0, len: Int = -1) {
 }
 
 def PartialIStream.readLeShort(): Int {
-  var b0 = read()
-  var b1 = read()
+  var b0 = this.read()
+  var b1 = this.read()
   if (b1 == -1)
     error(ERR_IO, "End of stream");
   (b0 & 0xff) | (b1 & 0xff) << 8
 }
 
 def PartialIStream.readLeInt(): Int {
-  var b0 = read()
-  var b1 = read()
-  var b2 = read()
-  var b3 = read()
+  var b0 = this.read()
+  var b1 = this.read()
+  var b2 = this.read()
+  var b3 = this.read()
   if (b3 == -1)
     error(ERR_IO, "End of stream");
   ((b0 & 0xff) | (b1 & 0xff) << 8) | ((b2 & 0xff) | (b3 & 0xff) << 8) << 16

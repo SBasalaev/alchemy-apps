@@ -1,0 +1,20 @@
+Source: libzip
+Section: libs
+Version: 0.97
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (C) 2013-2014 Sergey Basalaev
+License: GPL-2+exception
+Build-Depends: make, zlib-dev
+
+Package: libzip1
+Summary: library for creating, reading and modifying zip archives
+Depends: ${libdeps}
+Files: /lib/libzip.1.so
+
+Package: libzip-dev
+Section: libdevel
+Summary: library for creating, reading and modifying zip archives (headers)
+Depends: ${libdeps}, libzip1
+Files:
+ /lib/libzip.so
+ /inc/*

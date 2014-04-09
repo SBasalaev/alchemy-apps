@@ -33,7 +33,6 @@ def ZipArchive.checkZipArchive() {
 
 def ZipArchive.new(in: IStream) {
   var out = new BArrayOStream()
-  var b = new [Byte](1024)
   out.writeall(in)
   this.buf = out.tobarray()
   this.off = 0

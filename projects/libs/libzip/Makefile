@@ -15,17 +15,6 @@ ${LINK}:
 clean:
  rm -f ${TARGET} ${LINK}
 
-package: all
- # libzip1
- mkdir lib
- install ${TARGET} lib
- cp libzip1.package PACKAGE
- arh c libzip1.pkg PACKAGE lib
- rm -r lib
- # libzip-dev
- mkdir -p lib inc/zip
- install ${LINK} lib
- install ${HEADERS} inc/zip
- cp libzip-dev.package PACKAGE
- arh c libzip-dev.pkg PACKAGE lib inc
- rm -r PACKAGE lib inc
+install: all
+ install ${TARGET} ${LINK} ${DESTDIR}/lib
+ install ${HEADERS} ${DESTDIR}/inc/zip
