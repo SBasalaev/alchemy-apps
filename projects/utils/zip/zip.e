@@ -8,7 +8,7 @@ const HELP =
   "Use: zip [options] file.zip [files]\n" +
   "Options:\n" +
   " -r travel directories recursively"
-const VERSION = "zip 0.1"
+const VERSION = "zip 0.2"
 
 def List.addfile(fname: String, recursive: Bool) {
   if (is_dir(fname) && fname[fname.len()-1] != '/') fname += '/'
