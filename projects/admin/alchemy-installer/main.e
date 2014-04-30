@@ -6,7 +6,7 @@ use "pkg"
 use "infoscreens"
 use "string"
 
-const VERSION = "2.1.7"
+const VERSION = "2.1.8"
 
 const TASK_BASE = 0
 const TASK_UI = 1
@@ -54,9 +54,9 @@ def configureBaseSystem() {
     "http://alchemy-os.org/pkg 2.1/main\n" +
     "http://alchemy-os.org/pkg 2.1/nonfree", true)
   writeString("/bin/ec", "#=nec")
-  setExec("/bin/ec", true)
+  set_exec("/bin/ec", true)
   writeString("/bin/el", "#=elink")
-  setExec("/bin/el", true)
+  set_exec("/bin/el", true)
 }
 
 def installUi(progress: ProgressScreen, manager: PkgManager) {
