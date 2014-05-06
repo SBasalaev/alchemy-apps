@@ -35,6 +35,10 @@ type Package {
   summary: String,
   depends: [Dependency],
   conflicts: [Dependency],
+  sharedLibs: String,
+  onInstall: String,
+  onUpdate: String,
+  onRemove: String,
   baseUrl: String,
   file: String,
   size: Int = 0

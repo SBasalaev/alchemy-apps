@@ -9,7 +9,7 @@ LINK=lib${NAME}.so
 all: ${LIB} ${LINK}
 
 ${LIB}: ${SOURCES}
- ex ${SOURCES} -o ${LIB} -s${LIB} -g
+ ex ${SOURCES} -o ${LIB} -s${LIB}
 
 ${LINK}:
  echo '#=${LIB}' > ${LINK}

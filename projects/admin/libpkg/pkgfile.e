@@ -4,11 +4,12 @@ use "cfgreader.eh"
 use "dataio.eh"
 use "bufferio.eh"
 use "list.eh"
+use "sys.eh"
 
 def pkgExtractSpec(file: String): Package {
   var input = fread(file)
   input.readUTF()
-  input.skip(8)
+  input.skip(9)
   var buf = new [Byte](input.readInt())
   input.readArray(buf)
   input.close()
@@ -51,11 +52,13 @@ const A_EXEC = 1
 
 const BUF_SIZE = 1024
 
-def pkgInstallFile(name: String, file: String) {
+def pkgInstallFile(pkg: Package, file: String) {
   // read existing file list
-  var listName = PKG_FILELIST_DIR + name + ".files"
+  var listName = PKG_FILELIST_DIR + pkg.name + ".files"
   var oldFileList = new List()
+  var update = false
   if (exists(listName)) {
+    update = true
     var r = utfreader(fread(listName))
     while (var line = r.readLine(), line != null) {
       oldFileList.add(line)
@@ -105,24 +108,64 @@ def pkgInstallFile(name: String, file: String) {
   }
   output.flush()
   output.close()
-}
-
-def pkgRemovePackage(name: String): Bool {
-  // reading file list
-  var filelistFile = PKG_FILELIST_DIR + name + ".files"
-  if (!exists(filelistFile)) return false
-  var input = fread(filelistFile)
-  var buf = input.readFully()
-  input.close()
-  var list = ba2utf(buf).split('\n', true)
-  // removing files
-  for (var i = list.len-1, i>=0, i-=1) {
-    var file = "/" + list[i]
-    if (exists(file) && (!isDir(file) || flist(file).len == 0)) {
-      fremove(file)
+  // install scripts if defined
+  if (pkg.sharedLibs != null) {
+    var out = fwrite(PKG_FILELIST_DIR + pkg.name + ".shlibs")
+    out.println(pkg.sharedLibs.trim())
+    out.close()
+  }
+  if (pkg.onInstall != null) {
+    var out = fwrite(PKG_FILELIST_DIR + pkg.name + ".install")
+    out.print(pkg.onInstall.trim())
+    out.close()
+  }
+  if (pkg.onUpdate != null) {
+    var out = fwrite(PKG_FILELIST_DIR + pkg.name + ".update")
+    out.print(pkg.onUpdate.trim())
+    out.close()
+  }
+  if (pkg.onRemove != null) {
+    var out = fwrite(PKG_FILELIST_DIR + pkg.name + ".remove")
+    out.print(pkg.onRemove.trim())
+    out.close()
+  }
+  // call on-install or on-update
+  if (update) {
+    var script = PKG_FILELIST_DIR + pkg.name + ".update"
+    if (exists(script)) {
+      if (execWait(script, []) != SUCCESS) throw(FAIL, "On-Update action failed")
+    }
+  } else {
+    var script = PKG_FILELIST_DIR + pkg.name + ".install"
+    if (exists(script)) {
+      if (execWait(script, []) != SUCCESS) throw(FAIL, "On-Install action failed")
     }
   }
-  // removing database entry
-  fremove(filelistFile)
-  return true
+}
+
+def pkgRemovePackage(name: String) {
+  // calling on-remove
+  var onremoveFile = PKG_FILELIST_DIR + ".remove"
+  if (exists(onremoveFile)) {
+    if (execWait(onremoveFile, []) != 0) throw(FAIL, "On-Remove action failed")
+  }
+  // removing files read from filelist
+  var filelistFile = PKG_FILELIST_DIR + name + ".files"
+  if (exists(filelistFile)) {
+    var input = fread(filelistFile)
+    var buf = input.readFully()
+    input.close()
+    var list = ba2utf(buf).split('\n', true)
+    for (var i = list.len-1, i>=0, i-=1) {
+      var file = "/" + list[i]
+      if (exists(file) && (!isDir(file) || flist(file).len == 0)) {
+        fremove(file)
+      }
+    }
+  }
+  // removing database entries
+  for (var ext in [".files", ".shlibs", ".install", ".update", ".remove"]) {
+    var file = PKG_FILELIST_DIR + name + ext
+    if (exists(file)) fremove(file)
+  }
 }

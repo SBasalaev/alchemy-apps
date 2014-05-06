@@ -8,8 +8,8 @@ def pkgExtractSpec(file: String): Package;
 /* Lists files contained in given package file. */
 def pkgListContents(file: String): [String];
 
-/* Installs/updates given package file as named package. */
-def pkgInstallFile(name: String, file: String);
+/* Installs/updates given package using given file. */
+def pkgInstallFile(pkg: Package, file: String);
 
 /* Uninstalls package. */
-def pkgRemovePackage(name: String): Bool;
+def pkgRemovePackage(name: String);

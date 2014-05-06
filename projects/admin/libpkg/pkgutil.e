@@ -92,7 +92,7 @@ def parseDependencies(depstr: String): [Dependency] {
       str = str[sp+1:].trim()
       sp = str.indexof(' ')
       if (sp > 0) {
-        var depversion = str[sp+1:].trim()
+        dep.version = str[sp+1:].trim()
         switch (str[:sp]) {
           "<":  dep.relation = REL_LT
           ">":  dep.relation = REL_GT
@@ -135,10 +135,14 @@ def Package.new(dict: Dict) {
   this.license = dict["license"].cast(String)
   this.section = dict["section"].cast(String)
   this.summary = dict["summary"].cast(String)
+  this.file = dict["file"].cast(String)
+  this.sharedLibs = dict["shared-libs"].cast(String)
+  this.onInstall = dict["on-install"].cast(String)
+  this.onUpdate = dict["on-update"].cast(String)
+  this.onRemove = dict["on-remove"].cast(String)
   try {
     this.size = dict["size"].cast(String).toint()
   } catch { }
-  this.file = dict["file"].cast(String)
   if (dict["depends"] != null) {
     this.depends = parseDependencies(dict["depends"].cast(String))
   } else {

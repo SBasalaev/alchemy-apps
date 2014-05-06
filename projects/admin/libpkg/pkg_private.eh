@@ -31,6 +31,7 @@ type PkgManager {
   installedList: PkgList,
   pkgLists: [PkgList],
   failHook: (String,Error),
+  warnHook: (String),
   installHook: (String,String,Int,Int),
   removeHook: (String,String,Int,Int),
   downloadHook: (String,String,Int,Int),
@@ -41,7 +42,8 @@ type PkgManager {
 def PkgManager.saveInstalledList(): Bool
 
 /* Hook callers */
-def PkgManager.fail(msg: String, err: Error);
+def PkgManager.fail(msg: String, err: Error)
+def PkgManager.warn(msg: String)
 def PkgManager.installProgress(name: String, version: String, count: Int, total: Int)
 def PkgManager.removeProgress(name: String, version: String, count: Int, total: Int)
 def PkgManager.downloadProgress(baseUrl: String, name: String, count: Int, total: Int)

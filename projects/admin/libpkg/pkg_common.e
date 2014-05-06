@@ -68,8 +68,18 @@ def PkgManager.getPackage(dep: Dependency): Package {
   return null
 }
 
+def PkgManager.getInstalledPackages(): [Package] {
+  var packages = new [Package](this.installedList.packages.len())
+  this.installedList.packages.copyInto(0, packages)
+  return packages
+}
+
 def PkgManager.onFail(handle: (String,Error)) {
   this.failHook = handle
+}
+
+def PkgManager.onWarn(handle: (String)) {
+  this.warnHook = handle
 }
 
 def PkgManager.onInstall(handle: (String,String,Int,Int)) {
@@ -95,6 +105,12 @@ def PkgManager.onRemoveRequest(handle: ([Package]): Bool) {
 def PkgManager.fail(msg: String, err: Error) {
   if (this.failHook != null) try {
     this.failHook(msg, err)
+  } catch { }
+}
+
+def PkgManager.warn(msg: String) {
+  if (this.warnHook != null) try {
+    this.warnHook(msg)
   } catch { }
 }
 

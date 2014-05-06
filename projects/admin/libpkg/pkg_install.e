@@ -19,16 +19,7 @@ def PkgManager.findConflict(pkg: Package): Conflict {
 }
 
 /* Builds sequence of packages and their dependencies to install. */
-def PkgManager.makeInstallSequence(names: [String]): [Package] {
-  var deps = new List()
-  for (var name in names) {
-    var eq = name.indexof('=')
-    if (eq > 0) {
-      deps.add(new Dependency(name[:eq], REL_EQ, name[eq+1:]))
-    } else {
-      deps.add(new Dependency(name, REL_NOREL, null))
-    }
-  }
+def PkgManager.makeInstallSeq(deps: List): [Package] {
   var seq = new List()
   while (deps.len() > 0) {
     var dep = deps[deps.len()-1].cast(Dependency)
@@ -85,8 +76,7 @@ def PkgManager.makeInstallSequence(names: [String]): [Package] {
   return packages
 }
 
-def PkgManager.install(names: [String]): Bool {
-  var seq = this.makeInstallSequence(names)
+def PkgManager.installSeq(seq: [Package]): Bool {
   if (seq == null) return false
   var len = seq.len
   if (!this.installRequest(seq) || len == 0) return true
@@ -125,7 +115,7 @@ def PkgManager.install(names: [String]): Bool {
     var pkg = seq[i]
     this.installProgress(pkg.name, pkg.version, i+1, len)
     try {
-      pkgInstallFile(pkg.name, paths[i])
+      pkgInstallFile(pkg, paths[i])
       if (!isDirect[i]) fremove(paths[i])
     } catch (var err) {
       this.fail("Failed to install package " + pkg.name, err)
@@ -159,4 +149,72 @@ def PkgManager.install(names: [String]): Bool {
   }
 
   return status
+}
+
+def PkgManager.install(names: [String]): Bool {
+  var deps = new List()
+  for (var name in names) {
+    var eq = name.indexof('=')
+    if (eq > 0) {
+      deps.add(new Dependency(name[:eq], REL_EQ, name[eq+1:]))
+    } else {
+      deps.add(new Dependency(name, REL_NOREL, null))
+    }
+  }
+  return this.installSeq(this.makeInstallSeq(deps))
+}
+
+def PkgManager.update(names: [String]): Bool {
+  var deps = new List()
+  if (names == null || names.len == 0) {
+    var packages = this.installedList.packages
+    for (var i in 0 .. packages.len()-1) {
+      var pkg = this.getLatestPackage(packages[i].cast(Package).name)
+      deps.add(new Dependency(pkg.name, REL_GE, pkg.version))
+    }
+  } else {
+    for (var name in names) {
+      var pkg = this.getLatestPackage(name)
+      if (pkg == null) {
+        this.fail("Could not find package " + pkg.name, null)
+        return false
+      }
+      deps.add(new Dependency(pkg.name, REL_GE, pkg.version))
+    }
+  }
+  return this.installSeq(this.makeInstallSeq(deps))
+}
+
+def PkgManager.installFile(file: String): Bool {
+  try {
+    var pkg = pkgExtractSpec(file)
+
+    // searching if already installed
+    var instpkg = this.getInstalledPackage(pkg.name)
+    if (instpkg != null) {
+      var cmp = compareVersions(instpkg.version, pkg.version)
+      if (cmp > 0) this.warn("Installing older version of package (" + pkg.version + " over " + instpkg.version + ")")
+      if (cmp == 0) this.warn("Installing the same version of package (" + pkg.version + ")")
+    }
+
+    // searching for conflicts
+    var conflict = this.findConflict(pkg)
+    if (conflict != null) {
+      this.fail("Cannot install file " + file + "\nPackage " + conflict.pkg.name + " conflicts " + conflict.dep.tostr(), null)
+      return false
+    }
+
+    // installing file and its dependencies
+    var deps = this.makeInstallSeq(new List(pkg.depends))
+    var seq = new [Package](deps.len+1)
+    acopy(deps, 0, seq, 0, deps.len)
+    seq[deps.len] = pkg
+    pkg.baseUrl = "file:/"
+    pkg.file = abspath(file)
+
+    return this.installSeq(seq)
+  } catch (var e) {
+    this.fail("Error reading file " + file, e)
+    return false
+  }
 }
