@@ -1,8 +1,5 @@
 use "PartialIStream.eh"
 
-use "error.eh"
-use "string.eh"
-
 type PartialIStream {
   buf: [Byte],
   count: Int,
@@ -19,7 +16,7 @@ def PartialIStream.new(buf: [Byte], offset: Int, len: Int) {
 }
 
 def PartialIStream.available(): Int {
-  this.count - this.pos + this.dummyByteCount
+  return this.count - this.pos + this.dummyByteCount
 }
 
 def PartialIStream.setLength(length: Int) {
@@ -33,22 +30,22 @@ def PartialIStream.read(): Int {
     if (this.dummyByteCount > 0) {
       this.dummyByteCount = 0
       this.pos += 1
-      0
+      return 0
     } else {
-      -1
+      return -1
     }
   } else {
     var pos = this.pos
     this.pos = pos + 1
-    this.buf[pos] & 0xff
+    return this.buf[pos] & 0xff
   }
 }
 
-def PartialIStream.readarray(b: [Byte], off: Int, len: Int): Int {
+def PartialIStream.readArray(b: [Byte], off: Int, len: Int): Int {
   if (b == null) {
-    error(ERR_NULL)
+    throw(ERR_NULL)
   } else if ((off < 0) || (off > b.len) || (len < 0) || ((off + len) > b.len) || ((off + len) < 0)) {
-    error(ERR_RANGE)
+    throw(ERR_RANGE)
   }
 
   var numBytes = len
@@ -78,7 +75,7 @@ def PartialIStream.readarray(b: [Byte], off: Int, len: Int): Int {
     }
   }
 
-  numBytes
+  return numBytes
 }
 
 def PartialIStream.skip(n: Int): Int {
@@ -86,10 +83,10 @@ def PartialIStream.skip(n: Int): Int {
     n = this.count - this.pos
   }
   if (n < 0) {
-    0
+    return 0
   } else {
     this.pos += n
-    n
+    return n
   }
 }
 
@@ -99,40 +96,39 @@ def PartialIStream.seek(newpos: Int) {
 
 def PartialIStream.readFully(buf: [Byte], off: Int = 0, len: Int = -1) {
   if (len < 0) len = buf.len
-  if (this.readarray(buf, off, len) != len)
-    error(ERR_IO, "End of stream")
+  if (this.readArray(buf, off, len) != len)
+    throw(ERR_IO, "End of stream")
 }
 
 def PartialIStream.readLeShort(): Int {
-  var b0 = read()
-  var b1 = read()
+  var b0 = this.read()
+  var b1 = this.read()
   if (b1 == -1)
-    error(ERR_IO, "End of stream");
-  (b0 & 0xff) | (b1 & 0xff) << 8
+    throw(ERR_IO, "End of stream")
+  return (b0 & 0xff) | (b1 & 0xff) << 8
 }
 
 def PartialIStream.readLeInt(): Int {
-  var b0 = read()
-  var b1 = read()
-  var b2 = read()
-  var b3 = read()
+  var b0 = this.read()
+  var b1 = this.read()
+  var b2 = this.read()
+  var b3 = this.read()
   if (b3 == -1)
-    error(ERR_IO, "End of stream");
-  ((b0 & 0xff) | (b1 & 0xff) << 8) | ((b2 & 0xff) | (b3 & 0xff) << 8) << 16
+    throw(ERR_IO, "End of stream")
+  return ((b0 & 0xff) | (b1 & 0xff) << 8) | ((b2 & 0xff) | (b3 & 0xff) << 8) << 16
 }
 
 def PartialIStream.readString(length: Int): String {
   if (length > this.count - this.pos)
-    error(ERR_IO, "End of stream")
+    throw(ERR_IO, "End of stream")
   if (length < 0)
-    error(ERR_ILL_ARG)
+    throw(ERR_ILL_ARG)
   if (length == 0) {
-    ""
-  } else {
-    var b = new [Byte](length)
-    this.readFully(b, 0, length)
-    ba2utf(b)
+    return ""
   }
+  var b = new [Byte](length)
+  this.readFully(b, 0, length)
+  return ba2utf(b)
 }
 
 def PartialIStream.addDummyByte() {

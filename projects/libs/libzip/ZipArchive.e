@@ -4,8 +4,7 @@ use "ZipEntryImpl.eh"
 use "PartialIStream.eh"
 
 use "dict.eh"
-use "string.eh"
-use "error.eh"
+use "bufferio.eh"
 
 type ZipArchive {
   // Byte array from which zip entries are read.
@@ -20,22 +19,21 @@ type ZipArchive {
 
 def ZipArchive.checkZipArchive() {
   if (this.len < 4) {
-    error(ERR_IO, "Not a valid zip archive")
+    throw(ERR_IO, "Not a valid zip archive")
   }
   var sig = this.buf[this.off] & 0xFF
             | ((this.buf[this.off + 1] & 0xFF) << 8)
             | ((this.buf[this.off + 2] & 0xFF) << 16)
             | ((this.buf[this.off + 3] & 0xFF) << 24)
   if (sig != LOCSIG) {
-    error(ERR_IO, "Not a valid zip archive");
+    throw(ERR_IO, "Not a valid zip archive");
   }
 }
 
-def ZipArchive.new(in: IStream) {
-  var out = new BArrayOStream()
-  var b = new [Byte](1024)
-  out.writeall(in)
-  this.buf = out.tobarray()
+def ZipArchive.new(inp: IStream) {
+  var out = new BufferOStream()
+  out.writeAll(inp)
+  this.buf = out.getBytes()
   this.off = 0
   this.len = this.buf.len
   this.checkZipArchive()
@@ -53,16 +51,16 @@ def ZipArchive.readEntries() {
   if (top < 0) top = 0
   do {
     if (pos < top)
-      error(ERR_IO, "central directory not found, probably not a zip archive")
+      throw(ERR_IO, "central directory not found, probably not a zip archive")
     inp.seek(this.off + pos)
     pos -= 1
   } while (inp.readLeInt() != ENDSIG)
     
   if (inp.skip(ENDTOT - ENDNRD) != ENDTOT - ENDNRD)
-    error(ERR_IO, "End of stream")
+    throw(ERR_IO, "End of stream")
   var count = inp.readLeShort()
   if (inp.skip(ENDOFF - ENDSIZ) != ENDOFF - ENDSIZ)
-    error(ERR_IO, "End of stream")
+    throw(ERR_IO, "End of stream")
   var centralOffset = inp.readLeInt()
 
   this.entries = new Dict()
@@ -70,7 +68,7 @@ def ZipArchive.readEntries() {
     
   for (var i=0, i < count, i+=1) {
     if (inp.readLeInt() != CENSIG)
-      error(ERR_IO, "Wrong Central Directory signature")
+      throw(ERR_IO, "Wrong Central Directory signature")
 
     inp.skip(6)
     var method = inp.readLeShort()
@@ -86,18 +84,18 @@ def ZipArchive.readEntries() {
     var name = inp.readString(nameLen)
 
     var entry = new ZipEntry(name)
-    entry.set_method(method)
-    entry.set_crc(crc)
-    entry.set_size(size)
-    entry.set_compressedsize(csize)
+    entry.setMethod(method)
+    entry.setCRC(crc)
+    entry.setSize(size)
+    entry.setCompressedSize(csize)
     entry.setDOSTime(dostime)
     if (extraLen > 0) {
       var extra = new [Byte](extraLen)
       inp.readFully(extra)
-      entry.set_extra(extra)
+      entry.setExtra(extra)
     }
     if (commentLen > 0) {
-      entry.set_comment(inp.readString(commentLen))
+      entry.setComment(inp.readString(commentLen))
     }
     entry.offset = offset
     this.entries[name] = entry
@@ -108,15 +106,11 @@ def ZipArchive.getEntries(): Dict {
   if (this.entries == null)
     this.readEntries()
 
-  this.entries
+  return this.entries
 }
 
 def ZipArchive.entries(): [ZipEntry] {
-  var d = try {
-    this.getEntries()
-  } catch {
-    new Dict()
-  }
+  var d = try this.getEntries() catch new Dict()
   
   var keys = d.keys()
   var result = new [ZipEntry](keys.len)
@@ -125,7 +119,7 @@ def ZipArchive.entries(): [ZipEntry] {
     result[i] = d[keys[i]].cast(ZipEntry)
   }
   
-  result
+  return result
 }
 
 def ZipArchive.getEntry(name: String): ZipEntry {
@@ -133,36 +127,36 @@ def ZipArchive.getEntry(name: String): ZipEntry {
     var entries = this.getEntries()
     var entry = entries[name].cast(ZipEntry)
     // If we didn't find it, maybe it's a directory.
-    if (entry == null && !name.endswith("/"))
+    if (entry == null && !name.endsWith("/"))
       entry = entries[name + '/'].cast(ZipEntry)
     if (entry != null) {
       var z = entry.clone()
       z.name = name
-      z
-    } else
-      null
+      return z
+    }
+    else return null
   } catch {
-    null
+    return null
   }
 }
 
 def ZipArchive.getIStream(entry: ZipEntry): ZipEntryIStream {
   var entries = this.getEntries()
-  var name = entry.get_name()
+  var name = entry.getName()
   var zipEntry = entries[name].cast(ZipEntry)
   if (zipEntry == null) {
-    error(ERR_IO, "No such entry: " + name)
+    throw(ERR_IO, "No such entry: " + name)
   }
   var inp = new PartialIStream(this.buf, this.off, this.len)
   inp.seek(this.off + zipEntry.offset)
 
   if (inp.readLeInt() != LOCSIG)
-    error(ERR_IO, "Wrong Local header signature: " + name)
+    throw(ERR_IO, "Wrong Local header signature: " + name)
 
   inp.skip(4)
 
-  if (zipEntry.get_method() != inp.readLeShort())
-    error(ERR_IO, "Compression method mismatch: " + name)
+  if (zipEntry.getMethod() != inp.readLeShort())
+    throw(ERR_IO, "Compression method mismatch: " + name)
 
   inp.skip(16)
 
@@ -170,31 +164,34 @@ def ZipArchive.getIStream(entry: ZipEntry): ZipEntryIStream {
   var extraLen = inp.readLeShort()
   inp.skip(nameLen + extraLen)
 
-  inp.setLength(zipEntry.get_compressedsize())
+  inp.setLength(zipEntry.getCompressedSize())
 
-  var method = zipEntry.get_method()
+  var method = zipEntry.getMethod()
   switch (method) {
     ZIP_STORED:
-      new ZipEntryIStream { pin = inp }
+      return new ZipEntryIStream {
+        pin = inp
+      }
     ZIP_DEFLATED: {
       inp.addDummyByte()
       var buf = new [Byte](inp.available())
       inp.readFully(buf)
       var inf = new Inflater(true)
-      var sz = entry.get_size().cast(Int)
-      new ZipEntryIStream { infin = new InflaterStream(istream_from_ba(buf), inf, 4096) }
+      var sz = entry.getSize().cast(Int)
+      return new ZipEntryIStream {
+        infin = new InflaterStream(new BufferIStream(buf), inf, 4096)
+      }
     }
     else: {
-      error(ERR_IO, "Unknown compression method " + method)
-      null
+      throw(ERR_IO, "Unknown compression method " + method)
     }
   }
 }
 
 def ZipArchive.size(): Int {
   try {
-    this.getEntries().size()
+    return this.getEntries().len()
   } catch {
-    0
+    return 0
   }
 }

@@ -1,6 +1,5 @@
 use "ZipEntryImpl.eh"
 
-use "error.eh"
 use "time.eh"
 
 const KNOWN_SIZE    = 1
@@ -12,8 +11,25 @@ const KNOWN_EXTRA   = 32
 
 def ZipEntry.new(name: String) {
   if (name.len() > 65535)
-    error(ERR_ILL_ARG, "name is too long")
+    throw(ERR_ILL_ARG, "name is too long")
   this.name = name
+}
+
+def ZipEntry.clone(): ZipEntry {
+  var entry = new ZipEntry(this.name)
+  entry.name = this.name
+  entry.size = this.size
+  entry.compressedSize = this.compressedSize
+  entry.crc = this.crc
+  entry.comment = this.comment
+  entry.method = this.method
+  entry.known = this.known
+  entry.dostime = this.dostime
+  entry.time = this.time
+  entry.extra = this.extra
+  entry.flags = this.flags
+  entry.offset = this.offset
+  return entry
 }
 
 def ZipEntry.setDOSTime(dostime: Int) {
@@ -24,8 +40,9 @@ def ZipEntry.setDOSTime(dostime: Int) {
 
 def ZipEntry.getDOSTime(): Int {
   if ((this.known & KNOWN_DOSTIME) != 0) {
-    this.dostime
-  } else if ((this.known & KNOWN_TIME) != 0) {
+    return this.dostime
+  }
+  if ((this.known & KNOWN_TIME) != 0) {
     var time = this.time
     this.dostime = (year(time) - 1980 & 0x7f) << 25
         | (month(time) + 1) << 21
@@ -34,17 +51,16 @@ def ZipEntry.getDOSTime(): Int {
         | (minute(time)) << 5
         | (second(time)) >> 1
     this.known |= KNOWN_DOSTIME
-    this.dostime
-  } else {
-    0
+    return this.dostime
   }
+  return 0
 }
 
-def ZipEntry.get_name(): String {
-  this.name
+def ZipEntry.getName(): String {
+  return this.name
 }
 
-def ZipEntry.set_time(time: Long) {
+def ZipEntry.setTime(time: Long) {
   this.time = time
   this.known |= KNOWN_TIME
   this.known &= ~KNOWN_DOSTIME
@@ -71,7 +87,7 @@ def ZipEntry.parseExtra() {
                    | (extra[pos+2] & 0xff) << 8
                    | (extra[pos+3] & 0xff) << 16
                    | (extra[pos+4] & 0xff) << 24)
-              this.set_time(time*1000)
+              this.setTime(time*1000)
             }
           }
           pos += len
@@ -83,13 +99,14 @@ def ZipEntry.parseExtra() {
   }
 }
 
-def ZipEntry.get_time(): Long {
+def ZipEntry.getTime(): Long {
   // The extra bytes might contain the time (posix/unix extension)
   this.parseExtra()
 
   if ((this.known & KNOWN_TIME) != 0) {
-    this.time
-  } else if ((this.known & KNOWN_DOSTIME) != 0) {
+    return this.time
+  }
+  if ((this.known & KNOWN_DOSTIME) != 0) {
     var dostime = this.dostime
     var sec = 2 * (dostime & 0x1f)
     var min = (dostime >> 5) & 0x3f
@@ -101,84 +118,83 @@ def ZipEntry.get_time(): Long {
     try {
       this.time = timeof(yr, mon, dy, hrs, min, sec, 0)
       this.known |= KNOWN_TIME
-      this.time
+      return this.time
     } catch {
       /* Ignore illegal time stamp */
       this.known &= ~KNOWN_TIME;
-      -1L
+      return -1L
     }
-  } else {
-    -1L
   }
+  return -1L
 }
 
-def ZipEntry.set_size(size: Long) {
+def ZipEntry.setSize(size: Long) {
   if ((size & 0xffffffff00000000L) != 0)
-    error(ERR_ILL_ARG)
+    throw(ERR_ILL_ARG)
   this.size = size
   this.known |= KNOWN_SIZE
 }
 
-def ZipEntry.get_size(): Long {
-  if ((this.known & KNOWN_SIZE) != 0) this.size & 0xffffffffL else -1L
+def ZipEntry.getSize(): Long {
+  return if ((this.known & KNOWN_SIZE) != 0) this.size & 0xffffffffL else -1L
 }
 
-def ZipEntry.set_compressedsize(csize: Long) {
+def ZipEntry.setCompressedSize(csize: Long) {
   this.compressedSize = csize
 }
 
-def ZipEntry.get_compressedsize(): Long {
-  this.compressedSize
+def ZipEntry.getCompressedSize(): Long {
+  return this.compressedSize
 }
 
-def ZipEntry.set_crc(crc: Int) {
+def ZipEntry.setCRC(crc: Int) {
   this.crc = crc
   this.known |= KNOWN_CRC
 }
 
-def ZipEntry.get_crc(): Int {
-  if ((this.known & KNOWN_CRC) != 0) this.crc else -1
+def ZipEntry.getCRC(): Int {
+  return if ((this.known & KNOWN_CRC) != 0) this.crc else -1
 }
 
-def ZipEntry.set_method(method: Int) {
+def ZipEntry.setMethod(method: Int) {
   if (method != ZIP_STORED && method != ZIP_DEFLATED)
-    error(ERR_ILL_ARG)
+    throw(ERR_ILL_ARG)
   this.method = method
 }
 
-def ZipEntry.get_method(): Int {
-  this.method
+def ZipEntry.getMethod(): Int {
+  return this.method
 }
 
-def ZipEntry.set_extra(extra: [Byte]) {
+def ZipEntry.setExtra(extra: [Byte]) {
   if (extra == null) {
     this.extra = null
   } else {
     if (extra.len > 0xffff)
-      error(ERR_ILL_ARG)
+      throw(ERR_ILL_ARG)
     this.extra = extra
   }
 }
 
-def ZipEntry.get_extra(): [Byte] {
-  this.extra
+def ZipEntry.getExtra(): [Byte] {
+  return this.extra
 }
 
-def ZipEntry.set_comment(comment: String) {
+def ZipEntry.setComment(comment: String) {
   if (comment != null && comment.len() > 0xffff)
-    error(ERR_ILL_ARG)
+    throw(ERR_ILL_ARG)
   this.comment = comment
 }
 
-def ZipEntry.get_comment(): String {
-  this.comment
+def ZipEntry.getComment(): String {
+  return this.comment
 }
 
-def ZipEntry.isdir(): Bool {
+def ZipEntry.isDir(): Bool {
   var nlen = this.name.len()
-  nlen > 0 && this.name[nlen - 1] == '/'
+  return nlen > 0 && this.name[nlen - 1] == '/'
 }
 
 def ZipEntry.tostr(): String {
-  this.name
+  return this.name
 }

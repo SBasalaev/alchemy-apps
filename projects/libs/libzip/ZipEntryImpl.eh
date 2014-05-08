@@ -15,8 +15,9 @@ type ZipEntry {
   offset: Int    /* used by ZipFile and ZipOutputStream */
 }
 
-def ZipEntry.setDOSTime(dostime: Int);
-def ZipEntry.getDOSTime(): Int;
+def ZipEntry.setDOSTime(dostime: Int)
+def ZipEntry.getDOSTime(): Int
+def ZipEntry.clone(): ZipEntry
 
 use "zlib/inflaterstream.eh"
 use "PartialIStream.eh"

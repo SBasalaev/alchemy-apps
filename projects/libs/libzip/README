@@ -1,14 +1,14 @@
 This is an Ether port of zipME library which is a modified version
 of ZIP handling library from GNU Classpath.
 
-Copyright: (c) 2013 Sergey Basalaev
+Copyright: (c) 2013-2014 Sergey Basalaev
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 
 zipME is
 Copyright (C) 2007 Akihiko Kusanagi
 
 GNU Classpath is
-Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+Copyright (C) 2001-2006 Free Software Foundation, Inc.
 
 == LICENSE ==
 
