@@ -165,7 +165,7 @@ def readmf(fname: String): Bool {
       var cl = line.indexof(':')
       var target = substvars(null, line[:cl])
       var deps = substvars(null, line[cl+1:])
-      rule = new Rule { target = target, deps = deps.split(' ') }
+      rule = new Rule { target = target, deps = deps.split(' ', true) }
     } else if (line.find("include ") == 0) {
       var incl_name = line[8:].trim()
       if (exists(incl_name)) {
