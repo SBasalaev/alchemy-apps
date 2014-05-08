@@ -6,8 +6,6 @@
 use "libsyms.eh"
 use "etypes.eh"
 use "dataio.eh"
-use "error.eh"
-use "string.eh"
 use "sys.eh"
 use "dict.eh"
 
@@ -26,8 +24,10 @@ def main(args: [String]): Int {
   var soname: String = null
   var infiles = new List()
   var linklibs = new List()
-  linklibs.add("libcoree.so") //always link with libcoree
-  linklibs.add("libcore.so")  //always link with libcore
+  // always link with system libraries
+  linklibs.add("libcoree.so")
+  linklibs.add("libcore.so")
+  linklibs.add("libui.so")
   var wait_outname = false
   for (var arg in args) {
     if (arg == "-h") {

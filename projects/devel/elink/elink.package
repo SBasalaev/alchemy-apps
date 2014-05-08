@@ -1,8 +1,8 @@
 Source: elink
-Version: 2.2.1
+Version: 2.2.2
 Section: devel
 Author: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) Sergey Basalaev,  2013, 2014
+Copyright: (c) Sergey Basalaev,  2013-2014
 License: GPL-3
 Build-Depends: make
 
