@@ -112,7 +112,7 @@ def PkgManager.installSeq(seq: [Package]): Bool {
 
   // installing packages
   for (var i in 0..len-1) {
-    var pkg = seq[i]
+    var pkg = pkgExtractSpec(paths[i])
     this.installProgress(pkg.name, pkg.version, i+1, len)
     try {
       pkgInstallFile(pkg, paths[i])
