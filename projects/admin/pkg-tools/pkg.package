@@ -1,9 +1,0 @@
-Source: pkg-tools
-Package: pkg
-Version: 0.1.5
-Section: admin
-Summary: package manager
-Depends: libcore3, libpkg1
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2012-2013 Sergey Basalaev
-License: GPL-3

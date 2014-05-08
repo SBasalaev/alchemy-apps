@@ -1,0 +1,12 @@
+Source: pkg
+Version: 0.2
+Section: admin
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2012-2014 Sergey Basalaev
+License: GPL-3
+Build-Depends: make, libpkg-dev
+
+Package: pkg
+Summary: package manager
+Depends: ${libdeps}
+Conflicts: pkg-arh
