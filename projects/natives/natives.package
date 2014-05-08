@@ -1,12 +1,11 @@
 Source: natives
-Version: 2.1
+Version: 2.2
 Section: admin
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3
 Copyright: (c) 2011-2013 Sergey Basalaev
 
 Package: terminal
-Version: 2.1.1
 Summary: Built-in terminal for Alchemy OS
 Files:
  bin/terminal /bin
