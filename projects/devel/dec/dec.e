@@ -8,9 +8,9 @@ use "opcodes.eh"
 use "io.eh"
 
 def main(args: [String]) {
-  var in = fopen_r(args[0]);
-  var obj = read_eobj(in);
-  in.close();
+  var inp = fread(args[0]);
+  var obj = read_eobj(inp);
+  inp.close();
   print("Ether object");
   println(", format version "+(obj.vmversion>>8)+"."+(obj.vmversion & 0xff));
   if ((obj.lflags & LFLAG_SONAME) != 0) {
@@ -36,15 +36,15 @@ def main(args: [String]) {
       T_STRING:
         println("String = "+item.value);
       T_UNRESOLVED: {
-        var u = cast (Unresolved) item.value;
+        var u = item.value.cast(Unresolved);
         println("Unresolved function = "+u.name);
       }
       T_EXTERNAL: {
-        var e = cast (External) item.value;
+        var e = item.value.cast(External);
         println("External function = "+obj.libs[e.libref]+":"+e.name);
       }
       T_FUNCTION: {
-        var f = cast (EFunction) item.value;
+        var f = item.value.cast(EFunction);
         println(if ((f.flags & FFLAG_SHARED) != 0)
           "Public function = "+f.name
           else "Private function = "+f.name);
@@ -499,11 +499,11 @@ def main(args: [String]) {
               var ld = obj.cpool[tmp]
               switch (ld.t) {
                 T_UNRESOLVED:
-                  println((cast(Unresolved)ld.value).name)
+                  println(ld.value.cast(Unresolved).name)
                 T_EXTERNAL:
-                  println((cast(External)ld.value).name)
+                  println(ld.value.cast(External).name)
                 T_FUNCTION:
-                  println((cast(EFunction)ld.value).name)
+                  println(ld.value.cast(EFunction).name)
                 else:
                   println(ld.value)
               }
@@ -592,6 +592,160 @@ def main(args: [String]) {
               }
               println("        else: "+dflt);
               println("    }");
+            }
+            THROW: {
+              println("throw");
+            }
+            GETGLOBAL: {
+              println("getglobal");
+            }
+            GETGLOBALDEF: {
+              println("getglobaldef");
+            }
+            SETGLOBAL: {
+              println("setglobal");
+            }
+            NEWMULTIARRAY: {
+              addr += 1;
+              var dim = f.code[addr] & 0xff;
+              addr += 1;
+              var t = f.code[addr].cast(Char);
+              println("newmultiarray " + dim + ", '" + t +'\'');
+            }
+            CONCAT: {
+              addr += 1;
+              var n = f.code[addr] & 0xff;
+              println("concat " + n);
+            }
+            CALLC_0: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_0 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC_1: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_1 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC_2: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_2 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC_3: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_3 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC_4: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_4 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC_5: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_5 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC_6: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_6 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC_7: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc_7 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_0: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_0 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_1: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_1 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_2: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_2 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_3: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_3 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_4: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_4 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_5: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_5 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_6: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_6 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC_7: {
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc_7 #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALLC: {
+              addr += 1;
+              var n = f.code[addr] & 0xff;
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("callc " + n + " #"+tmp+"   //"+obj.cpool[tmp]);
+            }
+            CALVC: {
+              addr += 1;
+              var n = f.code[addr] & 0xff;
+              addr += 1;
+              var tmp = (f.code[addr] & 0xff) << 8;
+              addr += 1;
+              tmp |= f.code[addr] & 0xff;
+              println("calvc " + n + " #"+tmp+"   //"+obj.cpool[tmp]);
             }
             else:
               println("UNKNOWN OPCODE");

@@ -1,5 +1,6 @@
+use "io"
 
-const MAX_VMVERSION = 0x0201
+const MAX_VMVERSION = 0x0202
 const MIN_VMVERSION = 0x0200
 
 const T_NULL = '0'
@@ -45,5 +46,4 @@ type EObj {
  cpool: [PoolItem]
 }
 
-type IStream;
-def read_eobj(in: IStream): EObj;
+def read_eobj(inp: IStream): EObj;

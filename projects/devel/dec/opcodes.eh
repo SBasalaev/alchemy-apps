@@ -1,12 +1,14 @@
 /* Alchemy assembler opcodes. */
 
-const LFLAG_SONAME = 1;  /* Library has soname. */
-const LFLAG_DEPS = 2;    /* Library has dependencies. */
+const LFLAG_SONAME = 1       /* Library has soname. */
+const LFLAG_DEPS = 2         /* Library has dependencies. */
+const LFLAG_COMMENT = 0x8000 /* Library has comment section. */
 
-const FFLAG_SHARED = 1;  /* Function is shared. */
-const FFLAG_RELOCS = 2;  /* Function has relocation table. */
-const FFLAG_LNUM   = 4;  /* Function has line number table. */
-const FFLAG_ERRTBL = 8;  /* Function has error table. */
+const FFLAG_SHARED = 1       /* Function is shared. */
+const FFLAG_RELOCS = 2       /* Function has relocation table. */
+const FFLAG_LNUM   = 4       /* Function has line number table. */
+const FFLAG_ERRTBL = 8       /* Function has error table. */
+const FFLAG_COMMENT = 0x8000 /* Function has comment section. */
 
 const NOP         = 0x00;
 const ACONST_NULL = 0x01;
@@ -137,6 +139,31 @@ const CALV_5      = 0x7D;
 const CALV_6      = 0x7E;
 const CALV_7      = 0x7F;
 
+const CALLC_0     = 0xB0;
+const CALLC_1     = 0xB1;
+const CALLC_2     = 0xB2;
+const CALLC_3     = 0xB3;
+const CALLC_4     = 0xB4;
+const CALLC_5     = 0xB5;
+const CALLC_6     = 0xB6;
+const CALLC_7     = 0xB7;
+const CALVC_0     = 0xB8;
+const CALVC_1     = 0xB9;
+const CALVC_2     = 0xBA;
+const CALVC_3     = 0xBB;
+const CALVC_4     = 0xBC;
+const CALVC_5     = 0xBD;
+const CALVC_6     = 0xBE;
+const CALVC_7     = 0xBF;
+const CALLC       = 0xC0;
+const CALVC       = 0xC1;
+
+const CONCAT      = 0xCD;
+const NEWMULTIARRAY = 0xCE;
+const SETGLOBAL   = 0xCF;
+const GETGLOBAL   = 0xD0;
+const GETGLOBALDEF= 0xD1;
+const THROW       = 0xD2;
 const IINC        = 0xD3;
 const JSR         = 0xD4;
 const RET         = 0xD5;
