@@ -1,4 +1,4 @@
-TARGET=libz.2.so
+TARGET=libz.3.so
 LINK=libz.so
 SONAME=${TARGET}
 SOURCES=adler32.e crc32.e deflater.e deflaterconstants.e deflaterengine.e deflaterhuffman.e deflaterstream.e gzistream.e gzostream.e inflater.e inflaterdynheader.e inflaterhuffmantree.e inflaterstream.e maxmin.e outputwindow.e pendingbuffer.e streammanipulator.e

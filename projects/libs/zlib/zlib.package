@@ -4,6 +4,7 @@ Section: libs
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2012-2014 Sergey Basalaev
 License: GPL-2 with runtime exception
+Build-Depends: make
 
 Package: libz3
 Summary: compression library
