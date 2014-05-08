@@ -5,5 +5,5 @@ def main(args: [String]): Int {
   newargs[0] = "-d"
   newargs[1] = "-c"
   acopy(args, 0, newargs, 2, args.len)
-  exec_wait("gzip", newargs)
+  return execWait("gzip", newargs)
 }

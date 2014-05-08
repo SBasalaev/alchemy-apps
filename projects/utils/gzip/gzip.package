@@ -1,9 +1,11 @@
-Package: gzip
 Source: gzip
-Version: 0.96
-Summary: compression utility
+Version: 0.97
 Section: utils
-Depends: libcore3, libz2
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (C) 2012-2013 Sergey Basalaev
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (C) 2012-2014 Sergey Basalaev
 License: GPL-2
+Build-Depends: make, zlib-dev
+
+Package: gzip
+Summary: compression utility
+Depends: ${libdeps}

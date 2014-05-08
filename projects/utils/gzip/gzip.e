@@ -1,8 +1,6 @@
 use "zlib/gzistream.eh"
 use "zlib/gzostream.eh"
 use "list.eh"
-use "string.eh"
-use "error.eh"
 
 const BUF_SIZE = 4096
 const WARN = 2
@@ -24,176 +22,160 @@ var suffix: String;
 
 /* Tests if file has one of well known gzip extensions */
 def has_gz_ext(file: String): Bool {
-  var result = false
   var len = file.len()
   if (len > 4) {
     var last4 = file[len-4:len].lcase()
-    result = last4 == ".tgz"
+    return last4 == ".tgz"
   }
-  if (!result && len > 3) {
+  if (len > 3) {
     var last3 = file[len-3:len].lcase()
-    result = last3 == ".gz" || last3 == "-gz"
+    return last3 == ".gz" || last3 == "-gz"
   }
-  if (!result && len > 2) {
+  if (len > 2) {
     var last2 = file[len-2:len].lcase()
-    result = last2 == ".z" || last2 == "-z"
+    return last2 == ".z" || last2 == "-z"
   }
-  result || file.endswith(suffix)
+  return file.endsWith(suffix)
 }
 
 /* Returns file name without gzip extension. */
 def name_nogzext(file: String): String {
   var len = file.len()
-  var name: String = file + ".unpacked"
-  var found = false
-  if (file.endswith(suffix)) {
-    found = true
-    name = file[0:len-suffix.len()]
+  if (file.endsWith(suffix)) {
+    return file[0:len-suffix.len()]
   }
-  if (!found && len > 4) {
+  if (len > 4) {
     var last4 = file[len-4:len]
     if (last4 == ".tgz") {
-      found = true
-      name = file[0:len-4] + ".tar"
+      return file[0:len-4] + ".tar"
     }
   }
-  if (!found && len > 3) {
+  if (len > 3) {
     var last3 = file[len-3:len]
     if (last3 == ".gz" || last3 == "-gz") {
-      found = true
-      name = file[0:len-3]
+      return file[0:len-3]
     }
   }
-  if (!found && len > 2) {
+  if (len > 2) {
     var last2 = file[len-2:len]
     if (last2 == ".z" || last2 == "-z") {
-      found = true
-      name = file[0:len-2]
+      return file[0:len-2]
     }
   }
-  name
+  return file + ".unpacked"
 }
 
 def do_compress(file: String, buf: [Byte]): Int {
-  if (is_dir(file)) {
+  if (isDir(file)) {
     stderr().println("gzip: " + file + " is a directory -- skipped")
-    WARN
+    return WARN
   } else if (!exists(file)) {
     stderr().println("gzip: " + file + ": no such file or directory")
-    FAIL
+    return FAIL
   } else if (!catenate && has_gz_ext(file)) {
     stderr().println("gzip: " + file + " has gzip extension -- skipped")
-    WARN
+    return WARN
   } else {
-    var in = fopen_r(file)
+    var input = fread(file)
     var out = new GzOStream(
-      if (!catenate) fopen_w(file + suffix)
+      if (!catenate) fwrite(file + suffix)
       else stdout())
     var len: Int;
-    while ({len = in.readarray(buf, 0, BUF_SIZE); len > 0}) {
-      out.writearray(buf, 0, len)
+    while (len = input.readArray(buf, 0, BUF_SIZE), len > 0) {
+      out.writeArray(buf, 0, len)
     }
-    in.close()
+    input.close()
     if (catenate) {
-      SUCCESS
-    } else {
-      out.close()
-      try {
-        fremove(file)
-        SUCCESS
-      } catch {
-        stderr().println("gzip: failed to remove original file " + file)
-        WARN
-      }
+      return SUCCESS
+    }
+    out.close()
+    try {
+      fremove(file)
+      return SUCCESS
+    } catch {
+      stderr().println("gzip: failed to remove original file " + file)
+      return WARN
     }
   }
 }
 
 def do_decompress(file: String, buf: [Byte]): Int {
-  if (is_dir(file)) {
+  if (isDir(file)) {
     stderr().println("gzip: " + file + " is a directory -- skipped")
-    WARN
+    return WARN
   } else if (!exists(file)) {
     stderr().println("gzip: " + file + ": no such file or directory")
-    FAIL
+    return FAIL
   } else if (!has_gz_ext(file)) {
     stderr().println("gzip: " + file + " has no gzip extension -- skipped")
-    WARN
+    return WARN
   } else {
-    var in = new GzIStream(fopen_r(file))
+    var input = new GzIStream(fread(file))
     var out = if (!catenate)
-      fopen_w(name_nogzext(file))
+      fwrite(name_nogzext(file))
       else stdout()
     var len: Int
-    while ({len = in.readarray(buf, 0, BUF_SIZE); len > 0}) {
-      out.writearray(buf, 0, len)
+    while (len = input.readArray(buf, 0, BUF_SIZE), len > 0) {
+      out.writeArray(buf, 0, len)
     }
-    in.close()
+    input.close()
     if (catenate) {
-      SUCCESS
-    } else {
-      out.close()
-      try {
-        fremove(file)
-        SUCCESS
-      } catch {
-        stderr().println("gzip: failed to remove original file " + file)
-        WARN
-      }
+      return SUCCESS
+    }
+    out.close()
+    try {
+      fremove(file)
+      return SUCCESS
+    } catch {
+      stderr().println("gzip: failed to remove original file " + file)
+      return WARN
     }
   }
 }
 
-def main(args: [String]) {
-  var files = new_list()
+def main(args: [String]): Int {
+  var files = new List()
   suffix = ".gz"
   catenate = false
   var decompress = false
 //  var recursive = false
-  var quit = false
-  var exitcode = SUCCESS
   // parse arguments
-  for (var i=0, i<args.len, i += 1) {
-    var arg = args[i]
+  for (var arg in args) {
     if (arg == "-h") {
       println(HELP)
-      quit = true
+      return SUCCESS
     } else if (arg == "-v") {
       println(VERSION)
-      quit = true
+      return SUCCESS
     } else if (arg == "-c") {
       catenate = true
     } else if (arg == "-d") {
       decompress = true
 //    } else if (arg == "-r") {
 //      recursive = true
-    } else if (arg.startswith("-S")) {
+    } else if (arg.startsWith("-S")) {
       suffix = arg[2:]
       if (suffix == "") {
         stderr().println("gzip: no suffix given with -S")
-        exitcode = FAIL
-        quit = true
+        return FAIL
       }
     } else if (arg[0] == '-') {
       stderr().println("Unknown option: " + arg)
-      exitcode = FAIL
-      quit = true
+      return FAIL
     } else {
       files.add(arg)
     }
   }
-  if (!quit && files.len() == 0) {
+  if (files.len() == 0) {
     stderr().println("gzip: no files given")
-    quit = true
-    exitcode = FAIL
+    return FAIL
   }
   // do the job
-  if (!quit) {
-    var buf = new [Byte](BUF_SIZE)
-    for (var i=0, i < files.len(), i += 1) {
-      var fun = if (decompress) do_decompress else do_compress
-      exitcode += fun(files[i].tostr(), buf)
-    }
+  var buf = new [Byte](BUF_SIZE)
+  var exitcode = 0
+  for (var i=0, i < files.len(), i += 1) {
+    var fun = if (decompress) do_decompress else do_compress
+    exitcode += fun(files[i].tostr(), buf)
   }
-  exitcode
+  return exitcode
 }
