@@ -1,9 +1,17 @@
-Package: zip
 Source: zip
-Version: 0.1
-Summary: compress and archive files
+Version: 0.2.1
 Section: utils
 License: GPL-2+exception
-Copyright: (c) 2013 Sergey Basalaev
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Depends: libcore3, libzip1
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013-2014 Sergey Basalaev
+Build-Depends: make, libzip-dev
+
+Package: zip
+Summary: compress and archive files
+Depends: ${libdeps}
+Files: /bin/zip
+
+Package: unzip
+Summary: list and extract files from ZIP archive
+Depends: ${libdeps}
+Files: /bin/unzip
