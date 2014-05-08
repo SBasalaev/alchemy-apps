@@ -1,5 +1,5 @@
 /* Ether decompiler.
- * Copyright (c) 2012-2013 Sergey Basalaev
+ * Copyright (c) 2012-2014 Sergey Basalaev
  * Licensed under GPL-3
  */
 
@@ -7,7 +7,18 @@ use "eobj.eh"
 use "opcodes.eh"
 use "io.eh"
 
+const HELP = "Ether decompiler.\nUsage: dec file"
+const VERSION = "dec 0.5"
+
 def main(args: [String]) {
+  if (args.len == 0 || args[0] == "-h") {
+    println(HELP);
+    return;
+  }
+  if (args[0] == "-v") {
+    println(VERSION);
+    return;
+  }
   var inp = fread(args[0]);
   var obj = read_eobj(inp);
   inp.close();
