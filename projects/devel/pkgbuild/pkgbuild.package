@@ -1,10 +1,10 @@
 Source: pkgbuild
 Section: devel
-Version: 0.4.1
+Version: 0.5.1
 Author: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2013 Sergey Basalaev
+Copyright: (c) 2013-2014 Sergey Basalaev
 License: GPL-3
-Build-Depends: make
+Build-Depends: make, libpkg-dev
 
 Package: pkgbuild
 Depends: ${libdeps}, arh, zip

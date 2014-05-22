@@ -1,14 +1,14 @@
 TARGET=pkgbuild
-SOURCES=cfgreader.e pkgbuild.e main.e
+SOURCES=specs.e rules.e main.e
+LINKFLAGS=-lpkg -g
 
 all: ${TARGET}
 
 ${TARGET}: ${SOURCES}
- ex ${SOURCES} -o ${TARGET}
+ ex ${SOURCES} -o ${TARGET} ${LINKFLAGS}
 
 clean:
  rm ${TARGET}
 
 install: all
- mkdir -p ${DESTDIR}/bin
  install ${TARGET} ${DESTDIR}/bin

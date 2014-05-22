@@ -1,18 +1,22 @@
-use "list.eh"
+use "pkg/pkgutil"
 
-type Source {
+type SourcePackage {
   name: String,
   version: String,
   author: String,
   maintainer: String,
   copyright: String,
   homepage: String,
-  section: String,
   license: String,
-  builddepends: List
+  section: String,
+  buildDepends: [Dependency],
+  buildConflicts: [Dependency],
+  customFields: Dict
 }
 
-type Binary {
+def SourcePackage.new(dict: Dict)
+
+type BinaryPackage {
   name: String,
   version: String,
   author: String,
@@ -22,6 +26,15 @@ type Binary {
   license: String,
   section: String,
   summary: String,
-  depends: List,
-  files: String
+  depends: [Dependency],
+  conflicts: [Dependency],
+  requiredProperties: [Dependency],
+  sharedLibs: Dict,
+  onInstall: String,
+  onUpdate: String,
+  onRemove: String,
+  files: String,
+  customFields: Dict
 }
+
+def BinaryPackage.new(dict: Dict, source: SourcePackage)
