@@ -1,5 +1,5 @@
 Source: natives
-Version: 2.2
+Version: 2.2.1
 Section: admin
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3
@@ -22,7 +22,3 @@ Package: nec
 Section: devel
 Summary: Ether compiler for Alchemy OS
 Files: bin/nec /bin
-
-Package: sh
-Summary: shell for Alchemy OS
-Files: bin/sh /bin
