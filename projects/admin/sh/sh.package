@@ -1,0 +1,11 @@
+Source: sh
+Version: 2.2.1
+Section: admin
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2011-2014 Sergey Basalaev
+License: GPL-3
+Build-Depends: make
+
+Package: sh
+Summary: simple command line interpreter for Alchemy OS
+Depends: ${libdeps}
