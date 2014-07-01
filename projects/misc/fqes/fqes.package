@@ -4,6 +4,7 @@ Section: misc
 Author: TANDAH Tiotsop Gildas <tandahgildas@gmail.com>
 Copyright: (C) 2014 TANDAH Tiotsop Gildas
 License: GPL-3
+Build-Depends: make, libdialog-dev
 
 Package: fqes
 Summary: free quadratic equation solver
