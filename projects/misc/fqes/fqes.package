@@ -1,0 +1,13 @@
+Source: fqes
+Version: 0.1
+Section: misc
+Author: TANDAH Tiotsop Gildas <tandahgildas@gmail.com>
+Copyright: (C) 2014 TANDAH Tiotsop Gildas
+License: GPL-3
+
+Package: fqes
+Summary: free quadratic equation solver
+Depends: ${libdeps}
+Files: 
+ fqes /bin
+ fqes.desktop /res/apps
