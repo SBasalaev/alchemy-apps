@@ -4,11 +4,10 @@
  use"sys"
  use"math"
  use"io"
- use"font"
- use"string"
  use"form"
  use"stdscreens"
  use"dialog"
+ use"string"
  
  var font=FACE_SYSTEM|STYLE_PLAIN|SIZE_MED
  var can:Canvas
@@ -22,7 +21,7 @@
  var event:UIEvent
  var quit:Bool
  var app_title="Free Quadratic Equation Solver"
- var about="fqes v0.1\n\nAuthor: TANDAH Tiotsop Gildas Brice\n\ndate: June 20 2014\n\nContact: gildastandah@gmail.com"
+ var about="fqes v0.2\n\nAuthor: TANDAH Tiotsop Gildas Brice\n\ndate: July 11 2014\n\nContact: gildastandah@gmail.com"
  
  type coef{
  a:Int,
@@ -208,35 +207,40 @@
  var b_w=str_width(font,num.b.tostr())
  var c_w=str_width(font,num.c.tostr())
  var sign=if(num.b>=0)"+"else"-"
+ var sign_w=str_width(font,sign)
  switch(num.b){
  0:{
- gra.draw_string(num.a.tostr(),at.x,at.y+3)
+ gra.draw_string(num.a.tostr(),at.x,at.y)
  new Point(at.x+a_w,at.y+h)
  }
  1,-1:{
  if(num.a==0){
- gra.draw_string((if(sign=="+")"  "else sign+" ")+num.c.tostr(),at.x,at.y+3)
- draw_sqrt(gra,new Point(at.x+3,at.y),c_w+3,h)
- new Point(at.x+c_w+3+if(sign=="+") str_width(font,"  ") else str_width(font,sign+" "),at.y+h)
+ gra.draw_string(if(sign=="-")sign else "",at.x,at.y)
+ gra.draw_string(num.c.tostr(),at.x+(if(sign=="-")sign_w else 0)+12,at.y)
+ draw_sqrt(gra,new Point(at.x+(if(sign=="-")sign_w else 0),at.y-2),c_w+4,h)
+ new Point(at.x+(if(sign=="-")sign_w else 0)+c_w+14,at.y+h-2)
  }
  else
  {
- gra.draw_string(num.a.tostr()+sign+" "+num.c.tostr(),at.x,at.y+3)
- draw_sqrt(gra,new Point(at.x+a_w+str_width(font,sign),at.y),c_w+3,h)
- new Point(at.x+a_w+str_width(font,sign+" ")+c_w+3,at.y+h)
+ gra.draw_string(num.a.tostr()+sign,at.x,at.y)
+ gra.draw_string(num.c.tostr(),at.x+a_w+sign_w+12,at.y)
+ draw_sqrt(gra,new Point(at.x+a_w+sign_w,at.y-2),c_w+4,h)
+ new Point(at.x+a_w+sign_w+c_w+14,at.y+h-2)
  }
  }
  else:{
  if(num.a==0){
- gra.draw_string(num.b.tostr()+" "+num.c.tostr(),at.x,at.y+3)
- draw_sqrt(gra,new Point(at.x+b_w,at.y),c_w+3,h)
- new Point(at.x+b_w+str_width(font," ")+c_w+3,at.y+h)
+ gra.draw_string(num.b.tostr(),at.x,at.y)
+ gra.draw_string(num.c.tostr(),at.x+b_w+13,at.y)
+ draw_sqrt(gra,new Point(at.x+b_w+1,at.y-2),c_w+4,h)
+ new Point(at.x+b_w+c_w+15,at.y+h-2)
  }
  else
  {
- gra.draw_string(num.a.tostr()+(if(sign=="+")sign else "")+num.b.tostr()+" "+num.c.tostr(),at.x,at.y+3)
- draw_sqrt(gra,new Point(at.x+a_w+if(sign=="+")str_width(font,sign)+b_w else b_w,at.y),c_w+3,h)
- new Point(at.x+a_w+3+b_w+c_w+str_width(font," "),at.y+h)
+ gra.draw_string(num.a.tostr()+(if(sign=="+")sign else "")+num.b.tostr(),at.x,at.y)
+ gra.draw_string(num.c.tostr(),at.x+a_w+(if(sign=="+")sign_w else 0)+b_w+13,at.y)
+ draw_sqrt(gra,new Point(at.x+a_w+(if(sign=="+")sign_w else 0)+b_w+1,at.y-2),c_w+4,h)
+ new Point(at.x+a_w+(if(sign=="+")sign_w else 0)+b_w+c_w+15,at.y+h-2)
  }
  }
  }
@@ -244,7 +248,7 @@
  def draw_deno(gra:Graphics,start:Point,end:Point,deno:Int){
  var w=str_width(font,deno.tostr())
  gra.draw_line(start.x,start.y,end.x,end.y)
- gra.draw_string(deno.tostr(),((end.x+start.x)/2)-(w/2),start.y)
+ gra.draw_string(deno.tostr(),((end.x+start.x)/2)-(w/2),start.y+1)
  }
  def draw_human_sols(gra:Graphics,sols:[quotient],start:Point){
  if(sols[0].deno==0) gra.draw_string("No Solutions in R!",start.x,start.y)
@@ -374,8 +378,8 @@
  {
  draw_normal_sols(gra,solve_normaly(eq_f),p)
  }
- ui_set_screen(can)
  can.add_menu(back)
+ ui_set_screen(can)
  can.refresh()
  event=ui_wait_event()
  while(event.kind!=EV_MENU&&event.value.cast(Menu)!=back) event=ui_wait_event()
